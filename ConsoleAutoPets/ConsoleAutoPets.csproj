@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoPets\AutoPets.csproj" />
+    <Reference Include="Spectre.Console">
+      <HintPath>..\packages\Spectre.Console.0.43.0\lib\net6.0\Spectre.Console.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+</Project>
