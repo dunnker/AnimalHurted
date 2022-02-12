@@ -2,9 +2,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutoPets\AutoPets.csproj" />
-    <Reference Include="Spectre.Console">
-      <HintPath>..\packages\Spectre.Console.0.43.0\lib\net6.0\Spectre.Console.dll</HintPath>
-    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.43.0" />
   </ItemGroup>
 
   <PropertyGroup>
