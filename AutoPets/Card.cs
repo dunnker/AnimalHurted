@@ -75,7 +75,6 @@ namespace AutoPets
                 card.Faint();
             if (_hitPoints <= 0)
                 Faint();
-
         }
 
         public int GetDamage()

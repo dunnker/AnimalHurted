@@ -37,8 +37,21 @@ namespace AutoPets
         {
             Name = name;
             _game = game;
-            _shopDeck = new Deck(this, Game.ShopPetSlots);
+            _shopDeck = new Deck(this, Game.ShopMaxPetSlots);
             _buildDeck = new Deck(this, Game.BuildDeckSlots);
+        }
+
+        public Player GetOpponentPlayer()
+        {
+            if (Game.Player1 == this)
+                return Game.Player2;
+            else if (Game.Player2 == this)
+                return Game.Player1;
+            else
+            {
+                Debug.Assert(false);
+                return null;
+            }
         }
 
         public void NewGame()

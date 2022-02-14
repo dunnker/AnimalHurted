@@ -24,8 +24,10 @@ namespace AutoPets
         public const int RollCost = 1;
         public const int GoldPerTurn = 10;
         public const int BuildDeckSlots = 5;
-        public const int ShopPetSlots = 5;
+        public const int ShopMaxPetSlots = 5;
         public const int ShopFoodSlots = 2;
+
+        public int ShopSlots { get { return _shopSlots; } }
 
         public Random Random { get { return _random; } }
 
@@ -56,12 +58,6 @@ namespace AutoPets
             _player1.NewGame();
             _player2.NewGame();
             NewRound();
-        }
-
-        public void NewBattle()
-        {
-            _player1.NewBattle();
-            _player2.NewBattle();
         }
 
         public void CheckNewTier()
@@ -106,7 +102,8 @@ namespace AutoPets
 
         public void Roll(Player player)
         {
-            Debug.Assert(player.Gold > 0);
+            if (player.Gold < RollCost)
+                throw new Exception("Not enough gold for Roll.");
             player.Gold -= RollCost;
             player.ShopDeck.Clear();
             for (int i = 0; i < _shopSlots; i++)
@@ -126,6 +123,12 @@ namespace AutoPets
                 player.ShopDeck.Remove(shopIndex);
                 player.Gold -= Game.PetCost;
             }
+        }
+
+        public void NewBattle()
+        {
+            _player1.NewBattle();
+            _player2.NewBattle();
         }
 
         public bool IsFightOver()

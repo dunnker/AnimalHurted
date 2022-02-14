@@ -8,17 +8,17 @@ namespace AutoPets
 {
     public class AbilityList
     {
-        private static AbilityList instance = null;
+        private static AbilityList _instance = null;
 
         public static AbilityList Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new AbilityList();
+                    _instance = new AbilityList();
                 }
-                return instance;
+                return _instance;
             }
         }
 
