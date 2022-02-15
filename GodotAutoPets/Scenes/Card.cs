@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using AutoPets;
 
 public class Card : Area2D
 {
@@ -9,6 +10,20 @@ public class Card : Area2D
 
     [Signal]
     public delegate void DragSignal();
+
+    public void RenderCard(AutoPets.Card card)
+    {
+        var sprite = GetNode<Sprite>("Sprite");
+        if (card == null)
+            sprite.Hide();
+        else
+        {
+            int index = AbilityList.Instance.AllAbilities.IndexOf(card.Ability);
+            var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", index));
+            sprite.Texture = res as Godot.Texture;
+            sprite.Show();
+        }
+    }
 
     public void _on_Area2D_mouse_entered()
     {

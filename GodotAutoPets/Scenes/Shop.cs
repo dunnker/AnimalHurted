@@ -1,5 +1,5 @@
 using Godot;
-using AutoPets;using System;
+using AutoPets;
 
 public class Shop : Node2D
 {
@@ -14,17 +14,8 @@ public class Shop : Node2D
         {
             var card = GameSingleton.Instance.Game.Player1.ShopDeck[i];
             var cardSlot = GetNode<Node2D>(string.Format("CardSlot{0}", i + 1));
-            var gdCard = cardSlot.GetNode("Card");
-            var sprite = gdCard.GetNode<Sprite>("Sprite");
-            if (card == null)
-                sprite.Hide();
-            else
-            {
-                int index = AbilityList.Instance.AllAbilities.IndexOf(card.Ability);
-                var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", index));
-                sprite.Texture = res as Godot.Texture;
-                sprite.Show();
-            }
+            var gdCard = cardSlot.GetNode<global::Card>("Card");
+            gdCard.RenderCard(card);
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
         }

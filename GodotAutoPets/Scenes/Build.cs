@@ -16,6 +16,7 @@ public class Build : Node
 
     public override void _Ready()
     {
+        GetNode<global::Deck>("Deck").RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
     }
 
     public override void _Process(float delta)
