@@ -6,6 +6,10 @@ public class GameSingleton
 
     public Game Game { get; set; }
 
+    public bool Dragging { get; set; }
+    
+    public object DragTarget { get; set; }
+
     public static GameSingleton Instance
     {
         get
