@@ -9,7 +9,7 @@ public class Deck : Node2D, IDragParent
         for (int i = 0; i < deck.Size; i++)
         {
             var cardSlot = GetNode(string.Format("CardSlot{0}", i + 1));
-            var card = cardSlot.GetNode<global::Card>("Card");
+            var card = cardSlot.GetNode<global::CardArea2D>("Card");
             card.RenderCard(deck[i], i);
         }
     }
@@ -25,15 +25,15 @@ public class Deck : Node2D, IDragParent
     }
 
     // IDragParent
-    public void DragDropped(Card card)
+    public void DragDropped(CardArea2D card)
     {
         if (GameSingleton.Instance.DragTarget != null)
         {
-            var targetCard = GameSingleton.Instance.DragTarget as Card;
+            var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
             var cardParent = targetCard.GetParent().GetParent();
             if (cardParent is Deck)
             {
-                var sourceCard = GameSingleton.Instance.DragSource as Card;
+                var sourceCard = GameSingleton.Instance.DragSource as CardArea2D;
                 
                 GameSingleton.Instance.Game.Player1.BuildDeck.MoveCard(
                     GameSingleton.Instance.Game.Player1.BuildDeck[sourceCard.CardIndex], 

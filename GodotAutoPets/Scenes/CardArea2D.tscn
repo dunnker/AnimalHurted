@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://Scenes/Card.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/CardArea2D.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/CardAttrs.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Assets/Pets/8.png" type="Texture" id=4]
 

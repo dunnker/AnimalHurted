@@ -1,4 +1,4 @@
 interface IDragParent
 {
-    void DragDropped(Card card);
+    void DragDropped(CardArea2D card);
 }

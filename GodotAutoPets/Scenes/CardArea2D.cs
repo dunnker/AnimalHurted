@@ -2,7 +2,7 @@ using Godot;
 using System;
 using AutoPets;
 
-public class Card : Area2D
+public class CardArea2D : Area2D
 {
     bool _dragging;
     Vector2 _savePosition;

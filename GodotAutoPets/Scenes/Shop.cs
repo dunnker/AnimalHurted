@@ -16,7 +16,7 @@ public class Shop : Node2D, IDragParent
         {
             var card = GameSingleton.Instance.Game.Player1.ShopDeck[i];
             var cardSlot = GetNode<Node2D>(string.Format("CardSlot{0}", i + 1));
-            var gdCard = cardSlot.GetNode<global::Card>("Card");
+            var gdCard = cardSlot.GetNode<global::CardArea2D>("Card");
             gdCard.RenderCard(card, i);
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
@@ -29,11 +29,11 @@ public class Shop : Node2D, IDragParent
     }
 
     // IDragParent
-    public void DragDropped(Card card)
+    public void DragDropped(CardArea2D card)
     {
         if (GameSingleton.Instance.DragTarget != null)
         {
-            var targetCard = GameSingleton.Instance.DragTarget as Card;
+            var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
             var cardParent = targetCard.GetParent().GetParent();
             if (cardParent is Deck)
             {
