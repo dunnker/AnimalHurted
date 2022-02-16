@@ -43,4 +43,9 @@ public class DeckNode2D : Node2D, IDragParent
         }
         RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
     }
+
+    public bool GetCanDrag()
+    {
+        return true;
+    }
 }

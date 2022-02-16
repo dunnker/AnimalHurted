@@ -45,4 +45,9 @@ public class ShopNode2D : Node2D, IDragParent
         Build.Deck.RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
         Build.Deck.PlayThump();
     }
+
+    public bool GetCanDrag()
+    {
+        return GameSingleton.Instance.Game.Player1.Gold >= Game.PetCost;
+    }
 }

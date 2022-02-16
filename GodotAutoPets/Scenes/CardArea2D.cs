@@ -13,9 +13,11 @@ public class CardArea2D : Area2D
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
 
-    public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrs/AttackPointsLabel"); } }
+    public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/AttackPointsLabel"); } }
 
-    public Label HitPointsLabel { get { return GetNode<Label>("CardAttrs/HitPointsLabel"); } }
+    public Label HitPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/HitPointsLabel"); } }
+
+    public IDragParent DragParent { get { return GetParent().GetParent() as IDragParent; } } 
 
     [Signal]
     public delegate void DragSignal();
@@ -26,7 +28,7 @@ public class CardArea2D : Area2D
         if (card == null)
         {
             Sprite.Hide();
-            (GetNode("CardAttrs") as Node2D).Hide();
+            (GetNode("CardAttrsNode2D") as Node2D).Hide();
         }
         else
         {
@@ -36,7 +38,7 @@ public class CardArea2D : Area2D
             Sprite.Show();
             AttackPointsLabel.Text = card.AttackPoints.ToString();
             HitPointsLabel.Text = card.HitPoints.ToString();
-            (GetNode("CardAttrs") as Node2D).Show();
+            (GetNode("CardAttrsNode2D") as Node2D).Show();
         }
     }
 
@@ -64,7 +66,8 @@ public class CardArea2D : Area2D
             if (Sprite.Visible && mouseEvent.ButtonIndex == (int)ButtonList.Left && 
                 mouseEvent.Pressed)
             {
-                EmitSignal("DragSignal");
+                if (DragParent.GetCanDrag())
+                    EmitSignal("DragSignal");
             }
             else
             {
@@ -104,7 +107,7 @@ public class CardArea2D : Area2D
             ZIndex = _saveZIndex;    
             // notify the parent of this card, either the Shop or BuildDeck that
             // a card has been dropped somewhere 
-            (GetParent().GetParent() as IDragParent).DragDropped(this);
+            DragParent.DragDropped(this);
             GameSingleton.Instance.DragTarget = null;
         }
     }

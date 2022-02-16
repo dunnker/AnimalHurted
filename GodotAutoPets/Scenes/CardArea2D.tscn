@@ -19,7 +19,7 @@ __meta__ = {
 "_edit_group_": true
 }
 
-[node name="CardAttrs" parent="." instance=ExtResource( 2 )]
+[node name="CardAttrsNode2D" parent="." instance=ExtResource( 2 )]
 position = Vector2( -16, 56 )
 
 [connection signal="input_event" from="." to="." method="_on_Area2D_input_event"]
