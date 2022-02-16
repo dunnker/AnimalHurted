@@ -1,16 +1,30 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Assets/background.png" type="Texture" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/BattleNode.cs" type="Script" id=3]
 
 [node name="Node" type="Node"]
+script = ExtResource( 3 )
 
 [node name="BackgroundSprite" type="Sprite" parent="."]
 texture = ExtResource( 1 )
 centered = false
 
-[node name="Node2D" parent="." instance=ExtResource( 2 )]
-position = Vector2( 8, 64 )
+[node name="Player1DeckNode2D" parent="." instance=ExtResource( 2 )]
+position = Vector2( 48, 192 )
+scale = Vector2( 0.9, 0.9 )
 
-[node name="Node2D2" parent="." instance=ExtResource( 2 )]
-position = Vector2( 656, 64 )
+[node name="Player2DeckNode2D" parent="." instance=ExtResource( 2 )]
+position = Vector2( 648, 192 )
+scale = Vector2( 0.9, 0.9 )
+
+[node name="BeginBattleTimer" type="Timer" parent="."]
+one_shot = true
+autostart = true
+
+[node name="Player1Tween" type="Tween" parent="."]
+
+[node name="Player2Tween" type="Tween" parent="."]
+
+[connection signal="timeout" from="BeginBattleTimer" to="." method="_on_BeginBattleTimer_timeout"]

@@ -8,20 +8,58 @@ public class DeckNode2D : Node2D, IDragParent
     {
         for (int i = 0; i < deck.Size; i++)
         {
-            var cardSlot = GetNode(string.Format("CardSlotNode2D_{0}", i + 1));
-            var card = cardSlot.GetNode<global::CardArea2D>("CardAreaNode2D");
-            card.RenderCard(deck[i], i);
+            var cardSlot = GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", i + 1));
+            cardSlot.CardArea2D.RenderCard(deck[i], i);
         }
     }
 
     public override void _Ready()
     {
-        
     }
 
     public void PlayThump()
     {
         GetNode<AudioStreamPlayer>("ThumpPlayer").Play();
+    }
+
+    public void ReverseCardAreaPositions()
+    {
+        var cardSlot = GetNode<Node2D>("CardSlotNode2D_1");
+        var savePosition = cardSlot.Position;
+        cardSlot.Position = GetNode<Node2D>("CardSlotNode2D_5").Position;
+        GetNode<Node2D>("CardSlotNode2D_5").Position = savePosition;
+
+        cardSlot = GetNode<Node2D>("CardSlotNode2D_2");
+        savePosition = cardSlot.Position;
+        cardSlot.Position = GetNode<Node2D>("CardSlotNode2D_4").Position;
+        GetNode<Node2D>("CardSlotNode2D_4").Position = savePosition;
+
+        // flip the sprite to face other direction
+        for (int i = 1; i <= 5; i++)
+            GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", i)).CardArea2D.Sprite.FlipH = true;
+    }
+
+    public void HideEndingCardSlots()
+    {
+        for (int i = 5; i >= 1; i--)
+        {
+            var cardSlot = GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", i));
+            if (cardSlot.CardArea2D.Sprite.Visible)
+                break;
+            else
+                cardSlot.Hide();
+        }
+    }
+
+    public CardSlotNode2D GetEndingVisibleCardSlot()
+    {
+        for (int i = 5; i >= 1; i--)
+        {
+            var cardSlot = GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", i));
+            if (cardSlot.Visible)
+                return cardSlot;
+        }
+        return null;
     }
 
     // IDragParent
@@ -46,6 +84,6 @@ public class DeckNode2D : Node2D, IDragParent
 
     public bool GetCanDrag()
     {
-        return true;
+        return GetParent() is BuildNode;
     }
 }
