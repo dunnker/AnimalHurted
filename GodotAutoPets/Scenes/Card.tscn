@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scenes/Card.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/CardAttrs.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Assets/Pets/8.png" type="Texture" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
@@ -17,6 +18,9 @@ texture = ExtResource( 4 )
 __meta__ = {
 "_edit_group_": true
 }
+
+[node name="CardAttrs" parent="." instance=ExtResource( 2 )]
+position = Vector2( 0, 40 )
 
 [connection signal="input_event" from="." to="." method="_on_Area2D_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_Area2D_mouse_entered"]

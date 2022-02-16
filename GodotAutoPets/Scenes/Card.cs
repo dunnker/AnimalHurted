@@ -13,6 +13,10 @@ public class Card : Area2D
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
 
+    public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrs/ColorRect/AttackPointsLabel"); } }
+
+    public Label HitPointsLabel { get { return GetNode<Label>("CardAttrs/ColorRect/HitPointsLabel"); } }
+
     [Signal]
     public delegate void DragSignal();
 
@@ -20,13 +24,19 @@ public class Card : Area2D
     {
         _cardIndex = index;
         if (card == null)
+        {
             Sprite.Hide();
+            (GetNode("CardAttrs") as Node2D).Hide();
+        }
         else
         {
             int abilityIndex = AbilityList.Instance.AllAbilities.IndexOf(card.Ability);
             var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", abilityIndex));
             Sprite.Texture = res as Godot.Texture;
             Sprite.Show();
+            AttackPointsLabel.Text = card.AttackPoints.ToString();
+            HitPointsLabel.Text = card.HitPoints.ToString();
+            (GetNode("CardAttrs") as Node2D).Show();
         }
     }
 
