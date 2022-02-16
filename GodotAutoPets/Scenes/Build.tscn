@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=2]
 
-[ext_resource path="res://Scenes/Deck.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/grass.jpg" type="Texture" id=2]
 [ext_resource path="res://Scenes/Build.cs" type="Script" id=4]
-[ext_resource path="res://Scenes/Shop.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/ShopNode2D.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=6]
 
 [sub_resource type="DynamicFont" id=1]

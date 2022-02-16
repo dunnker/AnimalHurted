@@ -2,7 +2,7 @@ using Godot;
 using System;
 using AutoPets;
 
-public class Deck : Node2D, IDragParent
+public class DeckNode2D : Node2D, IDragParent
 {
     public void RenderDeck(AutoPets.Deck deck)
     {
@@ -31,7 +31,7 @@ public class Deck : Node2D, IDragParent
         {
             var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
             var cardParent = targetCard.GetParent().GetParent();
-            if (cardParent is Deck)
+            if (cardParent is DeckNode2D)
             {
                 var sourceCard = GameSingleton.Instance.DragSource as CardArea2D;
                 

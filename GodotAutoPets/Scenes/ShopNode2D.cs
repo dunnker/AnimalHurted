@@ -1,7 +1,7 @@
 using Godot;
 using AutoPets;
 
-public class Shop : Node2D, IDragParent
+public class ShopNode2D : Node2D, IDragParent
 {
     public Build Build { get { return GetParent() as Build; } }
 
@@ -35,7 +35,7 @@ public class Shop : Node2D, IDragParent
         {
             var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
             var cardParent = targetCard.GetParent().GetParent();
-            if (cardParent is Deck)
+            if (cardParent is DeckNode2D)
             {
                 GameSingleton.Instance.Game.BuyFromShop(card.CardIndex, targetCard.CardIndex, 
                     GameSingleton.Instance.Game.Player1);

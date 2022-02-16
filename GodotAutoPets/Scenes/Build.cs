@@ -3,9 +3,9 @@ using AutoPets;
 
 public class Build : Node
 {
-    public Shop Shop { get { return GetNode<Shop>("Shop"); } }
+    public ShopNode2D Shop { get { return GetNode<ShopNode2D>("Shop"); } }
 
-    public Deck Deck { get { return GetNode<global::Deck>("Deck"); } }
+    public DeckNode2D Deck { get { return GetNode<global::DeckNode2D>("Deck"); } }
 
     public Label GoldLabel { get { return GetNode<Label>("GoldLabel"); } }
     public Label LivesLabel { get { return GetNode<Label>("LivesLabel"); } }
