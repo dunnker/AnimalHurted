@@ -43,5 +43,6 @@ public class Shop : Node2D, IDragParent
         }
         RenderShop();
         Build.Deck.RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
+        Build.Deck.PlayThump();
     }
 }

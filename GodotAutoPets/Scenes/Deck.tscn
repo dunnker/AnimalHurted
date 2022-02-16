@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Scenes/CardSlot.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Deck.cs" type="Script" id=2]
+[ext_resource path="res://Assets/thump.mp3" type="AudioStream" id=3]
 
 [node name="DeckNode2D" type="Node2D"]
 script = ExtResource( 2 )
@@ -20,3 +21,7 @@ position = Vector2( 472, 64 )
 
 [node name="CardSlot5" parent="." instance=ExtResource( 1 )]
 position = Vector2( 608, 64 )
+
+[node name="ThumpPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 3 )
+volume_db = -23.416

@@ -19,6 +19,11 @@ public class Deck : Node2D, IDragParent
         
     }
 
+    public void PlayThump()
+    {
+        GetNode<AudioStreamPlayer>("ThumpPlayer").Play();
+    }
+
     // IDragParent
     public void DragDropped(Card card)
     {
@@ -33,6 +38,7 @@ public class Deck : Node2D, IDragParent
                 GameSingleton.Instance.Game.Player1.BuildDeck.MoveCard(
                     GameSingleton.Instance.Game.Player1.BuildDeck[sourceCard.CardIndex], 
                     targetCard.CardIndex);
+                PlayThump();   
             }
         }
         RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
