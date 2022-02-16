@@ -1,7 +1,7 @@
 using Godot;
 using AutoPets;
 
-public class Build : Node
+public class BuildNode : Node
 {
     public ShopNode2D Shop { get { return GetNode<ShopNode2D>("Shop"); } }
 
@@ -14,7 +14,7 @@ public class Build : Node
 
     public void _on_QuitGameButton_pressed()
     {
-        GetTree().ChangeScene("res://Scenes/Main.tscn");
+        GetTree().ChangeScene("res://Scenes/MainNode.tscn");
     }
 
     public void _on_RollButton_pressed()

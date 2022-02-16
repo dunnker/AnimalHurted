@@ -3,7 +3,7 @@ using AutoPets;
 
 public class ShopNode2D : Node2D, IDragParent
 {
-    public Build Build { get { return GetParent() as Build; } }
+    public BuildNode Build { get { return GetParent() as BuildNode; } }
 
     public override void _Ready()
     {

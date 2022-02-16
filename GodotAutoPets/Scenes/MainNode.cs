@@ -1,7 +1,7 @@
 using Godot;
 using AutoPets;
 
-public class Main : Node
+public class MainNode : Node
 {
     public void _on_QuitButton_pressed()
     {
@@ -10,7 +10,7 @@ public class Main : Node
     public void _on_NewGameButton_pressed()
     {
         GameSingleton.Instance.Game = new Game();
-        GetTree().ChangeScene("res://Scenes/Build.tscn");
+        GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
     }
 
     public override void _Ready()
