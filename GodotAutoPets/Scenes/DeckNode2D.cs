@@ -35,13 +35,13 @@ public class DeckNode2D : Node2D, IDragParent
             {
                 var sourceCard = GameSingleton.Instance.DragSource as CardArea2D;
                 
-                GameSingleton.Instance.Game.Player1.BuildDeck.MoveCard(
-                    GameSingleton.Instance.Game.Player1.BuildDeck[sourceCard.CardIndex], 
+                GameSingleton.Instance.BuildPlayer.BuildDeck.MoveCard(
+                    GameSingleton.Instance.BuildPlayer.BuildDeck[sourceCard.CardIndex], 
                     targetCard.CardIndex);
                 PlayThump();   
             }
         }
-        RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
+        RenderDeck(GameSingleton.Instance.BuildPlayer.BuildDeck);
     }
 
     public bool GetCanDrag()

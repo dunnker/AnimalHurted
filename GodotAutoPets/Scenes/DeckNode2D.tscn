@@ -11,16 +11,16 @@ script = ExtResource( 2 )
 position = Vector2( 64, 64 )
 
 [node name="CardSlotNode2D_2" parent="." instance=ExtResource( 1 )]
-position = Vector2( 200, 64 )
+position = Vector2( 192, 64 )
 
 [node name="CardSlotNode2D_3" parent="." instance=ExtResource( 1 )]
-position = Vector2( 336, 64 )
+position = Vector2( 320, 64 )
 
 [node name="CardSlotNode2D_4" parent="." instance=ExtResource( 1 )]
-position = Vector2( 472, 64 )
+position = Vector2( 448, 64 )
 
 [node name="CardSlotNode2D_5" parent="." instance=ExtResource( 1 )]
-position = Vector2( 608, 64 )
+position = Vector2( 576, 64 )
 
 [node name="ThumpPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 3 )

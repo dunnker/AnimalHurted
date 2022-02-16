@@ -1,6 +1,6 @@
 public interface IDragParent
 {
-    void DragDropped(CardArea2D card);
+    void DragDropped(CardArea2D cardArea2D);
 
     bool GetCanDrag();
 }

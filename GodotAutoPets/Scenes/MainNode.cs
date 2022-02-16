@@ -10,6 +10,7 @@ public class MainNode : Node
     public void _on_NewGameButton_pressed()
     {
         GameSingleton.Instance.Game = new Game();
+        GameSingleton.Instance.BuildPlayer = GameSingleton.Instance.Game.Player1; 
         GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
     }
 

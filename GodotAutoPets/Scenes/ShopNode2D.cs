@@ -3,7 +3,7 @@ using AutoPets;
 
 public class ShopNode2D : Node2D, IDragParent
 {
-    public BuildNode Build { get { return GetParent() as BuildNode; } }
+    public BuildNode BuildNode { get { return GetParent() as BuildNode; } }
 
     public override void _Ready()
     {
@@ -12,12 +12,12 @@ public class ShopNode2D : Node2D, IDragParent
 
     public void RenderShop()
     {
-        for (int i = 0; i < GameSingleton.Instance.Game.Player1.ShopDeck.Size; i++)
+        for (int i = 0; i < GameSingleton.Instance.BuildPlayer.ShopDeck.Size; i++)
         {
-            var card = GameSingleton.Instance.Game.Player1.ShopDeck[i];
+            var card = GameSingleton.Instance.BuildPlayer.ShopDeck[i];
             var cardSlot = GetNode<Node2D>(string.Format("CardSlotNode2D_{0}", i + 1));
-            var gdCard = cardSlot.GetNode<global::CardArea2D>("CardAreaNode2D");
-            gdCard.RenderCard(card, i);
+            var cardArea2D = cardSlot.GetNode<global::CardArea2D>("CardAreaNode2D");
+            cardArea2D.RenderCard(card, i);
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
         }
@@ -29,25 +29,26 @@ public class ShopNode2D : Node2D, IDragParent
     }
 
     // IDragParent
-    public void DragDropped(CardArea2D card)
+    public void DragDropped(CardArea2D cardArea2D)
     {
         if (GameSingleton.Instance.DragTarget != null)
         {
             var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
             var cardParent = targetCard.GetParent().GetParent();
+            // did we drop onto the build deck
             if (cardParent is DeckNode2D)
             {
-                GameSingleton.Instance.Game.BuyFromShop(card.CardIndex, targetCard.CardIndex, 
-                    GameSingleton.Instance.Game.Player1);
+                GameSingleton.Instance.Game.BuyFromShop(cardArea2D.CardIndex, targetCard.CardIndex, 
+                    GameSingleton.Instance.BuildPlayer);
             }
         }
         RenderShop();
-        Build.Deck.RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
-        Build.Deck.PlayThump();
+        BuildNode.Deck.RenderDeck(GameSingleton.Instance.BuildPlayer.BuildDeck);
+        BuildNode.Deck.PlayThump();
     }
 
     public bool GetCanDrag()
     {
-        return GameSingleton.Instance.Game.Player1.Gold >= Game.PetCost;
+        return GameSingleton.Instance.BuildPlayer.Gold >= Game.PetCost;
     }
 }
