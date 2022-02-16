@@ -28,7 +28,13 @@ public class Deck : Node2D, IDragParent
             var cardParent = targetCard.GetParent().GetParent();
             if (cardParent is Deck)
             {
+                var sourceCard = GameSingleton.Instance.DragSource as Card;
+                
+                GameSingleton.Instance.Game.Player1.BuildDeck.MoveCard(
+                    GameSingleton.Instance.Game.Player1.BuildDeck[sourceCard.CardIndex], 
+                    targetCard.CardIndex);
             }
         }
+        RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
     }
 }

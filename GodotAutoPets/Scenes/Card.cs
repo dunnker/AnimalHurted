@@ -13,9 +13,9 @@ public class Card : Area2D
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
 
-    public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrs/ColorRect/AttackPointsLabel"); } }
+    public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrs/AttackPointsLabel"); } }
 
-    public Label HitPointsLabel { get { return GetNode<Label>("CardAttrs/ColorRect/HitPointsLabel"); } }
+    public Label HitPointsLabel { get { return GetNode<Label>("CardAttrs/HitPointsLabel"); } }
 
     [Signal]
     public delegate void DragSignal();

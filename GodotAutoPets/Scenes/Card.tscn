@@ -20,7 +20,7 @@ __meta__ = {
 }
 
 [node name="CardAttrs" parent="." instance=ExtResource( 2 )]
-position = Vector2( 0, 40 )
+position = Vector2( -16, 56 )
 
 [connection signal="input_event" from="." to="." method="_on_Area2D_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_Area2D_mouse_entered"]
