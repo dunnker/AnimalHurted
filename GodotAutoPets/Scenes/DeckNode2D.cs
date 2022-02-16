@@ -8,8 +8,8 @@ public class DeckNode2D : Node2D, IDragParent
     {
         for (int i = 0; i < deck.Size; i++)
         {
-            var cardSlot = GetNode(string.Format("CardSlot{0}", i + 1));
-            var card = cardSlot.GetNode<global::CardArea2D>("Card");
+            var cardSlot = GetNode(string.Format("CardSlotNode2D_{0}", i + 1));
+            var card = cardSlot.GetNode<global::CardArea2D>("CardAreaNode2D");
             card.RenderCard(deck[i], i);
         }
     }
