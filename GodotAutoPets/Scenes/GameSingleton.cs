@@ -9,6 +9,7 @@ public class GameSingleton
     public bool Dragging { get; set; }
     
     public object DragTarget { get; set; }
+    public object DragSource { get; set; }
 
     public static GameSingleton Instance
     {

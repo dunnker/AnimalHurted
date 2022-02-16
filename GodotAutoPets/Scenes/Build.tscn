@@ -7,7 +7,7 @@
 [ext_resource path="res://Scenes/Shop.tscn" type="PackedScene" id=5]
 
 [sub_resource type="DynamicFont" id=1]
-size = 45
+size = 35
 outline_size = 5
 outline_color = Color( 0, 0, 0, 1 )
 font_data = ExtResource( 3 )
@@ -41,12 +41,12 @@ position = Vector2( 128, 128 )
 [node name="Shop" parent="." instance=ExtResource( 5 )]
 position = Vector2( 128, 320 )
 
-[node name="Label" type="Label" parent="."]
+[node name="GoldLabel" type="Label" parent="."]
 margin_left = 40.0
 margin_top = 40.0
 margin_right = 104.0
 margin_bottom = 113.0
-custom_colors/font_color = Color( 0.411765, 0.666667, 0.180392, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_fonts/font = SubResource( 1 )
 text = "23"
 __meta__ = {
@@ -94,6 +94,78 @@ margin_right = 190.0
 margin_bottom = 513.0
 custom_fonts/font = SubResource( 4 )
 text = "Roll"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label3" type="Label" parent="."]
+margin_left = 232.0
+margin_top = 16.0
+margin_right = 296.0
+margin_bottom = 51.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Wins"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WinsLabel" type="Label" parent="."]
+margin_left = 232.0
+margin_top = 40.0
+margin_right = 296.0
+margin_bottom = 113.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "23"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label4" type="Label" parent="."]
+margin_left = 328.0
+margin_top = 16.0
+margin_right = 392.0
+margin_bottom = 51.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Round"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RoundLabel" type="Label" parent="."]
+margin_left = 328.0
+margin_top = 40.0
+margin_right = 392.0
+margin_bottom = 113.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "23"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label5" type="Label" parent="."]
+margin_left = 136.0
+margin_top = 16.0
+margin_right = 200.0
+margin_bottom = 51.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Lives"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LivesLabel" type="Label" parent="."]
+margin_left = 136.0
+margin_top = 40.0
+margin_right = 200.0
+margin_bottom = 113.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "23"
 __meta__ = {
 "_edit_use_anchors_": false
 }

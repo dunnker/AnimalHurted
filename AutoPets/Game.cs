@@ -38,7 +38,7 @@ namespace AutoPets
         public bool Fighting { get { return _fighting; } }
 
         public event AbilityEventHandler AbilityEvent;
-
+        
         public void OnAbilityEvent(Ability ability, Card card, int index, string message)
         {
             AbilityEvent?.Invoke(this, ability, card, index, message);
@@ -115,7 +115,9 @@ namespace AutoPets
 
         public void BuyFromShop(int shopIndex, int buildIndex, Player player)
         {
-            if (player.Gold >= Game.PetCost)
+            if (player.Gold < Game.PetCost)
+                throw new Exception("Not enough gold to buy pet");
+            else
             {
                 Debug.Assert(player.BuildDeck[buildIndex] == null); //TODO
                 var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);

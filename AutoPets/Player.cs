@@ -8,11 +8,14 @@ using System.Diagnostics;
 
 namespace AutoPets
 {
+    public delegate void GoldChangedEventHandler(object sender, int oldValue);
+
     public class Player
     {
         readonly Game _game;
         int _lives;
         int _wins;
+        int _gold;
         readonly Deck _shopDeck;
         readonly Deck _buildDeck;
         Deck _battleDeck;
@@ -25,13 +28,32 @@ namespace AutoPets
 
         public Deck ShopDeck { get { return _shopDeck; } }
 
-        public int Gold { get; set; }
+        public int Gold { 
+            get
+            {
+                return _gold;
+            } 
+            
+            set
+            {
+                int oldValue = _gold;
+                _gold = value;
+                OnGoldChangedEvent(oldValue);
+            } 
+        }
 
         public int Lives { get { return _lives; } }
 
         public int Wins { get { return _wins; } }
 
         public string Name { get; set; }
+
+        public event GoldChangedEventHandler GoldChangedEvent;
+
+        public void OnGoldChangedEvent(int oldValue)
+        {
+            GoldChangedEvent?.Invoke(this, oldValue);
+        }
 
         public Player(Game game, string name)
         {

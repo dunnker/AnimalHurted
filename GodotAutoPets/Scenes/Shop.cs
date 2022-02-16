@@ -1,8 +1,10 @@
 using Godot;
 using AutoPets;
 
-public class Shop : Node2D
+public class Shop : Node2D, IDragParent
 {
+    public Build Build { get { return GetParent() as Build; } }
+
     public override void _Ready()
     {
         RenderShop();        
@@ -15,7 +17,7 @@ public class Shop : Node2D
             var card = GameSingleton.Instance.Game.Player1.ShopDeck[i];
             var cardSlot = GetNode<Node2D>(string.Format("CardSlot{0}", i + 1));
             var gdCard = cardSlot.GetNode<global::Card>("Card");
-            gdCard.RenderCard(card);
+            gdCard.RenderCard(card, i);
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
         }
@@ -24,5 +26,22 @@ public class Shop : Node2D
     public override void _Process(float delta)
     {
         
+    }
+
+    // IDragParent
+    public void DragDropped(Card card)
+    {
+        if (GameSingleton.Instance.DragTarget != null)
+        {
+            var targetCard = GameSingleton.Instance.DragTarget as Card;
+            var cardParent = targetCard.GetParent().GetParent();
+            if (cardParent is Deck)
+            {
+                GameSingleton.Instance.Game.BuyFromShop(card.CardIndex, targetCard.CardIndex, 
+                    GameSingleton.Instance.Game.Player1);
+            }
+        }
+        RenderShop();
+        Build.Deck.RenderDeck(GameSingleton.Instance.Game.Player1.BuildDeck);
     }
 }
