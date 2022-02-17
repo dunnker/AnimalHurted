@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scenes/CardArea2D.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/CardAttrsNode2D.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Assets/Pets/8.png" type="Texture" id=4]
+[ext_resource path="res://Assets/Pets/0.png" type="Texture" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 64, 64 )
@@ -14,7 +14,7 @@ script = ExtResource( 1 )
 shape = SubResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
-texture = ExtResource( 4 )
+texture = ExtResource( 3 )
 __meta__ = {
 "_edit_group_": true
 }

@@ -4,6 +4,10 @@ using AutoPets;
 
 public class DeckNode2D : Node2D, IDragParent
 {
+    Deck _deck;
+
+    public Deck Deck { get { return _deck; } }
+
     public CardSlotNode2D GetCardSlotNode2D(int index)
     {
         return GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", index));
@@ -11,6 +15,7 @@ public class DeckNode2D : Node2D, IDragParent
 
     public void RenderDeck(AutoPets.Deck deck)
     {
+        _deck = deck;
         for (int i = 0; i < deck.Size; i++)
         {
             var cardSlot = GetCardSlotNode2D(i + 1);

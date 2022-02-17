@@ -22,7 +22,10 @@ public class BattleNode : Node
     public delegate void FightOverSignal();
 
     [Signal]
-    public delegate void CardFaintedSignal(DeckNode2D deck, int index);
+    public delegate void CardFaintedSignal(DeckNode2D deck, int index, bool hideSlot);
+
+    [Signal]
+    public delegate void CardSummonedSignal(DeckNode2D deck, int index);
 
     public override void _Ready()
     {
@@ -36,6 +39,8 @@ public class BattleNode : Node
             (int)ConnectFlags.Deferred);
         Connect("CardFaintedSignal", this, "_signal_CardFainted", null, 
             (int)ConnectFlags.Deferred);
+        Connect("CardSummonedSignal", this, "_signal_CardSummoned", null, 
+            (int)ConnectFlags.Deferred);
 
         GameSingleton.Instance.Game.NewBattle();
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
@@ -45,11 +50,16 @@ public class BattleNode : Node
 
     public async void _on_BeginBattleTimer_timeout()
     {
+        Player1DeckNode2D.HideEndingCardSlots();
+        Player2DeckNode2D.HideEndingCardSlots();
+
         await PositionDecks();
 
         GameSingleton.Instance.Game.FightEvent += _game_FightEvent;
         GameSingleton.Instance.Game.Player1.CardFaintedEvent += _player_CardFaintedEvent;
         GameSingleton.Instance.Game.Player2.CardFaintedEvent += _player_CardFaintedEvent;
+        GameSingleton.Instance.Game.Player1.CardSummonedEvent += _player_CardSummonedEvent;
+        GameSingleton.Instance.Game.Player2.CardSummonedEvent += _player_CardSummonedEvent;
         var thread = new System.Threading.Thread(() => BattleNode.ThreadProc(this));
         thread.Start();
     }
@@ -82,7 +92,23 @@ public class BattleNode : Node
             deck = Player1DeckNode2D;
         else
             deck = Player2DeckNode2D;
-        EmitSignal("CardFaintedSignal", deck, index);
+
+        // a cricket will spawn zombie immediately, so no need to hide the card slot
+		//TODO add other pet abilities here
+        bool hideSlot = !(card.Ability is CricketAbility);
+        EmitSignal("CardFaintedSignal", deck, index, hideSlot);
+
+        autoResetEvent.WaitOne();
+    }
+
+    public void _player_CardSummonedEvent(object sender, Card card)
+    {
+        DeckNode2D deck;
+        if (card.Deck.Player == GameSingleton.Instance.Game.Player1)
+            deck = Player1DeckNode2D;
+        else
+            deck = Player2DeckNode2D;
+        EmitSignal("CardSummonedSignal", deck, card.Index);
         autoResetEvent.WaitOne();
     }
 
@@ -123,7 +149,7 @@ public class BattleNode : Node
         autoResetEvent.Set();
     }
 
-    public async void _signal_CardFainted(DeckNode2D deck, int index)
+    public async void _signal_CardFainted(DeckNode2D deck, int index, bool hideSlot)
     {
         var tween = new Tween();
         AddChild(tween);
@@ -137,9 +163,32 @@ public class BattleNode : Node
 
         tween.QueueFree();
 
+        // restore modulate, even though we're about to hide the sprite
+        // next time something spawns we want modulate to have its restored value
+        var color = cardSlot.CardArea2D.Sprite.Modulate;
+        cardSlot.CardArea2D.Sprite.Modulate = new Color(color.r, color.g,
+            color.b, 1);
         cardSlot.CardArea2D.RenderCard(null, index);
 
-        await PositionDecks();
+        if (hideSlot)
+		{
+            deck.HideEndingCardSlots();
+	        await PositionDecks();
+		}
+
+        autoResetEvent.Set();
+    }
+
+    public async void _signal_CardSummoned(DeckNode2D deck, int index)
+    {
+        var cardSlot = deck.GetCardSlotNode2D(index + 1);
+        if (!cardSlot.Visible)
+        {
+            cardSlot.Show();
+            await PositionDecks();
+        }
+
+        cardSlot.CardArea2D.RenderCard(deck.Deck[index], index);
 
         autoResetEvent.Set();
     }
@@ -149,13 +198,12 @@ public class BattleNode : Node
         GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
         GameSingleton.Instance.Game.Player1.CardFaintedEvent -= _player_CardFaintedEvent;
         GameSingleton.Instance.Game.Player2.CardFaintedEvent -= _player_CardFaintedEvent;
+        GameSingleton.Instance.Game.Player1.CardSummonedEvent -= _player_CardSummonedEvent;
+        GameSingleton.Instance.Game.Player2.CardSummonedEvent -= _player_CardSummonedEvent;
     }
 
     public async Task PositionDecks()
     {
-        Player1DeckNode2D.HideEndingCardSlots();
-        Player2DeckNode2D.HideEndingCardSlots();
-
         var tween1 = new Tween();
         AddChild(tween1);
         var tween2 = new Tween();
@@ -169,7 +217,7 @@ public class BattleNode : Node
             var lastCardSlot = Player1DeckNode2D.GetCardSlotNode2D(5);
             destination.x += lastCardSlot.GlobalPosition.x - lastVisibleCardSlot.GlobalPosition.x;
             tween1.InterpolateProperty(Player1DeckNode2D, "position",
-                Player1DeckNode2D.Position, destination, 0.05f, Tween.TransitionType.Expo, 
+                Player1DeckNode2D.Position, destination, 0.5f, Tween.TransitionType.Expo, 
                 Tween.EaseType.In);
             tween1.Start();
             awaitTween = tween1;
@@ -182,7 +230,7 @@ public class BattleNode : Node
             var lastCardSlot = Player2DeckNode2D.GetCardSlotNode2D(5);
             destination.x -= lastVisibleCardSlot.GlobalPosition.x - lastCardSlot.GlobalPosition.x;
             tween2.InterpolateProperty(Player2DeckNode2D, "position",
-                Player2DeckNode2D.Position, destination, 0.05f, Tween.TransitionType.Expo, 
+                Player2DeckNode2D.Position, destination, 0.5f, Tween.TransitionType.Expo, 
                 Tween.EaseType.In);
             tween2.Start();
             if (awaitTween == null)

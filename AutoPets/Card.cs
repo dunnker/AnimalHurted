@@ -199,6 +199,7 @@ namespace AutoPets
                 throw new Exception(string.Format("A card already exists at {0}", atIndex));
             _deck.SetCard(this, atIndex);
             _state = CardState.Summoned;
+            _deck.Player.OnCardSummonedEvent(this);
             _ability.Summoned(this);
             foreach (var card in Deck)
             {

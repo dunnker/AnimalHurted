@@ -34,6 +34,7 @@ autostart = true
 [node name="FightPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 4 )
 volume_db = -12.951
+pitch_scale = 0.65
 
 [node name="QuitButton" type="Button" parent="."]
 anchor_left = 0.5
