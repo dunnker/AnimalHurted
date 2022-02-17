@@ -22,7 +22,7 @@ public class BattleNode : Node
     public delegate void FightOverSignal();
 
     [Signal]
-    public delegate void CardFaintedSignal(DeckNode2D deck, int index, bool hideSlot);
+    public delegate void CardFaintedSignal(DeckNode2D deck, int index);
 
     [Signal]
     public delegate void CardSummonedSignal(DeckNode2D deck, int index);
@@ -48,13 +48,8 @@ public class BattleNode : Node
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
     }
 
-    public async void _on_BeginBattleTimer_timeout()
+    public void _on_BeginBattleTimer_timeout()
     {
-        Player1DeckNode2D.HideEndingCardSlots();
-        Player2DeckNode2D.HideEndingCardSlots();
-
-        await PositionDecks();
-
         GameSingleton.Instance.Game.FightEvent += _game_FightEvent;
         GameSingleton.Instance.Game.Player1.CardFaintedEvent += _player_CardFaintedEvent;
         GameSingleton.Instance.Game.Player2.CardFaintedEvent += _player_CardFaintedEvent;
@@ -93,10 +88,7 @@ public class BattleNode : Node
         else
             deck = Player2DeckNode2D;
 
-        // a cricket will spawn zombie immediately, so no need to hide the card slot
-		//TODO add other pet abilities here
-        bool hideSlot = !(card.Ability is CricketAbility);
-        EmitSignal("CardFaintedSignal", deck, index, hideSlot);
+        EmitSignal("CardFaintedSignal", deck, index);
 
         autoResetEvent.WaitOne();
     }
@@ -115,6 +107,8 @@ public class BattleNode : Node
     // signal events on main thread
     public async void _signal_FightEvent()
     {
+        await PositionDecks();
+
         var tween1 = new Tween();
         AddChild(tween1);
         var tween2 = new Tween();
@@ -149,7 +143,7 @@ public class BattleNode : Node
         autoResetEvent.Set();
     }
 
-    public async void _signal_CardFainted(DeckNode2D deck, int index, bool hideSlot)
+    public async void _signal_CardFainted(DeckNode2D deck, int index)
     {
         var tween = new Tween();
         AddChild(tween);
@@ -170,12 +164,6 @@ public class BattleNode : Node
             color.b, 1);
         cardSlot.CardArea2D.RenderCard(null, index);
 
-        if (hideSlot)
-		{
-            deck.HideEndingCardSlots();
-	        await PositionDecks();
-		}
-
         autoResetEvent.Set();
     }
 
@@ -193,8 +181,10 @@ public class BattleNode : Node
         autoResetEvent.Set();
     }
 
-    public void _signal_FightOver()
+    public async void _signal_FightOver()
     {
+        await PositionDecks();
+        
         GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
         GameSingleton.Instance.Game.Player1.CardFaintedEvent -= _player_CardFaintedEvent;
         GameSingleton.Instance.Game.Player2.CardFaintedEvent -= _player_CardFaintedEvent;
@@ -204,6 +194,9 @@ public class BattleNode : Node
 
     public async Task PositionDecks()
     {
+        Player1DeckNode2D.HideEndingCardSlots();
+        Player2DeckNode2D.HideEndingCardSlots();
+
         var tween1 = new Tween();
         AddChild(tween1);
         var tween2 = new Tween();
