@@ -257,6 +257,7 @@ namespace AutoPets
             _hitPoints += hitPoints;
             _attackPoints += attackPoints;
             _state = CardState.Buffed;
+            _deck.Player.OnCardBuffedEvent(this, sourceIndex);
             _ability.Buffed(this, sourceIndex, hitPoints, attackPoints); 
         }
     }
