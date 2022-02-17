@@ -27,6 +27,7 @@ public class BuildNode : Node
 
     public void _on_ContinueButton_pressed()
     {
+        GameSingleton.Instance.BuildPlayer.GoldChangedEvent -= _GoldChangedEvent;
         if (GameSingleton.Instance.BuildPlayer == GameSingleton.Instance.Game.Player1)
         {
             GameSingleton.Instance.BuildPlayer = GameSingleton.Instance.Game.Player2;

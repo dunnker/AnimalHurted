@@ -69,12 +69,25 @@ namespace AutoPets
 
         public void FightOne(Card card)
         {
-            Attack(card, GetDamage());
-            card.Attack(this, card.GetDamage());
-            if (card._hitPoints <= 0)
-                card.Faint();
+            Attack(card);
+            card.Attack(this);
+
+            int cardDamage = card.GetDamage();
+            _hitPoints -= cardDamage;
+            int damage = GetDamage();
+            card._hitPoints -= damage;
+
+            _deck.Player.Game.OnFightEvent();
+
+            if (cardDamage > 0)
+                _ability.Hurt(this);
+            if (damage > 0)
+                card._ability.Hurt(card);
+
             if (_hitPoints <= 0)
                 Faint();
+            if (card._hitPoints <= 0)
+                card.Faint();
         }
 
         public int GetDamage()
@@ -199,6 +212,7 @@ namespace AutoPets
             int saveIndex = _index;
             _deck.Remove(_index);
             _state = CardState.Fainted;
+            _deck.Player.OnCardFaintedEvent(this, saveIndex);
             _ability.Fainted(this, saveIndex);
         }
 
@@ -219,12 +233,11 @@ namespace AutoPets
             _ability.Sold(this, saveIndex);
         }
 
-        public void Attack(Card card, int damage)
+        public void Attack(Card card)
         {
             _ability.BeforeAttack(this);
             _state = CardState.Attacked;
             _ability.Attacked(this);
-            card.Hurt(damage);
         }
 
         public void Hurt(int damage)

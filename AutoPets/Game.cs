@@ -38,10 +38,16 @@ namespace AutoPets
         public bool Fighting { get { return _fighting; } }
 
         public event AbilityEventHandler AbilityEvent;
+        public event EventHandler FightEvent;
         
         public void OnAbilityEvent(Ability ability, Card card, int index, string message)
         {
             AbilityEvent?.Invoke(this, ability, card, index, message);
+        }
+
+        public void OnFightEvent()
+        {
+            FightEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public Game()

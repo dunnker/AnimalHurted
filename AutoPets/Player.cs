@@ -9,6 +9,7 @@ using System.Diagnostics;
 namespace AutoPets
 {
     public delegate void GoldChangedEventHandler(object sender, int oldValue);
+    public delegate void CardFaintedEventHandler(object sender, Card card, int index);
 
     public class Player
     {
@@ -49,10 +50,16 @@ namespace AutoPets
         public string Name { get; set; }
 
         public event GoldChangedEventHandler GoldChangedEvent;
+        public event CardFaintedEventHandler CardFaintedEvent;
 
         public void OnGoldChangedEvent(int oldValue)
         {
             GoldChangedEvent?.Invoke(this, oldValue);
+        }
+
+        public void OnCardFaintedEvent(Card card, int index)
+        {
+            CardFaintedEvent?.Invoke(this, card, index);
         }
 
         public Player(Game game, string name)
