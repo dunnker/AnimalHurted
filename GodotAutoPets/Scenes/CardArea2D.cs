@@ -13,6 +13,8 @@ public class CardArea2D : Area2D
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
 
+    public CardAttrsNode2D CardAttrsNode2D { get { return GetNode<CardAttrsNode2D>("CardAttrsNode2D"); } }
+
     public Label AttackPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/AttackPointsLabel"); } }
 
     public Label HitPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/HitPointsLabel"); } }
@@ -22,23 +24,31 @@ public class CardArea2D : Area2D
     [Signal]
     public delegate void DragSignal();
 
+    public void HideCard()
+    {
+        Sprite.Hide();
+        CardAttrsNode2D.Hide();
+    }
+
+    public void ShowCard()
+    {
+        Sprite.Show();
+        CardAttrsNode2D.Show();
+    }
+
     public void RenderCard(AutoPets.Card card, int index)
     {
         _cardIndex = index;
         if (card == null)
-        {
-            Sprite.Hide();
-            (GetNode("CardAttrsNode2D") as Node2D).Hide();
-        }
+            HideCard();
         else
         {
             int abilityIndex = AbilityList.Instance.AllAbilities.IndexOf(card.Ability);
             var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", abilityIndex));
             Sprite.Texture = res as Godot.Texture;
-            Sprite.Show();
             AttackPointsLabel.Text = card.AttackPoints.ToString();
             HitPointsLabel.Text = card.HitPoints.ToString();
-            (GetNode("CardAttrsNode2D") as Node2D).Show();
+            ShowCard();
         }
     }
 

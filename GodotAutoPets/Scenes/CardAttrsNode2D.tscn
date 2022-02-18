@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/heart.png" type="Texture" id=2]
 [ext_resource path="res://Assets/rock.png" type="Texture" id=3]
+[ext_resource path="res://Scenes/CardAttrsNode2D.cs" type="Script" id=4]
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
@@ -11,6 +12,7 @@ outline_color = Color( 0, 0, 0, 1 )
 font_data = ExtResource( 1 )
 
 [node name="Node2D" type="Node2D"]
+script = ExtResource( 4 )
 
 [node name="Sprite" type="Sprite" parent="."]
 position = Vector2( 56, 16 )

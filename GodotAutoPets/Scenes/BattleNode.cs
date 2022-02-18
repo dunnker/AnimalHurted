@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 public class BattleNode : Node
 {
+    System.Threading.Thread _gameThread;
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
 
@@ -25,6 +26,7 @@ public class BattleNode : Node
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+        _gameThread.Abort();
         GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
         GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
     }
@@ -54,7 +56,7 @@ public class BattleNode : Node
 
     public void _on_BeginBattleTimer_timeout()
     {
-        new System.Threading.Thread(() => 
+        _gameThread = new System.Threading.Thread(() => 
         {
             do
             {
@@ -62,11 +64,10 @@ public class BattleNode : Node
             } while (!GameSingleton.Instance.Game.IsFightOver());
             GameSingleton.Instance.Game.FightOver();
 
-            //TODO assuming "this" is still valid, e.g. user hasn't exited the battle screen
-            // before fight is finished. If we give the user a Close button or Cancel button
-            // we'll have to terminate this thread before closing
+			// assuming "this" is still valid. See Dispose method where thread is aborted
             this.EmitSignal("FightOverSignal");
-        }).Start();
+        });
+        _gameThread.Start();
     }
 
     // Game thread events happening within their own thread.
