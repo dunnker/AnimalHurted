@@ -79,6 +79,9 @@ namespace AutoPets
 
             _deck.Player.Game.OnFightEvent();
 
+            // not calling this.Hurt() since it will invoke Hurt event
+            // users get a OnFightEvent instead of Hurt event
+            // but we still need to call _ability.Hurt: 
             if (cardDamage > 0)
                 _ability.Hurt(this);
             if (damage > 0)
@@ -199,7 +202,7 @@ namespace AutoPets
                 throw new Exception(string.Format("A card already exists at {0}", atIndex));
             _deck.SetCard(this, atIndex);
             _state = CardState.Summoned;
-            _deck.Player.OnCardSummonedEvent(this);
+            _deck.Player.OnCardSummonedEvent(this, atIndex);
             _ability.Summoned(this);
             foreach (var card in Deck)
             {
@@ -241,12 +244,13 @@ namespace AutoPets
             _ability.Attacked(this);
         }
 
-        public void Hurt(int damage)
+        public void Hurt(int damage, Card sourceCard)
         {
             if (damage > 0)
             {
                 _state = CardState.Hurt;
                 _hitPoints -= damage;
+                _deck.Player.Game.OnCardHurtEvent(this, sourceCard);
                 _ability.Hurt(this);
             }
         }

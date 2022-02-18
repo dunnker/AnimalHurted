@@ -9,6 +9,7 @@ using System.Diagnostics;
 namespace AutoPets
 {
     public delegate void AbilityEventHandler(object sender, Ability ability, Card card, int index, string message);
+    public delegate void CardHurtEventHandler(object sender, Card card, Card sourceCard);
 
     public class Game
     {
@@ -39,7 +40,8 @@ namespace AutoPets
 
         public event AbilityEventHandler AbilityEvent;
         public event EventHandler FightEvent;
-        
+        public event CardHurtEventHandler CardHurtEvent;
+
         public void OnAbilityEvent(Ability ability, Card card, int index, string message)
         {
             AbilityEvent?.Invoke(this, ability, card, index, message);
@@ -48,6 +50,11 @@ namespace AutoPets
         public void OnFightEvent()
         {
             FightEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnCardHurtEvent(Card card, Card sourceCard)
+        {
+            CardHurtEvent?.Invoke(this, card, sourceCard);
         }
 
         public Game()

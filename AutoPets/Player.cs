@@ -9,10 +9,9 @@ using System.Diagnostics;
 namespace AutoPets
 {
     public delegate void GoldChangedEventHandler(object sender, int oldValue);
-    public delegate void CardFaintedEventHandler(object sender, Card card, int index);
-    public delegate void CardSummonedEventHandler(object sender, Card card);
+    public delegate void CardEventHandler(object sender, Card card, int index);
     public delegate void CardBuffedEventHandler(object sender, Card card, int sourceIndex);
-
+    
     public class Player
     {
         readonly Game _game;
@@ -52,8 +51,8 @@ namespace AutoPets
         public string Name { get; set; }
 
         public event GoldChangedEventHandler GoldChangedEvent;
-        public event CardFaintedEventHandler CardFaintedEvent;
-        public event CardSummonedEventHandler CardSummonedEvent;
+        public event CardEventHandler CardFaintedEvent;
+        public event CardEventHandler CardSummonedEvent;
         public event CardBuffedEventHandler CardBuffedEvent;
 
         public void OnGoldChangedEvent(int oldValue)
@@ -66,9 +65,9 @@ namespace AutoPets
             CardFaintedEvent?.Invoke(this, card, index);
         }
 
-        public void OnCardSummonedEvent(Card card)
+        public void OnCardSummonedEvent(Card card, int index)
         {
-            CardSummonedEvent?.Invoke(this, card);
+            CardSummonedEvent?.Invoke(this, card, index);
         }
 
         public void OnCardBuffedEvent(Card card, int sourceIndex)

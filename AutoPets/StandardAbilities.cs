@@ -133,7 +133,7 @@ namespace AutoPets
             {
                 var randomCard = opponent.BattleDeck.GetRandomCard();
                 if (randomCard != null)
-                    randomCard.Hurt(1);
+                    randomCard.Hurt(1, card);
             }
         }
     }
@@ -306,7 +306,7 @@ namespace AutoPets
 
                 card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Before attack => Deal {0} damage to friend behind.", card.Level));
                 card.Deck.OnDeckEvent(card, string.Format(string.Format("{0}. {1} attacked {2}. {3}", card.Index + 1, ToString(), priorCard.Index + 1, priorCard.Ability.ToString())));
-                priorCard.Hurt(card.Level);
+                priorCard.Hurt(card.Level, card);
             }
         }
     }
@@ -357,10 +357,10 @@ namespace AutoPets
                 card.Deck.Player.Game.OnAbilityEvent(this, card, index, 
                     string.Format("Faint => Deal {0} damage to all.", 2 * card.Level));
                 foreach (var c in card.Deck)
-                    c.Hurt(2 * card.Level);
+                    c.Hurt(2 * card.Level, card);
                 if (card.Deck.Player.Game.Fighting)
                     foreach (var c in opponent.BattleDeck)
-                        c.Hurt(2 * card.Level);
+                        c.Hurt(2 * card.Level, card);
             }
         }
     }
