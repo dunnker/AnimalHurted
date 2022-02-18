@@ -22,18 +22,55 @@ script = ExtResource( 1 )
 texture = ExtResource( 4 )
 centered = false
 
+[node name="ColorRect3" type="ColorRect" parent="."]
+modulate = Color( 1, 1, 1, 0.254902 )
+margin_left = 112.0
+margin_top = 8.0
+margin_right = 832.0
+margin_bottom = 96.0
+mouse_filter = 2
+color = Color( 0, 0, 0, 0.596078 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="PlayerAttrsNode2D" parent="." instance=ExtResource( 6 )]
+position = Vector2( 104, 0 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+modulate = Color( 1, 1, 1, 0.254902 )
+margin_left = 112.0
+margin_top = 104.0
+margin_right = 832.0
+margin_bottom = 368.0
+mouse_filter = 2
+color = Color( 0.796078, 0.917647, 0.529412, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="DeckNode2D" parent="." instance=ExtResource( 2 )]
 position = Vector2( 128, 128 )
 
+[node name="ColorRect2" type="ColorRect" parent="."]
+modulate = Color( 1, 1, 1, 0.254902 )
+margin_left = 112.0
+margin_top = 392.0
+margin_right = 832.0
+margin_bottom = 656.0
+mouse_filter = 2
+color = Color( 0.796078, 0.917647, 0.529412, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ShopNode2D" parent="." instance=ExtResource( 3 )]
-position = Vector2( 128, 320 )
+position = Vector2( 128, 416 )
 
 [node name="QuitGameButton" type="Button" parent="."]
-margin_left = 856.0
+margin_left = 848.0
 margin_top = 16.0
-margin_right = 998.0
+margin_right = 990.0
 margin_bottom = 52.0
 custom_fonts/font = SubResource( 3 )
 text = "Quit"
@@ -42,9 +79,9 @@ __meta__ = {
 }
 
 [node name="ContinueButton" type="Button" parent="."]
-margin_left = 856.0
+margin_left = 848.0
 margin_top = 64.0
-margin_right = 998.0
+margin_right = 990.0
 margin_bottom = 100.0
 custom_fonts/font = SubResource( 3 )
 text = "Continue"
@@ -54,11 +91,23 @@ __meta__ = {
 
 [node name="RollButton" type="Button" parent="."]
 margin_left = 128.0
-margin_top = 512.0
+margin_top = 608.0
 margin_right = 224.0
-margin_bottom = 548.0
+margin_bottom = 644.0
 custom_fonts/font = SubResource( 4 )
 text = "Roll"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SellButton" type="Button" parent="."]
+margin_left = 128.0
+margin_top = 320.0
+margin_right = 224.0
+margin_bottom = 356.0
+custom_fonts/font = SubResource( 4 )
+disabled = true
+text = "Sell"
 __meta__ = {
 "_edit_use_anchors_": false
 }

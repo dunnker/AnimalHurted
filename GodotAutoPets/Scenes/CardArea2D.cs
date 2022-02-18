@@ -4,7 +4,6 @@ using AutoPets;
 
 public class CardArea2D : Area2D
 {
-    bool _dragging;
     Vector2 _savePosition;
     int _saveZIndex;
     int _cardIndex;
@@ -22,7 +21,7 @@ public class CardArea2D : Area2D
     public IDragParent DragParent { get { return GetParent().GetParent() as IDragParent; } } 
 
     [Signal]
-    public delegate void DragSignal();
+    public delegate void StartStopDragSignal();
 
     public void HideCard()
     {
@@ -54,8 +53,15 @@ public class CardArea2D : Area2D
 
     public void _on_Area2D_mouse_entered()
     {
-        if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource != this)
+        // if dragging from one card to another adjacent card
+        // sometimes the mouse_entered event will fire for the adjacent card
+        // and then fire for the card we're dragging. So checking that the
+        // DragSource != this
+        if ((GameSingleton.Instance.StartingDrag || GameSingleton.Instance.Dragging) && 
+            GameSingleton.Instance.DragSource != this)
+        {
             GameSingleton.Instance.DragTarget = this;
+        }
         (GetParent().FindNode("SelectedSprite") as Sprite).Show();
     }
 
@@ -65,7 +71,9 @@ public class CardArea2D : Area2D
 		// so we don't always want to set DragTarget to null; set it to null only when 
 		// the DragTarget is "this"
         if (GameSingleton.Instance.DragTarget == this)
+        {
             GameSingleton.Instance.DragTarget = null;
+        }
         (GetParent().FindNode("SelectedSprite") as Sprite).Hide();
     }
 
@@ -79,15 +87,19 @@ public class CardArea2D : Area2D
                 mouseEvent.Pressed)
             {
                 if (DragParent.GetCanDrag())
-                    EmitSignal("DragSignal");
+                {
+                    EmitSignal("StartStopDragSignal");
+                }
             }
             else
             {
                 // mouse up
-                if (Sprite.Visible && _dragging && mouseEvent.ButtonIndex == (int)ButtonList.Left && 
+                if (Sprite.Visible && 
+                    GameSingleton.Instance.StartingDrag && GameSingleton.Instance.DragSource == this && 
+                    mouseEvent.ButtonIndex == (int)ButtonList.Left && 
                     !mouseEvent.Pressed)
                 {
-                    EmitSignal("DragSignal");
+                    EmitSignal("StartStopDragSignal");
                 }
             }
         }
@@ -102,39 +114,56 @@ public class CardArea2D : Area2D
         } 
     }
 
-    public void _signal_StartStopDrag()
+    public async void _signal_StartStopDrag()
     {
-        _dragging = !_dragging;
-        GameSingleton.Instance.Dragging = _dragging;
-        if (_dragging)
+        GameSingleton.Instance.StartingDrag = !GameSingleton.Instance.StartingDrag;
+        if (GameSingleton.Instance.StartingDrag)
         {
-            GameSingleton.Instance.DragSource = this;
             _savePosition = Position;
             _saveZIndex = ZIndex;
-            ZIndex = 101; // so the sprite appears above everything else during drag
+            // must set immediately because of mouse enter/exit events checking DragSource
+            GameSingleton.Instance.DragSource = this;
+            GameSingleton.Instance.DragTarget = null;
+
+            // defer starting drag in case user is just clicking on the card
+            await ToSignal(GetTree().CreateTimer(0.1f, false), "timeout");
+
+            // StartingDrag might be false if there was a mouse up event during the "await"
+            GameSingleton.Instance.Dragging = GameSingleton.Instance.StartingDrag;
+            if (GameSingleton.Instance.Dragging)
+            {
+                ZIndex = 101; // so the sprite appears above everything else during drag
+            }
         }
         else
         {
+            // otherwise end drag immediately
             Position = _savePosition;
-            ZIndex = _saveZIndex;    
-            // notify the parent of this card, either the Shop or BuildDeck that
-            // a card has been dropped somewhere 
-            DragParent.DragDropped(this);
-            GameSingleton.Instance.DragTarget = null;
+            ZIndex = _saveZIndex;
+
+            // if we ever started the drag
+            if (GameSingleton.Instance.Dragging)
+            {    
+                GameSingleton.Instance.Dragging = false;
+                // notify the parent of this card, either the Shop or BuildDeck that
+                // a card has been dropped somewhere 
+                DragParent.DragDropped(this);
+                GameSingleton.Instance.DragTarget = null;
+            }
         }
     }
 
     public override void _Ready()
     {
-        Connect("DragSignal", this, "_signal_StartStopDrag");
+        Connect("StartStopDragSignal", this, "_signal_StartStopDrag");
     }
 
     public override void _Process(float delta)
     {
-        if (_dragging)
+        if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource == this)
         {
-            var mousepos = GetGlobalMousePosition();
-            GlobalPosition = new Vector2(mousepos.x, mousepos.y);
+            var mousePos = GetGlobalMousePosition();
+            GlobalPosition = new Vector2(mousePos.x, mousePos.y);
         }
     }
 }

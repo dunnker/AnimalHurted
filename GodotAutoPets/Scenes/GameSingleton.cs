@@ -12,6 +12,7 @@ public class GameSingleton
 
     public Player BuildPlayer { get; set; }
     
+    public bool StartingDrag { get; set; }
     public bool Dragging { get; set; }
     
     public object DragTarget { get; set; }
