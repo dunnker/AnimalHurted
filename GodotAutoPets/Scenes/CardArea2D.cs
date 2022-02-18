@@ -61,9 +61,11 @@ public class CardArea2D : Area2D
 
     public void _on_Area2D_mouse_exited()
     {
-        // Note: can't set DragTarget to null on exit event because an exit event might happen
-        // after an enter event of the actual drag target
-
+		// mouse exit event can be invoked AFTER the mouse enter event of another card
+		// so we don't always want to set DragTarget to null; set it to null only when 
+		// the DragTarget is "this"
+        if (GameSingleton.Instance.DragTarget == this)
+            GameSingleton.Instance.DragTarget = null;
         (GetParent().FindNode("SelectedSprite") as Sprite).Hide();
     }
 

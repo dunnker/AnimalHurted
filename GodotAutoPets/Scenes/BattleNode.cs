@@ -73,6 +73,7 @@ public class BattleNode : Node
 			// assuming "this" is still valid. See Dispose method where thread is aborted
             this.EmitSignal("FightOverSignal");
         });
+        _gameThread.Name = "Battle Game Thread";
         _gameThread.Start();
     }
 

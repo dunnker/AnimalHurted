@@ -69,6 +69,7 @@ public class ShopNode2D : Node2D, IDragParent
 					// assuming "this" is still valid. See Dispose method where thread is aborted
                     this.EmitSignal("CardBoughtSignal");
                 });
+                _gameThread.Name = "Shop Game Thread";
                 _gameThread.Start();
             }
         }
