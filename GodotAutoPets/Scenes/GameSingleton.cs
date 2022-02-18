@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using AutoPets;
 
 public class GameSingleton
@@ -5,6 +7,8 @@ public class GameSingleton
     static GameSingleton _instance;
 
     public Game Game { get; set; }
+
+    public static readonly AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
     public Player BuildPlayer { get; set; }
     

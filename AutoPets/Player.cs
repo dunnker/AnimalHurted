@@ -51,28 +51,10 @@ namespace AutoPets
         public string Name { get; set; }
 
         public event GoldChangedEventHandler GoldChangedEvent;
-        public event CardEventHandler CardFaintedEvent;
-        public event CardEventHandler CardSummonedEvent;
-        public event CardBuffedEventHandler CardBuffedEvent;
 
         public void OnGoldChangedEvent(int oldValue)
         {
             GoldChangedEvent?.Invoke(this, oldValue);
-        }
-
-        public void OnCardFaintedEvent(Card card, int index)
-        {
-            CardFaintedEvent?.Invoke(this, card, index);
-        }
-
-        public void OnCardSummonedEvent(Card card, int index)
-        {
-            CardSummonedEvent?.Invoke(this, card, index);
-        }
-
-        public void OnCardBuffedEvent(Card card, int sourceIndex)
-        {
-            CardBuffedEvent?.Invoke(this, card, sourceIndex);
         }
 
         public Player(Game game, string name)

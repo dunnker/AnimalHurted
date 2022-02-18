@@ -40,6 +40,9 @@ namespace AutoPets
 
         public event AbilityEventHandler AbilityEvent;
         public event EventHandler FightEvent;
+        public event CardEventHandler CardFaintedEvent;
+        public event CardEventHandler CardSummonedEvent;
+        public event CardBuffedEventHandler CardBuffedEvent;
         public event CardHurtEventHandler CardHurtEvent;
 
         public void OnAbilityEvent(Ability ability, Card card, int index, string message)
@@ -50,6 +53,21 @@ namespace AutoPets
         public void OnFightEvent()
         {
             FightEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnCardFaintedEvent(Card card, int index)
+        {
+            CardFaintedEvent?.Invoke(this, card, index);
+        }
+
+        public void OnCardSummonedEvent(Card card, int index)
+        {
+            CardSummonedEvent?.Invoke(this, card, index);
+        }
+
+        public void OnCardBuffedEvent(Card card, int sourceIndex)
+        {
+            CardBuffedEvent?.Invoke(this, card, sourceIndex);
         }
 
         public void OnCardHurtEvent(Card card, Card sourceCard)

@@ -202,7 +202,7 @@ namespace AutoPets
                 throw new Exception(string.Format("A card already exists at {0}", atIndex));
             _deck.SetCard(this, atIndex);
             _state = CardState.Summoned;
-            _deck.Player.OnCardSummonedEvent(this, atIndex);
+            _deck.Player.Game.OnCardSummonedEvent(this, atIndex);
             _ability.Summoned(this);
             foreach (var card in Deck)
             {
@@ -216,7 +216,7 @@ namespace AutoPets
             int saveIndex = _index;
             _deck.Remove(_index);
             _state = CardState.Fainted;
-            _deck.Player.OnCardFaintedEvent(this, saveIndex);
+            _deck.Player.Game.OnCardFaintedEvent(this, saveIndex);
             _ability.Fainted(this, saveIndex);
         }
 
@@ -261,7 +261,7 @@ namespace AutoPets
             _hitPoints += hitPoints;
             _attackPoints += attackPoints;
             _state = CardState.Buffed;
-            _deck.Player.OnCardBuffedEvent(this, sourceIndex);
+            _deck.Player.Game.OnCardBuffedEvent(this, sourceIndex);
             _ability.Buffed(this, sourceIndex, hitPoints, attackPoints); 
         }
     }
