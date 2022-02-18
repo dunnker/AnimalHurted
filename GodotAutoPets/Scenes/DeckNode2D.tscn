@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scenes/CardSlotNode2D.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.cs" type="Script" id=2]
 [ext_resource path="res://Assets/thump.mp3" type="AudioStream" id=3]
+[ext_resource path="res://Assets/gulp_sound.wav" type="AudioStream" id=4]
+[ext_resource path="res://Assets/whoosh.wav" type="AudioStream" id=5]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 2 )
@@ -25,3 +27,11 @@ position = Vector2( 576, 64 )
 [node name="ThumpPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 3 )
 volume_db = -23.416
+
+[node name="WhooshPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+volume_db = -5.102
+
+[node name="GulpPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+volume_db = -10.988

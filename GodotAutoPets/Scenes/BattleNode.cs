@@ -26,9 +26,15 @@ public class BattleNode : Node
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        _gameThread.Abort();
-        GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
-        GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
+        if (_gameThread != null)
+            _gameThread.Abort();
+        // Dispose can be called from Godot editor, and our singleton
+        // may not have a Game when designing
+        if (GameSingleton.Instance.Game != null)
+        {
+            GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
+            GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
+        }
     }
 
     public override void _Ready()
@@ -148,6 +154,8 @@ public class BattleNode : Node
     {
         var cardSlot = deck.GetCardSlotNode2D(index + 1);
         var sourceCardSlot = sourceDeck.GetCardSlotNode2D(sourceIndex + 1);
+
+        deck.WhooshPlayer.Play();
 
         var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
         Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;

@@ -8,6 +8,10 @@ public class DeckNode2D : Node2D, IDragParent
 {
     Deck _deck;
 
+    public AudioStreamPlayer ThumpPlayer { get { return GetNode<AudioStreamPlayer>("ThumpPlayer"); } }
+    public AudioStreamPlayer GulpPlayer { get { return GetNode<AudioStreamPlayer>("GulpPlayer"); } }
+    public AudioStreamPlayer WhooshPlayer { get { return GetNode<AudioStreamPlayer>("WhooshPlayer"); } }
+
     public Deck Deck { get { return _deck; } }
 
     [Signal]
@@ -40,10 +44,15 @@ public class DeckNode2D : Node2D, IDragParent
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        GameSingleton.Instance.Game.CardFaintedEvent -= _game_CardFaintedEvent;
-        GameSingleton.Instance.Game.CardSummonedEvent -= _game_CardSummonedEvent;
-        GameSingleton.Instance.Game.CardBuffedEvent -= _game_CardBuffedEvent;
-        GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
+        // Dispose can be called from Godot editor, and our singleton
+        // may not have a Game when designing
+        if (GameSingleton.Instance.Game != null)
+        {
+            GameSingleton.Instance.Game.CardFaintedEvent -= _game_CardFaintedEvent;
+            GameSingleton.Instance.Game.CardSummonedEvent -= _game_CardSummonedEvent;
+            GameSingleton.Instance.Game.CardBuffedEvent -= _game_CardBuffedEvent;
+            GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
+        }
     }
 
     public override void _Ready()
@@ -65,7 +74,7 @@ public class DeckNode2D : Node2D, IDragParent
 
     public void PlayThump()
     {
-        GetNode<AudioStreamPlayer>("ThumpPlayer").Play();
+        ThumpPlayer.Play();
     }
 
     public void ReverseCardAreaPositions()
@@ -275,6 +284,7 @@ public class DeckNode2D : Node2D, IDragParent
 
         buffArea2D.QueueFree();
 
+        GulpPlayer.Play();
         cardSlot.CardArea2D.RenderCard(_deck[index], index);
 
         GameSingleton.autoResetEvent.Set();
@@ -284,6 +294,8 @@ public class DeckNode2D : Node2D, IDragParent
     {
         var cardSlot = GetCardSlotNode2D(index + 1);
         var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+
+        WhooshPlayer.Play();
 
         var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
         Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;

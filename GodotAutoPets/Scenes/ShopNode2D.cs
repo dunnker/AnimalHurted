@@ -15,7 +15,9 @@ public class ShopNode2D : Node2D, IDragParent
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        _gameThread.Abort();
+        // Dispose can be called from Godot editor so check if thread exists
+        if (_gameThread != null)
+            _gameThread.Abort();
     }
 
     public override void _Ready()
