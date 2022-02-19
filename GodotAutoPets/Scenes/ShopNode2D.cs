@@ -33,7 +33,7 @@ public class ShopNode2D : Node2D, IDragParent
         {
             var card = GameSingleton.Instance.BuildPlayer.ShopDeck[i];
             var cardSlot = GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", i + 1));
-            cardSlot.CardArea2D.RenderCard(card, i);
+            cardSlot.CardArea2D.RenderCard(card, i, false);
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
         }

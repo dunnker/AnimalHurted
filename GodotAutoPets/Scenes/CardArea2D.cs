@@ -8,6 +8,7 @@ public class CardArea2D : Area2D
     int _defaultZIndex;
     int _cardIndex;
     bool _cancelCardReorder = true;
+    bool _showLevelLabel;
 
     public CardSlotNode2D CardSlotNode2D { get { return GetParent() as CardSlotNode2D; } }
 
@@ -24,6 +25,8 @@ public class CardArea2D : Area2D
 
     public Label HitPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/HitPointsLabel"); } }
 
+    public Label LevelLabel { get { return GetNode<Label>("LevelLabel"); } }
+
     public IDragParent DragParent { get { return GetParent().GetParent() as IDragParent; } } 
 
     public Timer CardReorderTimer { get { return GetNode<Timer>("CardReorderTimer"); } }
@@ -35,17 +38,23 @@ public class CardArea2D : Area2D
     {
         Sprite.Hide();
         CardAttrsNode2D.Hide();
+        LevelLabel.Hide();
     }
 
     public void ShowCard()
     {
         Sprite.Show();
         CardAttrsNode2D.Show();
+        if (_showLevelLabel)
+            LevelLabel.Show();
     }
 
-    public void RenderCard(AutoPets.Card card, int index)
+    public void RenderCard(AutoPets.Card card, int index, bool showLevelLabel = true)
     {
         _cardIndex = index;
+        _showLevelLabel = showLevelLabel;
+        if (!_showLevelLabel)
+            LevelLabel.Hide();
         if (card == null)
             HideCard();
         else
@@ -55,6 +64,7 @@ public class CardArea2D : Area2D
             Sprite.Texture = res as Godot.Texture;
             AttackPointsLabel.Text = card.AttackPoints.ToString();
             HitPointsLabel.Text = card.HitPoints.ToString();
+            LevelLabel.Text = string.Format("Lvl{0}{1}", card.Level, new string('+', card.XPRemainder));
             ShowCard();
         }
     }
