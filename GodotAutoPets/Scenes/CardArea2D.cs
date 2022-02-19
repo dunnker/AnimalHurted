@@ -62,7 +62,8 @@ public class CardArea2D : Area2D
         if ((GameSingleton.Instance.StartingDrag || GameSingleton.Instance.Dragging) && 
             GameSingleton.Instance.DragSource != this)
         {
-            GameSingleton.Instance.DragTarget = this;
+            if (!Sprite.Visible)
+                GameSingleton.Instance.DragTarget = this;
         }
         CardSlotNode2D.HoverSprite.Show();
     }

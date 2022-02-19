@@ -1,3 +1,5 @@
+//#define CHEATS_ENABLED
+
 using System;
 using System.Threading;
 using Godot;
@@ -59,6 +61,16 @@ public class BuildNode : Node
             _gameThread.Start();
         }
     }
+
+    public override void _Input(InputEvent @event)
+    {
+        #if CHEATS_ENABLED
+        if (Input.IsActionPressed("give_gold"))
+        {
+            GameSingleton.Instance.BuildPlayer.Gold += 1;
+        }
+        #endif
+    } 
     
     public override void _Ready()
     {
