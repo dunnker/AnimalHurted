@@ -92,27 +92,38 @@ namespace AutoPets
             return null;
         }
 
-        public void MakeRoomAt(int atIndex)
+        public bool MakeRoomAt(int atIndex)
         {
             Debug.Assert(atIndex >= 0 && atIndex < _cards.Length);
+            bool moved = false;
             for (int i = atIndex; i < _cards.Length; i++)
             {
+                // find the first empty slot past atIndex
                 if (_cards[i] == null)
                 {
+                    // work backwards to move cards to empty slots
                     for (int j = i; j >= atIndex + 1; j--)
+                    {
                         MoveCard(_cards[j - 1], j);
+                        moved = true;
+                    }
                     break;
                 }
             }
-            for (int i = atIndex; i >= 0; i--)
-            {
-                if (_cards[i] == null)
+            if (!moved)
+                for (int i = atIndex; i >= 0; i--)
                 {
-                    for (int j = i; j <= atIndex - 1; j++)
-                        MoveCard(_cards[j + 1], j);
-                    break;
+                    if (_cards[i] == null)
+                    {
+                        for (int j = i; j <= atIndex - 1; j++)
+                        {
+                            MoveCard(_cards[j + 1], j);
+                            moved = true;
+                        }
+                        break;
+                    }
                 }
-            }
+            return moved;
         }
 
         public Card GetRandomCard(int excludingIndex = -1)

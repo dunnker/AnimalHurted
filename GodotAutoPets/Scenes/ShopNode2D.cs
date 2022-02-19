@@ -55,7 +55,7 @@ public class ShopNode2D : Node2D, IDragParent
             if (cardParent is DeckNode2D)
             {
                 targetCard.CardSlotNode2D.Selected = true;
-                
+
                 // hide immediately since it's being dropped and animations are about 
                 // to be shown (e.g. if the bought card is buffed by an ability)
 				// we don't want the card shown in the shop during animations
@@ -75,6 +75,11 @@ public class ShopNode2D : Node2D, IDragParent
                 _gameThread.Start();
             }
         }
+    }
+
+    public void DragReorder(CardArea2D cardArea2D)
+    {
+
     }
 
     public bool GetCanDrag()

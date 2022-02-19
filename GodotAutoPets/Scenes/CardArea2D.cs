@@ -4,11 +4,15 @@ using AutoPets;
 
 public class CardArea2D : Area2D
 {
-    Vector2 _savePosition;
-    int _saveZIndex;
+    Vector2 _defaultPosition;
+    int _defaultZIndex;
     int _cardIndex;
-    
+    bool _cancelCardReorder = true;
+
     public CardSlotNode2D CardSlotNode2D { get { return GetParent() as CardSlotNode2D; } }
+
+    public Vector2 DefaultPosition { get { return _defaultPosition; } }
+    public int DefaultZIndex { get { return _defaultZIndex; } }
 
     public int CardIndex { get { return _cardIndex; } }
 
@@ -21,6 +25,8 @@ public class CardArea2D : Area2D
     public Label HitPointsLabel { get { return GetNode<Label>("CardAttrsNode2D/HitPointsLabel"); } }
 
     public IDragParent DragParent { get { return GetParent().GetParent() as IDragParent; } } 
+
+    public Timer CardReorderTimer { get { return GetNode<Timer>("CardReorderTimer"); } }
 
     [Signal]
     public delegate void StartStopDragSignal();
@@ -55,6 +61,8 @@ public class CardArea2D : Area2D
 
     public void _on_Area2D_mouse_entered()
     {
+        CardSlotNode2D.HoverSprite.Show();
+
         // if dragging from one card to another adjacent card
         // sometimes the mouse_entered event will fire for the adjacent card
         // and then fire for the card we're dragging. So checking that the
@@ -63,13 +71,42 @@ public class CardArea2D : Area2D
             GameSingleton.Instance.DragSource != this)
         {
             if (!Sprite.Visible)
+            {
+                GameSingleton.Instance.DragTarget = this;
+            }
+            else
+            {
+                // every card has their own timer which can start from a mouse entered event
+                // and is stopped from a card exit event
+                _cancelCardReorder = false;
+                CardReorderTimer.Start();
+            }
+        }
+    }
+
+    public void _on_CardReorderTimer_timeout()
+    {
+        if (GameSingleton.Instance.Dragging && !_cancelCardReorder)
+        {
+            DragParent.DragReorder(this);
+            // if after re-order, the sprite is now not visible (e.g. empty slot was created), set the DragTarget
+			// to this empty slot
+            if (!Sprite.Visible)
                 GameSingleton.Instance.DragTarget = this;
         }
-        CardSlotNode2D.HoverSprite.Show();
+        _cancelCardReorder = true;
     }
 
     public void _on_Area2D_mouse_exited()
     {
+        CardSlotNode2D.HoverSprite.Hide();
+
+        if (GameSingleton.Instance.Dragging)
+        {
+            _cancelCardReorder = true;
+            CardReorderTimer.Stop();
+        }
+
 		// mouse exit event can be invoked AFTER the mouse enter event of another card
 		// so we don't always want to set DragTarget to null; set it to null only when 
 		// the DragTarget is "this"
@@ -77,7 +114,6 @@ public class CardArea2D : Area2D
         {
             GameSingleton.Instance.DragTarget = null;
         }
-        CardSlotNode2D.HoverSprite.Hide();
     }
 
     public void _on_Area2D_input_event(Node viewport, InputEvent @event, int shape_idx)
@@ -123,8 +159,6 @@ public class CardArea2D : Area2D
         GameSingleton.Instance.StartingDrag = !GameSingleton.Instance.StartingDrag;
         if (GameSingleton.Instance.StartingDrag)
         {
-            _savePosition = Position;
-            _saveZIndex = ZIndex;
             // must set immediately because of mouse enter/exit events checking DragSource
             GameSingleton.Instance.DragSource = this;
             GameSingleton.Instance.DragTarget = null;
@@ -142,8 +176,8 @@ public class CardArea2D : Area2D
         else
         {
             // otherwise end drag immediately
-            Position = _savePosition;
-            ZIndex = _saveZIndex;
+            Position = _defaultPosition;
+            ZIndex = _defaultZIndex;;
 
             // if we ever started the drag
             if (GameSingleton.Instance.Dragging)
@@ -160,6 +194,8 @@ public class CardArea2D : Area2D
     public override void _Ready()
     {
         Connect("StartStopDragSignal", this, "_signal_StartStopDrag");
+        _defaultPosition = Position;
+        _defaultZIndex = ZIndex;
     }
 
     public override void _Process(float delta)

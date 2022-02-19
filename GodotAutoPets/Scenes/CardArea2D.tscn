@@ -22,6 +22,11 @@ __meta__ = {
 [node name="CardAttrsNode2D" parent="." instance=ExtResource( 2 )]
 position = Vector2( -29, 56 )
 
+[node name="CardReorderTimer" type="Timer" parent="."]
+wait_time = 1.5
+one_shot = true
+
 [connection signal="input_event" from="." to="." method="_on_Area2D_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_Area2D_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_Area2D_mouse_exited"]
+[connection signal="timeout" from="CardReorderTimer" to="." method="_on_CardReorderTimer_timeout"]

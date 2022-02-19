@@ -60,6 +60,16 @@ public class BattleNode : Node
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
     }
 
+    public override void _Input(InputEvent @event)
+    {
+        #if CHEATS_ENABLED
+        if (Input.IsActionPressed("retry_battle"))
+        {
+            GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
+        }
+        #endif
+    } 
+    
     public void _on_BeginBattleTimer_timeout()
     {
         _gameThread = new System.Threading.Thread(() => 

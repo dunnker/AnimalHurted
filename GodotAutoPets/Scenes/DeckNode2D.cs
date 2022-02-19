@@ -212,7 +212,44 @@ public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
                 PlayThump();   
             }
         }
-        RenderDeck(GameSingleton.Instance.BuildPlayer.BuildDeck);
+        RenderDeck(_deck);
+    }
+
+    public void DragReorder(CardArea2D cardArea2D)
+    {
+        // we're either drag/dropping from the Shop scene or we are
+        // drag/dropping in the build deck -- reordering cards in the same deck
+        Card sourceCard = null;
+        CardArea2D sourceCardArea2D = GameSingleton.Instance.DragSource as CardArea2D;
+        // if reordering cards within the same deck 
+        if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+        {
+            //.. remove source card immediately
+            sourceCard = _deck[sourceCardArea2D.CardIndex];
+            _deck.Remove(sourceCardArea2D.CardIndex);
+        }
+        if (_deck.MakeRoomAt(cardArea2D.CardIndex))
+        {
+            if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+                // ...place in its new position
+                _deck.SetCard(sourceCard, cardArea2D.CardIndex);
+            // redisplay cards that have been moved
+            RenderDeck(_deck);
+            if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+            {
+                // sourceCardArea2D is now associated with a different card
+                // so restore its drag position and assign a new drag source card
+                GameSingleton.Instance.DragSource = cardArea2D;
+                GameSingleton.Instance.DragTarget = cardArea2D;
+                // new drag source card
+                cardArea2D.GlobalPosition = sourceCardArea2D.GlobalPosition;
+                cardArea2D.ZIndex = sourceCardArea2D.ZIndex;
+                // restore position
+                sourceCardArea2D.Position = sourceCardArea2D.DefaultPosition;
+                sourceCardArea2D.ZIndex = sourceCardArea2D.DefaultZIndex;
+            }
+            cardArea2D.CardSlotNode2D.Selected = false;
+        }
     }
 
     public bool GetCanDrag()
