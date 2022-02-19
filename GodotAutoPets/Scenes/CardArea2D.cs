@@ -7,6 +7,8 @@ public class CardArea2D : Area2D
     Vector2 _savePosition;
     int _saveZIndex;
     int _cardIndex;
+    
+    public CardSlotNode2D CardSlotNode2D { get { return GetParent() as CardSlotNode2D; } }
 
     public int CardIndex { get { return _cardIndex; } }
 
@@ -62,7 +64,7 @@ public class CardArea2D : Area2D
         {
             GameSingleton.Instance.DragTarget = this;
         }
-        (GetParent().FindNode("SelectedSprite") as Sprite).Show();
+        CardSlotNode2D.HoverSprite.Show();
     }
 
     public void _on_Area2D_mouse_exited()
@@ -74,7 +76,7 @@ public class CardArea2D : Area2D
         {
             GameSingleton.Instance.DragTarget = null;
         }
-        (GetParent().FindNode("SelectedSprite") as Sprite).Hide();
+        CardSlotNode2D.HoverSprite.Hide();
     }
 
     public void _on_Area2D_input_event(Node viewport, InputEvent @event, int shape_idx)
@@ -86,6 +88,7 @@ public class CardArea2D : Area2D
             if (Sprite.Visible && mouseEvent.ButtonIndex == (int)ButtonList.Left && 
                 mouseEvent.Pressed)
             {
+                CardSlotNode2D.Selected = !CardSlotNode2D.Selected;
                 if (DragParent.GetCanDrag())
                 {
                     EmitSignal("StartStopDragSignal");

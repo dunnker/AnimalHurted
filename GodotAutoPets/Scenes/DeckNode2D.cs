@@ -4,7 +4,12 @@ using System.Threading.Tasks;
 using Godot;
 using AutoPets;
 
-public class DeckNode2D : Node2D, IDragParent
+public interface ICardSelectHost
+{
+    void SelectionChanged(CardSlotNode2D cardSlot);
+}
+
+public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
 {
     Deck _deck;
 
@@ -40,6 +45,21 @@ public class DeckNode2D : Node2D, IDragParent
             cardSlot.CardArea2D.RenderCard(deck[i], i);
         }
     }
+
+    // ICardSelectHost
+    public void SelectionChanged(CardSlotNode2D cardSlot)
+    {
+        if (cardSlot.Selected)
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                var tempCardSlot = GetCardSlotNode2D(i);
+                if (tempCardSlot != cardSlot)
+                    tempCardSlot.Selected = false;
+            }
+        }
+    }
+    // ICardSelectHost
 
     protected override void Dispose(bool disposing)
     {
@@ -175,6 +195,8 @@ public class DeckNode2D : Node2D, IDragParent
                 GameSingleton.Instance.BuildPlayer.BuildDeck.MoveCard(
                     GameSingleton.Instance.BuildPlayer.BuildDeck[sourceCard.CardIndex], 
                     targetCard.CardIndex);
+
+                targetCard.CardSlotNode2D.Selected = true;
 
                 PlayThump();   
             }
