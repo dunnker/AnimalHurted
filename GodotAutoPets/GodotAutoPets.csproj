@@ -4,5 +4,6 @@
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <!-- DefineConstants>CHEATS_ENABLED</DefineConstants -->
   </PropertyGroup>
 </Project>

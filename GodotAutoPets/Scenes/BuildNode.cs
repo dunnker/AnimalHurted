@@ -1,5 +1,3 @@
-//#define CHEATS_ENABLED
-
 using System;
 using System.Threading;
 using Godot;
