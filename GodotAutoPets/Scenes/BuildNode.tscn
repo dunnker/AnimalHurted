@@ -106,7 +106,6 @@ margin_top = 320.0
 margin_right = 224.0
 margin_bottom = 356.0
 custom_fonts/font = SubResource( 4 )
-disabled = true
 text = "Sell"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -115,3 +114,4 @@ __meta__ = {
 [connection signal="pressed" from="QuitGameButton" to="." method="_on_QuitGameButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="RollButton" to="." method="_on_RollButton_pressed"]
+[connection signal="pressed" from="SellButton" to="." method="_on_SellButton_pressed"]

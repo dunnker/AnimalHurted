@@ -109,9 +109,9 @@ namespace AutoPets
             var buffCard2 = card.Deck.GetRandomCard(index);
             if (buffCard1 != null && buffCard2 != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Sell => Give two random friends +{0} health.", card.Level));
-                buffCard1.Buff(card.Index, card.Level, 0);
-                buffCard2.Buff(card.Index, card.Level, 0);
+                card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Sell => Give two random friends +{0} health.", card.Level));
+                buffCard1.Buff(index, card.Level, 0);
+                buffCard2.Buff(index, card.Level, 0);
             }
         }
     }

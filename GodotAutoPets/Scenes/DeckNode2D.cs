@@ -61,6 +61,17 @@ public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
     }
     // ICardSelectHost
 
+    public CardSlotNode2D GetSelectedCardSlotNode2D()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            var cardSlot = GetCardSlotNode2D(i);
+            if (cardSlot.Selected)
+                return cardSlot;
+        }
+        return null;
+    }
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

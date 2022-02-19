@@ -1,8 +1,12 @@
+using System;
+using System.Threading;
 using Godot;
 using AutoPets;
 
 public class BuildNode : Node
 {
+    System.Threading.Thread _gameThread;
+
     public ShopNode2D Shop { get { return GetNode<ShopNode2D>("ShopNode2D"); } }
 
     public DeckNode2D Deck { get { return GetNode<global::DeckNode2D>("DeckNode2D"); } }
@@ -35,6 +39,25 @@ public class BuildNode : Node
         }
         else
             GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
+    }
+
+    public void _on_SellButton_pressed()
+    {
+        var cardSlot = Deck.GetSelectedCardSlotNode2D();
+        if (cardSlot != null)
+        {
+            var card = GameSingleton.Instance.BuildPlayer.BuildDeck[cardSlot.CardArea2D.CardIndex];
+            cardSlot.CardArea2D.RenderCard(null, card.Index);
+            cardSlot.Selected = false;
+            _gameThread = new System.Threading.Thread(() => 
+            {
+                // from here events can be invoked in DeckNode2D, which send
+                // signals on main thread to render changes
+                card.Sell();
+            });
+            _gameThread.Name = "Sell Game Thread";
+            _gameThread.Start();
+        }
     }
     
     public override void _Ready()
