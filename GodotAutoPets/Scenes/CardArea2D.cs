@@ -5,6 +5,7 @@ using AutoPets;
 public class CardArea2D : Area2D
 {
     Vector2 _defaultPosition;
+    Vector2 _dragLocalMousePos;
     int _defaultZIndex;
     int _cardIndex;
     bool _cancelCardReorder = true;
@@ -12,12 +13,10 @@ public class CardArea2D : Area2D
 
     public CardSlotNode2D CardSlotNode2D { get { return GetParent() as CardSlotNode2D; } }
 
-    public Vector2 DefaultPosition { get { return _defaultPosition; } }
-    public int DefaultZIndex { get { return _defaultZIndex; } }
-
     public int CardIndex { get { return _cardIndex; } }
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
+    public CollisionShape2D CollisionShape2D { get { return GetNode<CollisionShape2D>("CollisionShape2D"); } }
 
     public CardAttrsNode2D CardAttrsNode2D { get { return GetNode<CardAttrsNode2D>("CardAttrsNode2D"); } }
 
@@ -77,8 +76,7 @@ public class CardArea2D : Area2D
         // sometimes the mouse_entered event will fire for the adjacent card
         // and then fire for the card we're dragging. So checking that the
         // DragSource != this
-        if ((GameSingleton.Instance.StartingDrag || GameSingleton.Instance.Dragging) && 
-            GameSingleton.Instance.DragSource != this)
+        if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource != this)
         {
             if (!Sprite.Visible)
             {
@@ -105,6 +103,19 @@ public class CardArea2D : Area2D
                 GameSingleton.Instance.DragTarget = this;
         }
         _cancelCardReorder = true;
+    }
+
+    public void ReplaceDragSource(CardArea2D cardArea2D)
+    {
+        GameSingleton.Instance.DragSource = cardArea2D;
+        GameSingleton.Instance.DragTarget = cardArea2D;
+        cardArea2D.GlobalPosition = GlobalPosition;
+        cardArea2D.ZIndex = ZIndex;
+        cardArea2D._dragLocalMousePos = _dragLocalMousePos;
+        // restore old DragSource's position
+        Position = _defaultPosition;
+        ZIndex = _defaultZIndex;
+        CardSlotNode2D.Selected = false;
     }
 
     public void _on_Area2D_mouse_exited()
@@ -145,7 +156,7 @@ public class CardArea2D : Area2D
             {
                 // mouse up
                 if (Sprite.Visible && 
-                    GameSingleton.Instance.StartingDrag && GameSingleton.Instance.DragSource == this && 
+                    GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource == this && 
                     mouseEvent.ButtonIndex == (int)ButtonList.Left && 
                     !mouseEvent.Pressed)
                 {
@@ -164,40 +175,26 @@ public class CardArea2D : Area2D
         } 
     }
 
-    public async void _signal_StartStopDrag()
+    public void _signal_StartStopDrag()
     {
-        GameSingleton.Instance.StartingDrag = !GameSingleton.Instance.StartingDrag;
-        if (GameSingleton.Instance.StartingDrag)
+        GameSingleton.Instance.Dragging = !GameSingleton.Instance.Dragging;
+        if (GameSingleton.Instance.Dragging)
         {
-            // must set immediately because of mouse enter/exit events checking DragSource
             GameSingleton.Instance.DragSource = this;
             GameSingleton.Instance.DragTarget = null;
-
-            // defer starting drag in case user is just clicking on the card
-            await ToSignal(GetTree().CreateTimer(0.1f, false), "timeout");
-
-            // StartingDrag might be false if there was a mouse up event during the "await"
-            GameSingleton.Instance.Dragging = GameSingleton.Instance.StartingDrag;
-            if (GameSingleton.Instance.Dragging)
-            {
-                ZIndex = 101; // so the sprite appears above everything else during drag
-            }
+            _dragLocalMousePos = GetLocalMousePosition();
+            ZIndex = 101; // so the sprite appears above everything else during drag
         }
         else
         {
-            // otherwise end drag immediately
+            // may have dropped somewhere, but restore its position no matter what
             Position = _defaultPosition;
             ZIndex = _defaultZIndex;;
 
-            // if we ever started the drag
-            if (GameSingleton.Instance.Dragging)
-            {    
-                GameSingleton.Instance.Dragging = false;
-                // notify the parent of this card, either the Shop or BuildDeck that
-                // a card has been dropped somewhere 
-                DragParent.DragDropped();
-                GameSingleton.Instance.DragTarget = null;
-            }
+            // notify the parent of this card, either the Shop or BuildDeck that
+            // a card has been dropped somewhere 
+            DragParent.DragDropped();
+            GameSingleton.Instance.DragTarget = null;
         }
     }
 
@@ -212,8 +209,12 @@ public class CardArea2D : Area2D
     {
         if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource == this)
         {
-            var mousePos = GetGlobalMousePosition();
-            GlobalPosition = new Vector2(mousePos.x, mousePos.y);
+            var globalMousePos = GetGlobalMousePosition();
+			// offset by original local mouse coords because if user is just clicking on the sprite,
+			// dragging starts immediately, and we don't want the sprite to snap to the new position
+			// for instance, if user mouse down is in the corner of the sprite and not exactly in 
+			// the middle of the sprite
+            GlobalPosition = globalMousePos - _dragLocalMousePos;
         }
     }
 }

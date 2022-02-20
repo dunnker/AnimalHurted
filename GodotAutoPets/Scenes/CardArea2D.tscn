@@ -30,7 +30,6 @@ __meta__ = {
 position = Vector2( -29, 56 )
 
 [node name="CardReorderTimer" type="Timer" parent="."]
-wait_time = 1.5
 one_shot = true
 
 [node name="LevelLabel" type="Label" parent="."]

@@ -234,18 +234,9 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             // redisplay cards that have been moved
             RenderDeck(_deck);
             if (sourceCardArea2D.CardSlotNode2D.CardSlotDeck == this)
-            {
                 // sourceCardArea2D is now associated with a different card
                 // so restore its drag position and assign a new drag source card
-                GameSingleton.Instance.DragSource = atCardArea2D;
-                GameSingleton.Instance.DragTarget = atCardArea2D;
-                // new drag source card
-                atCardArea2D.GlobalPosition = sourceCardArea2D.GlobalPosition;
-                atCardArea2D.ZIndex = sourceCardArea2D.ZIndex;
-                // restore position
-                sourceCardArea2D.Position = sourceCardArea2D.DefaultPosition;
-                sourceCardArea2D.ZIndex = sourceCardArea2D.DefaultZIndex;
-            }
+                sourceCardArea2D.ReplaceDragSource(atCardArea2D);
             atCardArea2D.CardSlotNode2D.Selected = false;
         }
     }

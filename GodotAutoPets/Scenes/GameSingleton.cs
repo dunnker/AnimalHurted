@@ -12,7 +12,6 @@ public class GameSingleton
 
     public Player BuildNodePlayer { get; set; }
     
-    public bool StartingDrag { get; set; }
     public bool Dragging { get; set; }
     
     public CardArea2D DragTarget { get; set; }
