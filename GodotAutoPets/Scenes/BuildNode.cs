@@ -5,11 +5,14 @@ using AutoPets;
 
 public class BuildNode : Node
 {
+    Player _player;
     System.Threading.Thread _gameThread;
 
-    public ShopNode2D Shop { get { return GetNode<ShopNode2D>("ShopNode2D"); } }
+    public ShopNode2D ShopNode2D { get { return GetNode<ShopNode2D>("ShopNode2D"); } }
 
-    public DeckNode2D Deck { get { return GetNode<global::DeckNode2D>("DeckNode2D"); } }
+    public DeckNode2D DeckNode2D { get { return GetNode<global::DeckNode2D>("DeckNode2D"); } }
+
+    public Player Player { get { return _player; } }
 
     public Label GoldLabel { get { return GetNode<Label>("PlayerAttrsNode2D/GoldLabel"); } }
     public Label LivesLabel { get { return GetNode<Label>("PlayerAttrsNode2D/LivesLabel"); } }
@@ -24,17 +27,17 @@ public class BuildNode : Node
 
     public void _on_RollButton_pressed()
     {
-        if (GameSingleton.Instance.BuildPlayer.Gold >= Game.RollCost)
-            GameSingleton.Instance.Game.Roll(GameSingleton.Instance.BuildPlayer);
-        Shop.RenderShop();
+        if (_player.Gold >= Game.RollCost)
+            GameSingleton.Instance.Game.Roll(_player);
+        ShopNode2D.RenderShop();
     }
 
     public void _on_ContinueButton_pressed()
     {
-        GameSingleton.Instance.BuildPlayer.GoldChangedEvent -= _GoldChangedEvent;
-        if (GameSingleton.Instance.BuildPlayer == GameSingleton.Instance.Game.Player1)
+        _player.GoldChangedEvent -= _GoldChangedEvent;
+        if (_player == GameSingleton.Instance.Game.Player1)
         {
-            GameSingleton.Instance.BuildPlayer = GameSingleton.Instance.Game.Player2;
+            GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
             GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
         }
         else
@@ -43,10 +46,10 @@ public class BuildNode : Node
 
     public void _on_SellButton_pressed()
     {
-        var cardSlot = Deck.GetSelectedCardSlotNode2D();
+        var cardSlot = DeckNode2D.GetSelectedCardSlotNode2D();
         if (cardSlot != null)
         {
-            var card = GameSingleton.Instance.BuildPlayer.BuildDeck[cardSlot.CardArea2D.CardIndex];
+            var card = _player.BuildDeck[cardSlot.CardArea2D.CardIndex];
             cardSlot.CardArea2D.RenderCard(null, card.Index);
             cardSlot.Selected = false;
             _gameThread = new System.Threading.Thread(() => 
@@ -65,24 +68,30 @@ public class BuildNode : Node
         #if CHEATS_ENABLED
         if (Input.IsActionPressed("give_gold"))
         {
-            GameSingleton.Instance.BuildPlayer.Gold += 1;
+            _player.Gold += 1;
         }
         #endif
     } 
     
     public override void _Ready()
     {
-        GameSingleton.Instance.BuildPlayer.GoldChangedEvent += _GoldChangedEvent;
-        Deck.RenderDeck(GameSingleton.Instance.BuildPlayer.BuildDeck);
-        GoldLabel.Text = GameSingleton.Instance.BuildPlayer.Gold.ToString();
-        LivesLabel.Text = GameSingleton.Instance.BuildPlayer.Lives.ToString();
-        WinsLabel.Text = GameSingleton.Instance.BuildPlayer.Wins.ToString();
+        // using singleton to init this scene
+        // this is because GetTree().ChangeScene(...) is a deferred call and we can't
+        // pass parameters to the new scene instance
+        _player = GameSingleton.Instance.BuildNodePlayer;
+
+        _player.GoldChangedEvent += _GoldChangedEvent;
+        GoldLabel.Text = _player.Gold.ToString();
+        LivesLabel.Text = _player.Lives.ToString();
+        WinsLabel.Text = _player.Wins.ToString();
         RoundLabel.Text = GameSingleton.Instance.Game.Round.ToString();
-        PlayerNameLabel.Text = GameSingleton.Instance.BuildPlayer.Name;
+        PlayerNameLabel.Text = _player.Name;
+        DeckNode2D.RenderDeck(_player.BuildDeck);
+        ShopNode2D.RenderShop();
     }
 
     public void _GoldChangedEvent(object sender, int oldValue)
     {
-        GoldLabel.Text = GameSingleton.Instance.BuildPlayer.Gold.ToString();
+        GoldLabel.Text = _player.Gold.ToString();
     }
 }

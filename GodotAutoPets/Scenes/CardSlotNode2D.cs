@@ -1,5 +1,11 @@
-using Godot;
 using System;
+using Godot;
+using AutoPets;
+
+public interface ICardSlotDeck
+{
+    Deck Deck { get; }
+}
 
 public class CardSlotNode2D : Node2D
 {
@@ -8,6 +14,7 @@ public class CardSlotNode2D : Node2D
     public CardArea2D CardArea2D { get { return GetNode<CardArea2D>("CardArea2D"); } }
     public Sprite HoverSprite { get { return GetNode<Sprite>("HoverSprite"); } }
     public Sprite SelectedSprite { get { return GetNode<Sprite>("SelectedSprite"); } }
+    public ICardSlotDeck CardSlotDeck { get { return GetParent() as ICardSlotDeck; } }
 
     public bool Selected 
     { 

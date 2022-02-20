@@ -10,13 +10,13 @@ public class GameSingleton
 
     public static readonly AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
-    public Player BuildPlayer { get; set; }
+    public Player BuildNodePlayer { get; set; }
     
     public bool StartingDrag { get; set; }
     public bool Dragging { get; set; }
     
-    public object DragTarget { get; set; }
-    public object DragSource { get; set; }
+    public CardArea2D DragTarget { get; set; }
+    public CardArea2D DragSource { get; set; }
 
     public static GameSingleton Instance
     {

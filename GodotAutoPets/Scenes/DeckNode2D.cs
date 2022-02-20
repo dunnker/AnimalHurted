@@ -9,7 +9,7 @@ public interface ICardSelectHost
     void SelectionChanged(CardSlotNode2D cardSlot);
 }
 
-public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
+public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 {
     Deck _deck;
 
@@ -191,23 +191,21 @@ public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
     }
 
     // IDragParent
-    public void DragDropped(CardArea2D card)
+    public void DragDropped()
     {
         if (GameSingleton.Instance.DragTarget != null)
         {
-            var targetCard = GameSingleton.Instance.DragTarget as CardArea2D;
-            var cardParent = targetCard.GetParent().GetParent();
-            if (cardParent is DeckNode2D)
+            var targetCardArea2D = GameSingleton.Instance.DragTarget;
+            var targetDeck = targetCardArea2D.CardSlotNode2D.CardSlotDeck;
+            if (targetDeck == this)
             {
-                var sourceCard = GameSingleton.Instance.DragSource as CardArea2D;
+                var sourceCard = GameSingleton.Instance.DragSource;
                 
                 // moving a card does not invoke any game events otherwise this
                 // would need to be done in a thread
-                GameSingleton.Instance.BuildPlayer.BuildDeck.MoveCard(
-                    GameSingleton.Instance.BuildPlayer.BuildDeck[sourceCard.CardIndex], 
-                    targetCard.CardIndex);
+                _deck.MoveCard(_deck[sourceCard.CardIndex], targetCardArea2D.CardIndex);
 
-                targetCard.CardSlotNode2D.Selected = true;
+                targetCardArea2D.CardSlotNode2D.Selected = true;
 
                 PlayThump();   
             }
@@ -215,40 +213,40 @@ public class DeckNode2D : Node2D, IDragParent, ICardSelectHost
         RenderDeck(_deck);
     }
 
-    public void DragReorder(CardArea2D cardArea2D)
+    public void DragReorder(CardArea2D atCardArea2D)
     {
         // we're either drag/dropping from the Shop scene or we are
         // drag/dropping in the build deck -- reordering cards in the same deck
         Card sourceCard = null;
-        CardArea2D sourceCardArea2D = GameSingleton.Instance.DragSource as CardArea2D;
+        CardArea2D sourceCardArea2D = GameSingleton.Instance.DragSource;
         // if reordering cards within the same deck 
-        if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+        if (sourceCardArea2D.CardSlotNode2D.CardSlotDeck == this)
         {
             //.. remove source card immediately
             sourceCard = _deck[sourceCardArea2D.CardIndex];
             _deck.Remove(sourceCardArea2D.CardIndex);
         }
-        if (_deck.MakeRoomAt(cardArea2D.CardIndex))
+        if (_deck.MakeRoomAt(atCardArea2D.CardIndex))
         {
-            if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+            if (sourceCardArea2D.CardSlotNode2D.CardSlotDeck == this)
                 // ...place in its new position
-                _deck.SetCard(sourceCard, cardArea2D.CardIndex);
+                _deck.SetCard(sourceCard, atCardArea2D.CardIndex);
             // redisplay cards that have been moved
             RenderDeck(_deck);
-            if (sourceCardArea2D.CardSlotNode2D.GetParent() == this)
+            if (sourceCardArea2D.CardSlotNode2D.CardSlotDeck == this)
             {
                 // sourceCardArea2D is now associated with a different card
                 // so restore its drag position and assign a new drag source card
-                GameSingleton.Instance.DragSource = cardArea2D;
-                GameSingleton.Instance.DragTarget = cardArea2D;
+                GameSingleton.Instance.DragSource = atCardArea2D;
+                GameSingleton.Instance.DragTarget = atCardArea2D;
                 // new drag source card
-                cardArea2D.GlobalPosition = sourceCardArea2D.GlobalPosition;
-                cardArea2D.ZIndex = sourceCardArea2D.ZIndex;
+                atCardArea2D.GlobalPosition = sourceCardArea2D.GlobalPosition;
+                atCardArea2D.ZIndex = sourceCardArea2D.ZIndex;
                 // restore position
                 sourceCardArea2D.Position = sourceCardArea2D.DefaultPosition;
                 sourceCardArea2D.ZIndex = sourceCardArea2D.DefaultZIndex;
             }
-            cardArea2D.CardSlotNode2D.Selected = false;
+            atCardArea2D.CardSlotNode2D.Selected = false;
         }
     }
 

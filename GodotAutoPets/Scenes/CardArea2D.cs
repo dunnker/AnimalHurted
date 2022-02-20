@@ -195,7 +195,7 @@ public class CardArea2D : Area2D
                 GameSingleton.Instance.Dragging = false;
                 // notify the parent of this card, either the Shop or BuildDeck that
                 // a card has been dropped somewhere 
-                DragParent.DragDropped(this);
+                DragParent.DragDropped();
                 GameSingleton.Instance.DragTarget = null;
             }
         }
