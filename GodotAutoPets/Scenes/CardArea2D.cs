@@ -78,11 +78,8 @@ public class CardArea2D : Area2D
         // DragSource != this
         if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource != this)
         {
-            if (!Sprite.Visible)
-            {
-                GameSingleton.Instance.DragTarget = this;
-            }
-            else
+            GameSingleton.Instance.DragTarget = this;
+            if (Sprite.Visible)
             {
                 // every card has their own timer which can start from a mouse entered event
                 // and is stopped from a card exit event

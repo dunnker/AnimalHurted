@@ -11,6 +11,7 @@ public interface ICardSelectHost
 
 public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 {
+    System.Threading.Thread _gameThread;
     Deck _deck;
 
     public AudioStreamPlayer ThumpPlayer { get { return GetNode<AudioStreamPlayer>("ThumpPlayer"); } }
@@ -30,6 +31,9 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
     [Signal]
     public delegate void CardHurtSignal(int index, int sourceIndex);
+
+    [Signal]
+    public delegate void CardGainedXPDragDropSignal();
 
     public CardSlotNode2D GetCardSlotNode2D(int index)
     {
@@ -75,6 +79,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+        if (_gameThread != null)
+            _gameThread.Abort();
         // Dispose can be called from Godot editor, and our singleton
         // may not have a Game when designing
         if (GameSingleton.Instance.Game != null)
@@ -100,6 +106,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         Connect("CardBuffedSignal", this, "_signal_CardBuffed", null, 
             (int)ConnectFlags.Deferred);
         Connect("CardHurtSignal", this, "_signal_CardHurt", null, 
+            (int)ConnectFlags.Deferred);
+        Connect("CardGainedXPDragDropSignal", this, "_signal_CardGainedXPDragDrop", null,
             (int)ConnectFlags.Deferred);
     }
 
@@ -195,21 +203,46 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     {
         if (GameSingleton.Instance.DragTarget != null)
         {
+            var sourceCardArea2D = GameSingleton.Instance.DragSource;
+            var sourceDeck = sourceCardArea2D.CardSlotNode2D.CardSlotDeck;
             var targetCardArea2D = GameSingleton.Instance.DragTarget;
             var targetDeck = targetCardArea2D.CardSlotNode2D.CardSlotDeck;
-            if (targetDeck == this)
+            if (targetDeck == this && sourceDeck == this)
             {
-                var sourceCard = GameSingleton.Instance.DragSource;
-                
-                // moving a card does not invoke any game events otherwise this
-                // would need to be done in a thread
-                _deck.MoveCard(_deck[sourceCard.CardIndex], targetCardArea2D.CardIndex);
+                // if dropping on an empty slot
+                if (_deck[targetCardArea2D.CardIndex] == null)
+                {
+                    // moving a card does not invoke any game events otherwise this
+                    // would need to be done in a thread
+                    _deck.MoveCard(_deck[sourceCardArea2D.CardIndex], targetCardArea2D.CardIndex);
+                }
+                else
+                {
+                    if ((targetCardArea2D.CardIndex != sourceCardArea2D.CardIndex) && 
+                        _deck[targetCardArea2D.CardIndex].Ability == sourceDeck.Deck[sourceCardArea2D.CardIndex].Ability)
+                    {
+                        _gameThread = new System.Threading.Thread(() =>
+                        {
+                            // leveling up can trigger abilities, so doing this in a thread
+                            // events will update UI
+                            _deck[targetCardArea2D.CardIndex].GainXP(sourceDeck.Deck[sourceCardArea2D.CardIndex]);
+
+                            this.EmitSignal("CardGainedXPDragDropSignal");
+                        });
+                        _gameThread.Name = "DragDropped Game Thread";
+                        _gameThread.Start();
+                    }
+                }
 
                 targetCardArea2D.CardSlotNode2D.Selected = true;
-
                 PlayThump();   
             }
         }
+        RenderDeck(_deck);
+    }
+
+    public void _signal_CardGainedXPDragDrop()
+    {
         RenderDeck(_deck);
     }
 

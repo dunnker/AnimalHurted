@@ -150,10 +150,18 @@ namespace AutoPets
                 throw new Exception("Not enough gold to buy pet");
             else
             {
-                Debug.Assert(player.BuildDeck[buildIndex] == null); //TODO
-                var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
-                card.Buy(buildIndex);
-                player.ShopDeck.Remove(shopIndex);
+                if (player.BuildDeck[buildIndex] == null)
+                {
+                    Debug.Assert(player.BuildDeck[buildIndex] == null); //TODO
+                    var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
+                    card.Buy(buildIndex);
+                    player.ShopDeck.Remove(shopIndex);
+                }
+                else
+                {
+                    if (player.ShopDeck[shopIndex].Ability == player.BuildDeck[buildIndex].Ability)
+                        player.BuildDeck[buildIndex].GainXP(player.ShopDeck[shopIndex]);
+                }
                 player.Gold -= Game.PetCost;
             }
         }
