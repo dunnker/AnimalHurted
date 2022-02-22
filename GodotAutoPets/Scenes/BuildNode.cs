@@ -20,6 +20,9 @@ public class BuildNode : Node
     public Label RoundLabel { get { return GetNode<Label>("PlayerAttrsNode2D/RoundLabel"); } }
     public Label PlayerNameLabel { get { return GetNode<Label>("PlayerAttrsNode2D/PlayerNameLabel"); } } 
 
+    [Signal]
+    public delegate void SellOverSignal();
+
     public void _on_QuitGameButton_pressed()
     {
         GetTree().ChangeScene("res://Scenes/MainNode.tscn");
@@ -57,10 +60,18 @@ public class BuildNode : Node
                 // from here events can be invoked in DeckNode2D, which send
                 // signals on main thread to render changes
                 card.Sell();
+
+                this.EmitSignal("SellOverSignal");
             });
             _gameThread.Name = "Sell Game Thread";
             _gameThread.Start();
         }
+    }
+
+    public void _signal_SellOver()
+    {
+		// in case a Duck was sold, refresh the shop
+        ShopNode2D.RenderShop();
     }
 
     public override void _Input(InputEvent @event)
@@ -88,6 +99,9 @@ public class BuildNode : Node
         PlayerNameLabel.Text = _player.Name;
         DeckNode2D.RenderDeck(_player.BuildDeck);
         ShopNode2D.RenderShop();
+
+        Connect("SellOverSignal", this, "_signal_SellOver", null, 
+            (int)ConnectFlags.Deferred);
     }
 
     public void _GoldChangedEvent(object sender, int oldValue)
