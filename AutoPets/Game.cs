@@ -8,7 +8,10 @@ using System.Diagnostics;
 
 namespace AutoPets
 {
-    public delegate void AbilityEventHandler(object sender, Ability ability, Card card, int index, string message);
+    public delegate void AbilityEventHandler(object sender, Ability ability, int index, string message);
+    public delegate void CardEventHandler(object sender, Card card, int index);
+    public delegate void CardBuffedEventHandler(object sender, Card card, int sourceIndex);
+    
     public delegate void CardHurtEventHandler(object sender, Card card, Card sourceCard);
 
     public class Game
@@ -19,6 +22,7 @@ namespace AutoPets
         int _round;
         int _shopSlots;
         List<Ability> _tierAbilities;
+        int _updateCount;
         bool _fighting;
 
         public const int PetCost = 3;
@@ -45,34 +49,40 @@ namespace AutoPets
         public event CardBuffedEventHandler CardBuffedEvent;
         public event CardHurtEventHandler CardHurtEvent;
 
-        public void OnAbilityEvent(Ability ability, Card card, int index, string message)
+        public void OnAbilityEvent(Ability ability, int index, string message)
         {
-            AbilityEvent?.Invoke(this, ability, card, index, message);
+            if (_updateCount == 0)
+                AbilityEvent?.Invoke(this, ability, index, message);
         }
 
         public void OnFightEvent()
         {
-            FightEvent?.Invoke(this, EventArgs.Empty);
+            if (_updateCount == 0)
+                FightEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public void OnCardFaintedEvent(Card card, int index)
         {
-            CardFaintedEvent?.Invoke(this, card, index);
+            if (_updateCount == 0)
+                CardFaintedEvent?.Invoke(this, card, index);
         }
 
         public void OnCardSummonedEvent(Card card, int index)
         {
-            CardSummonedEvent?.Invoke(this, card, index);
+            if (_updateCount == 0)
+                CardSummonedEvent?.Invoke(this, card, index);
         }
 
         public void OnCardBuffedEvent(Card card, int sourceIndex)
         {
-            CardBuffedEvent?.Invoke(this, card, sourceIndex);
+            if (_updateCount == 0)
+                CardBuffedEvent?.Invoke(this, card, sourceIndex);
         }
 
         public void OnCardHurtEvent(Card card, Card sourceCard)
         {
-            CardHurtEvent?.Invoke(this, card, sourceCard);
+            if (_updateCount == 0)
+                CardHurtEvent?.Invoke(this, card, sourceCard);
         }
 
         public Game()
@@ -123,6 +133,10 @@ namespace AutoPets
 
         public void NewRound()
         {
+            _player1.RoundOver(_player1.BattleDeck.GetCardCount() > 0, 
+                _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
+            _player2.RoundOver(_player2.BattleDeck.GetCardCount() > 0, 
+                _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
             _round++;
             CheckNewTier();
             _player1.Gold = GoldPerTurn + 1;
@@ -153,9 +167,19 @@ namespace AutoPets
                 if (player.BuildDeck[buildIndex] == null)
                 {
                     Debug.Assert(player.BuildDeck[buildIndex] == null); //TODO
+
                     var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
                     card.Buy(buildIndex);
                     player.ShopDeck.Remove(shopIndex);
+
+                    var queue = new CardCommandQueue();
+                    foreach (var c in player.BuildDeck)
+                        if (c != card)
+                            c.Ability.FriendSummoned(queue, c, card);
+                    while (queue.Peek() != null)
+                    {
+                        queue.Dequeue().Execute().ExecuteAbility(queue);
+                    }
                 }
                 else
                 {
@@ -166,56 +190,59 @@ namespace AutoPets
             }
         }
 
-        public void NewBattle()
+        public void BeginUpdate()
         {
-            _player1.NewBattle();
-            _player2.NewBattle();
+            _player1.BeginUpdate();
+            _player2.BeginUpdate();
+            _updateCount++;
+        }
+
+        public void EndUpdate()
+        {
+            _player1.EndUpdate();
+            _player2.EndUpdate();
+            _updateCount--;
         }
 
         public bool IsFightOver()
         {
-            // fight is over if either player has run out of cards, and there are no cards left to sweep to invoke Faint()
-            return (_player1.BattleDeck.GetCardCount() == 0 || _player2.BattleDeck.GetCardCount() == 0) && 
-                !_player1.BattleDeck.Any((c) => c.HitPoints <= 0) && !_player2.BattleDeck.Any((c) => c.HitPoints <= 0);
-        }
-
-        public void FightCanceled()
-        {
-            _fighting = false;
-            _player1.BattleCanceled();
-            _player2.BattleCanceled();
+            // fight is over if either player has run out of cards
+            return _player1.BattleDeck.GetCardCount() == 0 || _player2.BattleDeck.GetCardCount() == 0;
         }
 
         public void FightOver()
         {
             _fighting = false;
-            _player1.RoundOver(_player1.BattleDeck.GetCardCount() > 0, _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
-            _player2.RoundOver(_player2.BattleDeck.GetCardCount() > 0, _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
-            NewRound();
         }
 
-        public void FightOne()
+        public CardCommandQueue FightOne(CardCommandQueue lastQueue = null)
         {
-            foreach (var card in _player1.BattleDeck)
-                card.ResetState();
-            foreach (var card in _player2.BattleDeck)
-                card.ResetState();
+            var resultQueue = new CardCommandQueue();
             if (!_fighting)
             {
                 _fighting = true;
                 foreach (var card in _player1.BattleDeck)
-                    card.BattleStarted();
+                    card.Ability.BattleStarted(resultQueue, card);
                 foreach (var card in _player2.BattleDeck)
-                    card.BattleStarted();
-                foreach (var card in _player1.BattleDeck)
-                    if (card.HitPoints <= 0)
-                        card.Faint();
-                foreach (var card in _player2.BattleDeck)
-                    if (card.HitPoints <= 0)
-                        card.Faint();
+                    card.Ability.BattleStarted(resultQueue, card);
             }
-            if (_player1.BattleDeck.GetCardCount() > 0 && _player2.BattleDeck.GetCardCount() > 0)
-                _player1.BattleDeck.GetLastCard().FightOne(_player2.BattleDeck.GetLastCard());
+            else
+            {
+                if (lastQueue != null)
+                {
+                    while (lastQueue.Peek() != null)
+                    {
+                        var command = lastQueue.Dequeue();
+                        command.Execute();
+                        command.ExecuteAbility(resultQueue);
+                    }
+                }
+            }
+            // if there were no ability methods invoked then start a new card attack
+            if (resultQueue.Peek() == null)
+                if (_player1.BattleDeck.GetCardCount() > 0 && _player2.BattleDeck.GetCardCount() > 0)
+                    _player1.BattleDeck.GetLastCard().Attack(resultQueue, _player2.BattleDeck.GetLastCard());
+            return resultQueue;
         }
     }
 }

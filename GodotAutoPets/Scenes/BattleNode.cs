@@ -1,6 +1,8 @@
 using Godot;
 using AutoPets;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,10 +11,12 @@ public class BattleNode : Node
     System.Threading.Thread _gameThread;
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
+    Queue<CardCommandQueue> _fightResult;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
     public AudioStreamPlayer FightPlayer { get { return GetNode<AudioStreamPlayer>("FightPlayer"); } }
+    public Godot.Timer BeginBattleTimer { get { return GetNode<Godot.Timer>("BeginBattleTimer"); } }
 
     [Signal]
     public delegate void FightEventSignal();
@@ -53,7 +57,25 @@ public class BattleNode : Node
         Connect("FightOverSignal", this, "_signal_FightOver", null, 
             (int)ConnectFlags.Deferred);
 
-        GameSingleton.Instance.Game.NewBattle();
+        GameSingleton.Instance.Game.Player1.NewBattleDeck();
+        GameSingleton.Instance.Game.Player2.NewBattleDeck();
+
+        GameSingleton.Instance.Game.BeginUpdate();
+        _fightResult = new Queue<CardCommandQueue>();
+        CardCommandQueue lastQueue = null;
+        do
+        {
+            lastQueue = GameSingleton.Instance.Game.FightOne(lastQueue);
+            // clone the last queue because FightOne will dequeue it
+            if (lastQueue.Peek() != null)
+                _fightResult.Enqueue(lastQueue.Clone());
+        } while (lastQueue.Peek() != null || !GameSingleton.Instance.Game.IsFightOver());
+        GameSingleton.Instance.Game.FightOver();
+        GameSingleton.Instance.Game.EndUpdate();
+
+        // restore battle decks after fight
+        GameSingleton.Instance.Game.Player1.NewBattleDeck();
+        GameSingleton.Instance.Game.Player2.NewBattleDeck();
 
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.ReverseCardAreaPositions();
@@ -72,13 +94,44 @@ public class BattleNode : Node
     
     public void _on_BeginBattleTimer_timeout()
     {
+        ReplayBattle();
+    }
+
+    public void _on_ContinueButton_pressed()
+    {
+        GameSingleton.Instance.Game.NewRound();
+        GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
+        GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+    }
+
+    public void _on_ReplayButton_pressed()
+    {
+        Player1DeckNode2D.Position = _player1DeckPosition;
+        Player2DeckNode2D.Position = _player2DeckPosition;
+
+        GameSingleton.Instance.Game.Player1.NewBattleDeck();
+        GameSingleton.Instance.Game.Player2.NewBattleDeck();
+        Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
+        Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
+
+        BeginBattleTimer.Start();
+    }
+
+    void ReplayBattle()
+    {
         _gameThread = new System.Threading.Thread(() => 
         {
-            do
+            var nextResult = new Queue<CardCommandQueue>();
+            while (_fightResult.Count > 0 && _fightResult.Peek() != null)
             {
-                GameSingleton.Instance.Game.FightOne();
-            } while (!GameSingleton.Instance.Game.IsFightOver());
-            GameSingleton.Instance.Game.FightOver();
+                var commandQueue = _fightResult.Dequeue();
+                nextResult.Enqueue(commandQueue.Clone());
+                while (commandQueue.Peek() != null)
+                {
+                    commandQueue.Dequeue().Execute();
+                }
+            }
+            _fightResult = nextResult;
 
 			// assuming "this" is still valid. See Dispose method where thread is aborted
             this.EmitSignal("FightOverSignal");

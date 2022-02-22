@@ -20,11 +20,11 @@ centered = false
 offset = Vector2( -1152, -48 )
 
 [node name="Player1DeckNode2D" parent="." instance=ExtResource( 2 )]
-position = Vector2( 48, 192 )
+position = Vector2( 56, 320 )
 scale = Vector2( 0.9, 0.9 )
 
 [node name="Player2DeckNode2D" parent="." instance=ExtResource( 2 )]
-position = Vector2( 648, 192 )
+position = Vector2( 648, 320 )
 scale = Vector2( 0.9, 0.9 )
 
 [node name="BeginBattleTimer" type="Timer" parent="."]
@@ -36,17 +36,32 @@ stream = ExtResource( 4 )
 volume_db = -12.951
 pitch_scale = 0.65
 
-[node name="QuitButton" type="Button" parent="."]
+[node name="ReplayButton" type="Button" parent="."]
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = 456.0
-margin_top = 32.0
+margin_top = 88.0
 margin_right = 598.0
-margin_bottom = 68.0
+margin_bottom = 124.0
 custom_fonts/font = SubResource( 1 )
-text = "Quit"
+text = "Replay"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ContinueButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = 456.0
+margin_top = 40.0
+margin_right = 598.0
+margin_bottom = 76.0
+custom_fonts/font = SubResource( 1 )
+text = "Continue"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [connection signal="timeout" from="BeginBattleTimer" to="." method="_on_BeginBattleTimer_timeout"]
+[connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
+[connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]

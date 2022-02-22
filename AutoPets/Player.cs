@@ -9,9 +9,7 @@ using System.Diagnostics;
 namespace AutoPets
 {
     public delegate void GoldChangedEventHandler(object sender, int oldValue);
-    public delegate void CardEventHandler(object sender, Card card, int index);
-    public delegate void CardBuffedEventHandler(object sender, Card card, int sourceIndex);
-    
+
     public class Player
     {
         readonly Game _game;
@@ -21,6 +19,7 @@ namespace AutoPets
         readonly Deck _shopDeck;
         readonly Deck _buildDeck;
         Deck _battleDeck;
+        int _updateCount;
 
         public Game Game { get { return _game; } }
 
@@ -54,7 +53,8 @@ namespace AutoPets
 
         public void OnGoldChangedEvent(int oldValue)
         {
-            GoldChangedEvent?.Invoke(this, oldValue);
+            if (_updateCount == 0)
+                GoldChangedEvent?.Invoke(this, oldValue);
         }
 
         public Player(Game game, string name)
@@ -63,6 +63,17 @@ namespace AutoPets
             _game = game;
             _shopDeck = new Deck(this, Game.ShopMaxPetSlots);
             _buildDeck = new Deck(this, Game.BuildDeckSlots);
+            _battleDeck = new Deck(this, Game.BuildDeckSlots);
+        }
+
+        public void BeginUpdate()
+        {
+            _updateCount++;
+        }
+
+        public void EndUpdate()
+        {
+            _updateCount--;
         }
 
         public Player GetOpponentPlayer()
@@ -83,14 +94,13 @@ namespace AutoPets
             _wins = 0;
             _lives = 10;
         }
-        public void NewBattle()
-        {
-            _battleDeck = Deck.Clone(_buildDeck);
-        }
 
-        public void BattleCanceled()
+        public void NewBattleDeck()
         {
-            _battleDeck = null;
+            // other classes may keep a reference to the battle deck, e.g. CardCommand
+            // so CloneTo creates new card instances for the deck, but the deck reference
+            // itself remains
+            _buildDeck.CloneTo(_battleDeck);
         }
 
         public void RoundOver(bool won, bool lost, int round)

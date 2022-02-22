@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace AutoPets
 {
-    public delegate void DeckEventHandler(object sender, Card card, string message);
-
     public class Deck : IEnumerable<Card>
     {
         readonly Player _player;
@@ -21,13 +18,6 @@ namespace AutoPets
         public Player Player { get { return _player; } }
 
         public int Size { get { return _cards.Length; } }
-
-        public event DeckEventHandler DeckEvent;
-
-        public void OnDeckEvent(Card card, string message)
-        {
-            DeckEvent?.Invoke(this, card, message);
-        }
 
         public Deck(Player player, int size)
         {
@@ -139,21 +129,22 @@ namespace AutoPets
                 do
                 {
                     int i = _player.Game.Random.Next(0, _cards.Length);
-                    if ((excludingIndex == -1 || i != excludingIndex) && _cards[i] != null)
+                    if ((excludingIndex == -1 || i != excludingIndex) && _cards[i] != null && _cards[i].HitPoints > 0)
                         return _cards[i];
                 } while (true);
             }
         }
 
-        public static Deck Clone(Deck deck)
+        public void CloneTo(Deck deck)
         {
-            var result = new Deck(deck._player, deck.Size);
-            foreach (var card in deck._cards)
+            if (deck._cards.Length != _cards.Length)
+                throw new Exception("Invalid deck size.");
+            Array.Clear(deck._cards, 0, deck._cards.Length);
+            foreach (var card in _cards)
             {
                 if (card != null)
-                    result.SetCard(new Card(result, card), card.Index);
+                    deck.SetCard(new Card(deck, card), card.Index);
             }
-            return result;
         }
 
         public IEnumerator<Card> GetEnumerator()

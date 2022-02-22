@@ -47,6 +47,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         {
             var cardSlot = GetCardSlotNode2D(i + 1);
             cardSlot.CardArea2D.RenderCard(deck[i], i);
+            // during battle cardSlot can be hidden; so restoring to visible
+            cardSlot.Show();
         }
     }
 

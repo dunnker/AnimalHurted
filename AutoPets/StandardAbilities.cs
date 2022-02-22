@@ -23,14 +23,15 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
-        public override void Fainted(Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
-            base.Fainted(card, index);
+            base.Fainted(queue, card, index);
             var buffCard = card.Deck.GetRandomCard(index);
             if (buffCard != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Faint => Give a random friend +{0} attack and +{1} health.", 2 * card.Level, card.Level));
-                buffCard.Buff(index, card.Level, 2 * card.Level);
+                queue.Enqueue(new AbilityEventCardCommand(card, 
+                    string.Format("Faint => Give a random friend +{0} attack and +{1} health.", 2 * card.Level, card.Level)));
+                queue.Enqueue(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
             }
         }
     }
@@ -43,19 +44,14 @@ namespace AutoPets
             DefaultAttack = 1;
         }
 
-        public override void Fainted(Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
-            base.Fainted(card, index);
+            base.Fainted(queue, card, index);
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            Card newCard = new Card(card.Deck, AbilityList.Instance.ZombieCricketAbility)
-            {
-                HitPoints = card.Level,
-                AttackPoints = card.Level
-            };
-            card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Faint => Summon a {0}/{1} cricket.", card.Level, card.Level));
-            newCard.Summon(index);
+            queue.Enqueue(new AbilityEventCardCommand(card, string.Format("Faint => Summon a {0}/{1} cricket.", card.Level, card.Level)));
+            queue.Enqueue(new SummonCardCommand(card, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
         }
     }
 
@@ -82,7 +78,7 @@ namespace AutoPets
             var buffCard = card.Deck.GetRandomCard(card.Index);
             if (buffCard != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Buy => Give a random friend +{0} attack and +{1} health.", card.Level, card.Level));
+                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Buy => Give a random friend +{0} attack and +{1} health.", card.Level, card.Level));
                 buffCard.Buff(card.Index, card.Level, card.Level);
             }
         }
@@ -109,7 +105,7 @@ namespace AutoPets
             var buffCard2 = card.Deck.GetRandomCard(index);
             if (buffCard1 != null && buffCard2 != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Sell => Give two random friends +{0} health.", card.Level));
+                card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Sell => Give two random friends +{0} health.", card.Level));
                 buffCard1.Buff(index, card.Level, 0);
                 buffCard2.Buff(index, card.Level, 0);
             }
@@ -124,16 +120,21 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
-        public override void BattleStarted(Card card)
+        public override void BattleStarted(CardCommandQueue queue, Card card)
         {
             var opponent = card.Deck.Player.GetOpponentPlayer();
             //TODO: are the random enemies found all unique?
-            card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Start of battle => Deal 1 damage to {0} random enemies.", card.Level));
+
+            // BattleStarted abilities don't show a message, they spawn
+            // automatically all at once
+            //queue.Enqueue(new AbilityEventCardCommand(card, 
+            //    string.Format("Start of battle => Deal 1 damage to {0} random enemies.", card.Level)));
+
             for (int i = 1; i <= card.Level; i++)
             {
                 var randomCard = opponent.BattleDeck.GetRandomCard();
                 if (randomCard != null)
-                    randomCard.Hurt(1, card);
+                    queue.Enqueue(new HurtCardCommand(randomCard, 1, card));
             }
         }
     }
@@ -149,9 +150,8 @@ namespace AutoPets
         public override void Sold(Card card, int index)
         {
             base.Sold(card, index);
-            card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Sell => Gain an extra {0} gold.", card.Level));
+            //card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Sell => Gain an extra {0} gold.", card.Level));
             card.Deck.Player.Gold += card.Level;
-            card.Deck.OnDeckEvent(card, string.Format(string.Format("{0}. {1} sold. +{2} bonus gold", index + 1, ToString(), card.Level)));
         }
     }
 
@@ -166,10 +166,9 @@ namespace AutoPets
         public override void Sold(Card card, int index)
         {
             base.Sold(card, index);
-            card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Sell => Give shop pets {0} health.", card.Level));
+            //card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Sell => Give shop pets {0} health.", card.Level));
             foreach (var shopCard in card.Deck.Player.ShopDeck)
                 shopCard.Buff(-1, card.Level, 0);
-            card.Deck.OnDeckEvent(card, string.Format(string.Format("{0}. {1} sold. shop pets +{2} hitpoints", index + 1, ToString(), card.Level)));
         }
     }
 
@@ -186,7 +185,7 @@ namespace AutoPets
             base.LeveledUp(card);
             if (card.Deck.GetCardCount() > 0)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Level-up => Give all friends {0} health.", card.Level));
+                //card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Level-up => Give all friends {0} health.", card.Level));
                 foreach (var tempCard in card.Deck)
                 {
                     if (tempCard != card)
@@ -204,13 +203,13 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
-        public override void FriendSummoned(Card card, Card summonedCard)
+        public override void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
         {
-            base.FriendSummoned(card, summonedCard);
+            base.FriendSummoned(queue, card, summonedCard);
             //TODO: SAP is worded "Give it +? attack until end of battle." and it underscores the attack points during build and battle
             // after battle, if the friend was summoned during build, the friend's attack points will revert for next build
-            card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Friend summoned => Give it +{0} attack.", card.Level));
-            summonedCard.Buff(card.Index, 0, card.Level);
+            queue.Enqueue(new AbilityEventCardCommand(card, string.Format("Friend summoned => Give it +{0} attack.", card.Level)));
+            queue.Enqueue(new BuffCardCommand(summonedCard, card.Index, 0, card.Level));
         }
     }
 
@@ -227,9 +226,8 @@ namespace AutoPets
         {
             base.Bought(card);
             var maxCard = card.Deck.OrderByDescending(c => c.HitPoints).First();
-            card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, "Buy => Copy health from the most healthy friend.");
+            card.Deck.Player.Game.OnAbilityEvent(this, card.Index, "Buy => Copy health from the most healthy friend.");
             card.HitPoints = maxCard.HitPoints;
-            card.Deck.OnDeckEvent(card, string.Format(string.Format("{0}. {1} copied hit points from {2}. {3}", card.Index + 1, ToString(), maxCard.Index + 1, maxCard.Ability.ToString())));
         }
     }
 
@@ -241,9 +239,14 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
-        public override void BattleStarted(Card card)
+        public override void BattleStarted(CardCommandQueue queue, Card card)
         {
-            base.BattleStarted(card);
+            base.BattleStarted(queue, card);
+
+            //TODO: enqueu
+            //TODO: no need to enqueue ability message; see comments for mosquito
+
+
             // Note that this card might have been attacked by a mosquito and about to be fainted (see Game.FightOne, after calls to BattleStarted, there is a sweep to faint cards)
             // Same is true with the card ahead. It may have taken damage and about to be fainted
             // if a Dodo's ability were to buff the hitpoints of the card ahead, then that could bring the hitpoints of that card from negative to positive again --
@@ -278,7 +281,7 @@ namespace AutoPets
                         Debug.Assert(false);
                         break;
                 }
-                card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Start of battle => Give {0}% of Dodo's attack to friend ahead.", attackPercent));
+                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Start of battle => Give {0}% of Dodo's attack to friend ahead.", attackPercent));
                 nextCard.Buff(card.Index, 0, attackPoints);
             }
         }
@@ -292,20 +295,17 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
-        public override void BeforeAttack(Card card)
+        public override void BeforeAttack(CardCommandQueue queue, Card card)
         {
-            base.BeforeAttack(card);
+            base.BeforeAttack(queue, card);
             Debug.Assert(card.Index != -1);
             Card priorCard = null;
             if (card.Index > 0)
                 priorCard = card.Deck[card.Index - 1];
             if (priorCard != null)
             {
-                // not invoking attack as that would recursively call BeforeAttack in an infinite loop!
-                //card.Attack(priorCard, card.Index, card.Level);
-
-                card.Deck.Player.Game.OnAbilityEvent(this, card, card.Index, string.Format("Before attack => Deal {0} damage to friend behind.", card.Level));
-                card.Deck.OnDeckEvent(card, string.Format(string.Format("{0}. {1} attacked {2}. {3}", card.Index + 1, ToString(), priorCard.Index + 1, priorCard.Ability.ToString())));
+                //TODO: enqueue
+                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Before attack => Deal {0} damage to friend behind.", card.Level));
                 priorCard.Hurt(card.Level, card);
             }
         }
@@ -319,9 +319,12 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 		
-        public override void Fainted(Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
-            base.Fainted(card, index);
+            base.Fainted(queue, card, index);
+
+            //TODO: enqueue
+
             Card priorCard1 = null;
             if (index > 0)
                 priorCard1 = card.Deck[index - 1];
@@ -330,7 +333,7 @@ namespace AutoPets
                 priorCard2 = card.Deck[index - 2];
             if (priorCard1 != null || priorCard2 != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, index, string.Format("Faint => Give the two friends behind +{0} attack and +{1} health.", card.Level, card.Level));
+                card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Faint => Give the two friends behind +{0} attack and +{1} health.", card.Level, card.Level));
                 if (priorCard1 != null)
                     priorCard1.Buff(index, card.Level, card.Level);
                 if (priorCard2 != null)
@@ -347,14 +350,17 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
-        public override void Fainted(Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
-            base.Fainted(card, index);
+            base.Fainted(queue, card, index);
+
+            //TODO enqueue
+
             var opponent = card.Deck.Player.GetOpponentPlayer();
             if (card.Deck.GetCardCount() > 0 || 
                 (card.Deck.Player.Game.Fighting && opponent.BattleDeck.GetCardCount() > 0))
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, card, index, 
+                card.Deck.Player.Game.OnAbilityEvent(this, index, 
                     string.Format("Faint => Deal {0} damage to all.", 2 * card.Level));
                 foreach (var c in card.Deck)
                     c.Hurt(2 * card.Level, card);
