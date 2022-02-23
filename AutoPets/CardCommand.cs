@@ -73,25 +73,6 @@ namespace AutoPets
         }
     }
 
-    public class AbilityEventCardCommand : CardCommand
-    {
-        string _eventMessage;
-        Ability _ability;
-
-        public AbilityEventCardCommand(Card card, string eventMessage) : base(card)
-        {
-            _eventMessage = eventMessage;
-            _ability = card.Ability;
-        }
-
-        public override CardCommand Execute()
-        {
-            // just sends event, doesn't actually change the card or deck
-            Deck.Player.Game.OnAbilityEvent(_ability, Index, _eventMessage);
-            return this;
-        }
-    }
-
     public class FaintCardCommand : CardCommand
     {
         Card _faintedCard;

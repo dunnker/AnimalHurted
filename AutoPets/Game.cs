@@ -8,10 +8,8 @@ using System.Diagnostics;
 
 namespace AutoPets
 {
-    public delegate void AbilityEventHandler(object sender, Ability ability, int index, string message);
     public delegate void CardEventHandler(object sender, Card card, int index);
     public delegate void CardBuffedEventHandler(object sender, Card card, int sourceIndex);
-    
     public delegate void CardHurtEventHandler(object sender, Card card, Card sourceCard);
 
     public class Game
@@ -42,18 +40,11 @@ namespace AutoPets
         public Player Player2 { get { return _player2; } }
         public bool Fighting { get { return _fighting; } }
 
-        public event AbilityEventHandler AbilityEvent;
         public event EventHandler FightEvent;
         public event CardEventHandler CardFaintedEvent;
         public event CardEventHandler CardSummonedEvent;
         public event CardBuffedEventHandler CardBuffedEvent;
         public event CardHurtEventHandler CardHurtEvent;
-
-        public void OnAbilityEvent(Ability ability, int index, string message)
-        {
-            if (_updateCount == 0)
-                AbilityEvent?.Invoke(this, ability, index, message);
-        }
 
         public void OnFightEvent()
         {

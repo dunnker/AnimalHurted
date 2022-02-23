@@ -23,16 +23,17 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Faint => Give a random friend +{0} attack and +{1} health.", 2 * card.Level, card.Level);
+        }
+
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
             var buffCard = card.Deck.GetRandomCard(index);
             if (buffCard != null)
-            {
-                queue.Enqueue(new AbilityEventCardCommand(card, 
-                    string.Format("Faint => Give a random friend +{0} attack and +{1} health.", 2 * card.Level, card.Level)));
                 queue.Enqueue(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
-            }
         }
     }
 
@@ -44,13 +45,17 @@ namespace AutoPets
             DefaultAttack = 1;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Faint => Summon a {0}/{1} cricket.", card.Level, card.Level);
+        }
+
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Enqueue(new AbilityEventCardCommand(card, string.Format("Faint => Summon a {0}/{1} cricket.", card.Level, card.Level)));
             queue.Enqueue(new SummonCardCommand(card, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
         }
     }
@@ -71,16 +76,18 @@ namespace AutoPets
             DefaultAttack = 1;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Buy => Give a random friend +{0} attack and +{1} health.", card.Level, card.Level);
+        }
+
         public override void Bought(Card card)
         {
             base.Bought(card);
             // find and buff a random card that is not the otter
             var buffCard = card.Deck.GetRandomCard(card.Index);
             if (buffCard != null)
-            {
-                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Buy => Give a random friend +{0} attack and +{1} health.", card.Level, card.Level));
                 buffCard.Buff(card.Index, card.Level, card.Level);
-            }
         }
     }
 
@@ -90,6 +97,11 @@ namespace AutoPets
         {
             DefaultHP = 2;
             DefaultAttack = 2;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Sell => Give two random friends +{0} health.", card.Level);
         }
 
         public override void Sold(Card card, int index)
@@ -105,7 +117,6 @@ namespace AutoPets
             var buffCard2 = card.Deck.GetRandomCard(index);
             if (buffCard1 != null && buffCard2 != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Sell => Give two random friends +{0} health.", card.Level));
                 buffCard1.Buff(index, card.Level, 0);
                 buffCard2.Buff(index, card.Level, 0);
             }
@@ -120,16 +131,15 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Start of battle => Deal 1 damage to {0} random enemies.", card.Level);
+        }
+
         public override void BattleStarted(CardCommandQueue queue, Card card)
         {
             var opponent = card.Deck.Player.GetOpponentPlayer();
             //TODO: are the random enemies found all unique?
-
-            // BattleStarted abilities don't show a message, they spawn
-            // automatically all at once
-            //queue.Enqueue(new AbilityEventCardCommand(card, 
-            //    string.Format("Start of battle => Deal 1 damage to {0} random enemies.", card.Level)));
-
             for (int i = 1; i <= card.Level; i++)
             {
                 var randomCard = opponent.BattleDeck.GetRandomCard();
@@ -147,10 +157,14 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Sell => Gain an extra {0} gold.", card.Level);
+        }
+
         public override void Sold(Card card, int index)
         {
             base.Sold(card, index);
-            //card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Sell => Gain an extra {0} gold.", card.Level));
             card.Deck.Player.Gold += card.Level;
         }
     }
@@ -163,10 +177,14 @@ namespace AutoPets
             DefaultAttack = 1;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Sell => Give shop pets {0} health.", card.Level);
+        }
+
         public override void Sold(Card card, int index)
         {
             base.Sold(card, index);
-            //card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Sell => Give shop pets {0} health.", card.Level));
             foreach (var shopCard in card.Deck.Player.ShopDeck)
                 shopCard.Buff(-1, card.Level, 0);
         }
@@ -180,12 +198,16 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Level-up => Give all friends {0} health.", card.Level);
+        }
+
         public override void LeveledUp(Card card)
         {
             base.LeveledUp(card);
             if (card.Deck.GetCardCount() > 0)
             {
-                //card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Level-up => Give all friends {0} health.", card.Level));
                 foreach (var tempCard in card.Deck)
                 {
                     if (tempCard != card)
@@ -203,12 +225,16 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Friend summoned => Give it +{0} attack.", card.Level);
+        }
+
         public override void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
         {
             base.FriendSummoned(queue, card, summonedCard);
             //TODO: SAP is worded "Give it +? attack until end of battle." and it underscores the attack points during build and battle
             // after battle, if the friend was summoned during build, the friend's attack points will revert for next build
-            queue.Enqueue(new AbilityEventCardCommand(card, string.Format("Friend summoned => Give it +{0} attack.", card.Level)));
             queue.Enqueue(new BuffCardCommand(summonedCard, card.Index, 0, card.Level));
         }
     }
@@ -222,11 +248,15 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return "Buy => Copy health from the most healthy friend.";
+        }
+
         public override void Bought(Card card)
         {
             base.Bought(card);
             var maxCard = card.Deck.OrderByDescending(c => c.HitPoints).First();
-            card.Deck.Player.Game.OnAbilityEvent(this, card.Index, "Buy => Copy health from the most healthy friend.");
             card.HitPoints = maxCard.HitPoints;
         }
     }
@@ -239,13 +269,45 @@ namespace AutoPets
             DefaultAttack = 2;
         }
 
+        void GetAttackPercent(Card card, out int attackPoints, out int attackPercent)
+        {
+            switch (card.Level)
+            {
+                // buff 50% of dodo's attack
+                case 1:
+                    // doing integer division, so adding +1 to card.AttackPoints to round up
+                    attackPoints = (card.AttackPoints + 1) / 2;
+                    attackPercent = 50;
+                    break;
+                // buff 100% of dodo's attack
+                case 2:
+                    attackPoints = card.AttackPoints;
+                    attackPercent = 100;
+                    break;
+                // buff 150% of dodo's attack
+                case 3:
+                    attackPoints = card.AttackPoints + ((card.AttackPoints + 1) / 2);
+                    attackPercent = 150;
+                    break;
+                default:
+                    attackPercent = 0;
+                    attackPoints = 0;
+                    Debug.Assert(false);
+                    break;
+            }
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            GetAttackPercent(card, out int attackPoints, out int attackPercent);
+            return string.Format("Start of battle => Give {0}% of Dodo's attack to friend ahead.", attackPercent);
+        }
+
         public override void BattleStarted(CardCommandQueue queue, Card card)
         {
             base.BattleStarted(queue, card);
 
             //TODO: enqueu
-            //TODO: no need to enqueue ability message; see comments for mosquito
-
 
             // Note that this card might have been attacked by a mosquito and about to be fainted (see Game.FightOne, after calls to BattleStarted, there is a sweep to faint cards)
             // Same is true with the card ahead. It may have taken damage and about to be fainted
@@ -257,31 +319,7 @@ namespace AutoPets
                 nextCard = card.Deck[card.Index + 1];
             if (nextCard != null)
             {
-                int attackPoints = 0;
-                int attackPercent = 0;
-                switch (card.Level)
-                {
-                    // buff 50% of dodo's attack
-                    case 1:
-                        // doing integer division, so adding +1 to card.AttackPoints to round up
-                        attackPoints = (card.AttackPoints + 1) / 2;
-                        attackPercent = 50;
-                        break;
-                    // buff 100% of dodo's attack
-                    case 2:
-                        attackPoints = card.AttackPoints;
-                        attackPercent = 100;
-                        break;
-                    // buff 150% of dodo's attack
-                    case 3:
-                        attackPoints = card.AttackPoints + ((card.AttackPoints + 1) / 2);
-                        attackPercent = 150;
-                        break;
-                    default:
-                        Debug.Assert(false);
-                        break;
-                }
-                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Start of battle => Give {0}% of Dodo's attack to friend ahead.", attackPercent));
+                GetAttackPercent(card, out int attackPoints, out int attackPercent);
                 nextCard.Buff(card.Index, 0, attackPoints);
             }
         }
@@ -295,6 +333,11 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Before attack => Deal {0} damage to friend behind.", card.Level);
+        }
+
         public override void BeforeAttack(CardCommandQueue queue, Card card)
         {
             base.BeforeAttack(queue, card);
@@ -303,11 +346,8 @@ namespace AutoPets
             if (card.Index > 0)
                 priorCard = card.Deck[card.Index - 1];
             if (priorCard != null)
-            {
                 //TODO: enqueue
-                card.Deck.Player.Game.OnAbilityEvent(this, card.Index, string.Format("Before attack => Deal {0} damage to friend behind.", card.Level));
                 priorCard.Hurt(card.Level, card);
-            }
         }
     }
 
@@ -318,7 +358,12 @@ namespace AutoPets
             DefaultHP = 1;
             DefaultAttack = 3;
         }
-		
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Faint => Give the two friends behind +{0} attack and +{1} health.", card.Level, card.Level);
+        }
+
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
@@ -333,7 +378,6 @@ namespace AutoPets
                 priorCard2 = card.Deck[index - 2];
             if (priorCard1 != null || priorCard2 != null)
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, index, string.Format("Faint => Give the two friends behind +{0} attack and +{1} health.", card.Level, card.Level));
                 if (priorCard1 != null)
                     priorCard1.Buff(index, card.Level, card.Level);
                 if (priorCard2 != null)
@@ -350,6 +394,11 @@ namespace AutoPets
             DefaultAttack = 3;
         }
 
+        public override string GetAbilityMessage(Card card)
+        {
+            return string.Format("Faint => Deal {0} damage to all.", 2 * card.Level);
+        }
+
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
@@ -360,8 +409,6 @@ namespace AutoPets
             if (card.Deck.GetCardCount() > 0 || 
                 (card.Deck.Player.Game.Fighting && opponent.BattleDeck.GetCardCount() > 0))
             {
-                card.Deck.Player.Game.OnAbilityEvent(this, index, 
-                    string.Format("Faint => Deal {0} damage to all.", 2 * card.Level));
                 foreach (var c in card.Deck)
                     c.Hurt(2 * card.Level, card);
                 if (card.Deck.Player.Game.Fighting)

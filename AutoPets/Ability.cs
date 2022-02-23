@@ -17,6 +17,11 @@ namespace AutoPets
             return GetType().Name.Replace("Ability", string.Empty);
         }
 
+        public virtual string GetAbilityMessage(Card card)
+        {
+            return string.Empty;
+        }
+
         virtual public void BattleStarted(CardCommandQueue queue, Card card)
         {
 
