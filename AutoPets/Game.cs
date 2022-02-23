@@ -157,8 +157,6 @@ namespace AutoPets
             {
                 if (player.BuildDeck[buildIndex] == null)
                 {
-                    Debug.Assert(player.BuildDeck[buildIndex] == null); //TODO
-
                     var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
                     card.Buy(buildIndex);
                     player.ShopDeck.Remove(shopIndex);
@@ -167,10 +165,16 @@ namespace AutoPets
                     foreach (var c in player.BuildDeck)
                         if (c != card)
                             c.Ability.FriendSummoned(queue, c, card);
-                    while (queue.Peek() != null)
+                    var nextQueue = new CardCommandQueue();
+                    foreach (var command in queue)
                     {
-                        queue.Dequeue().Execute().ExecuteAbility(queue);
+                        command.Execute().ExecuteAbility(nextQueue);
                     }
+					// nextQueue should be empty because there should be no abilities invoked
+					// from buying a card; an exception here would mean we need to continue
+                    // processing abilities similar to Game.CreateFightResult()
+					if (nextQueue.Count > 0)
+						throw new Exception("Unprocessed abilities were found.");
                 }
                 else
                 {
@@ -206,7 +210,7 @@ namespace AutoPets
             _fighting = false;
         }
 
-        public CardCommandQueue FightOne(CardCommandQueue lastQueue = null)
+        public CardCommandQueue CreateAttackResult(CardCommandQueue lastQueue = null)
         {
             var resultQueue = new CardCommandQueue();
             if (!_fighting)
@@ -221,19 +225,40 @@ namespace AutoPets
             {
                 if (lastQueue != null)
                 {
-                    while (lastQueue.Peek() != null)
+                    foreach (var command in lastQueue)
                     {
-                        var command = lastQueue.Dequeue();
                         command.Execute();
                         command.ExecuteAbility(resultQueue);
                     }
                 }
             }
             // if there were no ability methods invoked then start a new card attack
-            if (resultQueue.Peek() == null)
+            if (resultQueue.Count == 0)
                 if (_player1.BattleDeck.GetCardCount() > 0 && _player2.BattleDeck.GetCardCount() > 0)
                     _player1.BattleDeck.GetLastCard().Attack(resultQueue, _player2.BattleDeck.GetLastCard());
             return resultQueue;
+        }
+
+        public List<CardCommandQueue> CreateFightResult()
+        {
+            // disable events
+            BeginUpdate();
+            _player1.NewBattleDeck();
+            _player2.NewBattleDeck();
+            var fightResult = new List<CardCommandQueue>();
+            CardCommandQueue lastQueue = null;
+            do
+            {
+                lastQueue = CreateAttackResult(lastQueue);
+                if (lastQueue.Count > 0)
+                    fightResult.Add(lastQueue);
+            } while (lastQueue.Count > 0 || !IsFightOver());
+            FightOver();
+            // restore battle decks
+            _player1.NewBattleDeck();
+            _player2.NewBattleDeck();
+            EndUpdate();
+            return fightResult;
         }
     }
 }

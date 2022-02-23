@@ -89,7 +89,7 @@ namespace AutoPets
             int opponentDamage = card.GetDamage();
             int damage = GetDamage();
 
-            queue.Enqueue(new AttackCardCommand(this, damage, card, opponentDamage));
+            queue.Add(new AttackCardCommand(this, damage, card, opponentDamage));
         }
 
         public int GetDamage()

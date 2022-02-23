@@ -33,7 +33,7 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             var buffCard = card.Deck.GetRandomCard(index);
             if (buffCard != null)
-                queue.Enqueue(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
+                queue.Add(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
         }
     }
 
@@ -56,7 +56,7 @@ namespace AutoPets
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Enqueue(new SummonCardCommand(card, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
+            queue.Add(new SummonCardCommand(card, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
         }
     }
 
@@ -144,7 +144,7 @@ namespace AutoPets
             {
                 var randomCard = opponent.BattleDeck.GetRandomCard();
                 if (randomCard != null)
-                    queue.Enqueue(new HurtCardCommand(randomCard, 1, card));
+                    queue.Add(new HurtCardCommand(randomCard, 1, card));
             }
         }
     }
@@ -235,7 +235,7 @@ namespace AutoPets
             base.FriendSummoned(queue, card, summonedCard);
             //TODO: SAP is worded "Give it +? attack until end of battle." and it underscores the attack points during build and battle
             // after battle, if the friend was summoned during build, the friend's attack points will revert for next build
-            queue.Enqueue(new BuffCardCommand(summonedCard, card.Index, 0, card.Level));
+            queue.Add(new BuffCardCommand(summonedCard, card.Index, 0, card.Level));
         }
     }
 
@@ -306,9 +306,6 @@ namespace AutoPets
         public override void BattleStarted(CardCommandQueue queue, Card card)
         {
             base.BattleStarted(queue, card);
-
-            //TODO: enqueu
-
             // Note that this card might have been attacked by a mosquito and about to be fainted (see Game.FightOne, after calls to BattleStarted, there is a sweep to faint cards)
             // Same is true with the card ahead. It may have taken damage and about to be fainted
             // if a Dodo's ability were to buff the hitpoints of the card ahead, then that could bring the hitpoints of that card from negative to positive again --
@@ -320,7 +317,7 @@ namespace AutoPets
             if (nextCard != null)
             {
                 GetAttackPercent(card, out int attackPoints, out int attackPercent);
-                nextCard.Buff(card.Index, 0, attackPoints);
+                queue.Add(new BuffCardCommand(nextCard, card.Index, 0, attackPoints));
             }
         }
     }
@@ -346,8 +343,7 @@ namespace AutoPets
             if (card.Index > 0)
                 priorCard = card.Deck[card.Index - 1];
             if (priorCard != null)
-                //TODO: enqueue
-                priorCard.Hurt(card.Level, card);
+                queue.Add(new HurtCardCommand(priorCard, card.Level, card));
         }
     }
 
@@ -367,9 +363,6 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-
-            //TODO: enqueue
-
             Card priorCard1 = null;
             if (index > 0)
                 priorCard1 = card.Deck[index - 1];
@@ -379,9 +372,9 @@ namespace AutoPets
             if (priorCard1 != null || priorCard2 != null)
             {
                 if (priorCard1 != null)
-                    priorCard1.Buff(index, card.Level, card.Level);
+                    queue.Add(new BuffCardCommand(priorCard1, index, card.Level, card.Level));
                 if (priorCard2 != null)
-                    priorCard2.Buff(index, card.Level, card.Level);
+                    queue.Add(new BuffCardCommand(priorCard2, index, card.Level, card.Level));
             }
         }
     }
@@ -402,18 +395,15 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-
-            //TODO enqueue
-
             var opponent = card.Deck.Player.GetOpponentPlayer();
             if (card.Deck.GetCardCount() > 0 || 
                 (card.Deck.Player.Game.Fighting && opponent.BattleDeck.GetCardCount() > 0))
             {
                 foreach (var c in card.Deck)
-                    c.Hurt(2 * card.Level, card);
+                    queue.Add(new HurtCardCommand(c, 2 * card.Level, card));
                 if (card.Deck.Player.Game.Fighting)
                     foreach (var c in opponent.BattleDeck)
-                        c.Hurt(2 * card.Level, card);
+                        queue.Add(new HurtCardCommand(c, 2 * card.Level, card));
             }
         }
     }

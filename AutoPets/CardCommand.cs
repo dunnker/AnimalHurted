@@ -66,9 +66,9 @@ namespace AutoPets
             if (_damage > 0)
                 OpponentCard.Ability.Hurt(queue, OpponentCard);
             if (Card.HitPoints <= 0)
-                queue.Enqueue(new FaintCardCommand(Card));
+                queue.Add(new FaintCardCommand(Card));
             if (OpponentCard.HitPoints <= 0)
-                queue.Enqueue(new FaintCardCommand(OpponentCard));
+                queue.Add(new FaintCardCommand(OpponentCard));
             return this;
         }
     }
@@ -128,7 +128,7 @@ namespace AutoPets
             // and for each HurtCommand, we don't need to queue up multiple Faint commands
             // so using _canFaint to prevent multiple Faint commands being added to queue
             if (_canFaint && Card.HitPoints <= 0)
-                queue.Enqueue(new FaintCardCommand(Card));
+                queue.Add(new FaintCardCommand(Card));
             return this;
         }
     }

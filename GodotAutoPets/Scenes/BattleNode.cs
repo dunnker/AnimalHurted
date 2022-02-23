@@ -11,7 +11,7 @@ public class BattleNode : Node
     System.Threading.Thread _gameThread;
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
-    Queue<CardCommandQueue> _fightResult;
+    List<CardCommandQueue> _fightResult;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
@@ -57,25 +57,7 @@ public class BattleNode : Node
         Connect("FightOverSignal", this, "_signal_FightOver", null, 
             (int)ConnectFlags.Deferred);
 
-        GameSingleton.Instance.Game.Player1.NewBattleDeck();
-        GameSingleton.Instance.Game.Player2.NewBattleDeck();
-
-        GameSingleton.Instance.Game.BeginUpdate();
-        _fightResult = new Queue<CardCommandQueue>();
-        CardCommandQueue lastQueue = null;
-        do
-        {
-            lastQueue = GameSingleton.Instance.Game.FightOne(lastQueue);
-            // clone the last queue because FightOne will dequeue it
-            if (lastQueue.Peek() != null)
-                _fightResult.Enqueue(lastQueue.Clone());
-        } while (lastQueue.Peek() != null || !GameSingleton.Instance.Game.IsFightOver());
-        GameSingleton.Instance.Game.FightOver();
-        GameSingleton.Instance.Game.EndUpdate();
-
-        // restore battle decks after fight
-        GameSingleton.Instance.Game.Player1.NewBattleDeck();
-        GameSingleton.Instance.Game.Player2.NewBattleDeck();
+        _fightResult = GameSingleton.Instance.Game.CreateFightResult();
 
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.ReverseCardAreaPositions();
@@ -117,21 +99,23 @@ public class BattleNode : Node
         BeginBattleTimer.Start();
     }
 
-    void ReplayBattle()
+    async void ReplayBattle()
     {
+        await PositionDecks();
+        
         _gameThread = new System.Threading.Thread(() => 
         {
-            var nextResult = new Queue<CardCommandQueue>();
-            while (_fightResult.Count > 0 && _fightResult.Peek() != null)
+            // each press of the 'Play' button
+            foreach (var commandQueue in _fightResult)
             {
-                var commandQueue = _fightResult.Dequeue();
-                nextResult.Enqueue(commandQueue.Clone());
-                while (commandQueue.Peek() != null)
+                foreach (var command in commandQueue)
                 {
-                    commandQueue.Dequeue().Execute();
+                    command.Execute();
+                    // not executing abilities during replay, because abilities
+                    // have already been processed in CreateFightResult()
+                    //command.ExecuteAbility()
                 }
             }
-            _fightResult = nextResult;
 
 			// assuming "this" is still valid. See Dispose method where thread is aborted
             this.EmitSignal("FightOverSignal");

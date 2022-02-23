@@ -4,33 +4,25 @@ using System.Collections.Generic;
 
 namespace AutoPets
 {
-    public class CardCommandQueue
+    public class CardCommandQueue : IEnumerable<CardCommand>
     {
-        Queue<CardCommand> _queue = new Queue<CardCommand>();
+        List<CardCommand> _list = new List<CardCommand>();
 
-        public void Enqueue(CardCommand cardCommand)
+        public int Count { get { return _list.Count; } }
+
+        public void Add(CardCommand cardCommand)
         {
-            _queue.Enqueue(cardCommand);
+            _list.Add(cardCommand);
         }
 
-        public CardCommand Dequeue()
+        public IEnumerator<CardCommand> GetEnumerator()
         {
-            return _queue.Dequeue();
+            return _list.GetEnumerator();
         }
 
-        public CardCommand Peek()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            if (_queue.Count > 0)
-                return _queue.Peek(); 
-            else
-                return null;
-        }
-
-        public CardCommandQueue Clone()
-        {
-            var result = new CardCommandQueue();
-            result._queue = new Queue<CardCommand>(_queue);
-            return result;
+            return _list.GetEnumerator();
         }
     }
 }
