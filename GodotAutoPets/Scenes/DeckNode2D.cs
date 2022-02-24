@@ -203,9 +203,9 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     // IDragParent
     public void DragDropped()
     {
-        if (GameSingleton.Instance.DragTarget != null)
+        if (GameSingleton.Instance.DragTarget != null && GameSingleton.Instance.DragSource is CardArea2D)
         {
-            var sourceCardArea2D = GameSingleton.Instance.DragSource;
+            var sourceCardArea2D = GameSingleton.Instance.DragSource as CardArea2D;
             var sourceDeck = sourceCardArea2D.CardSlotNode2D.CardSlotDeck;
             var targetCardArea2D = GameSingleton.Instance.DragTarget;
             var targetDeck = targetCardArea2D.CardSlotNode2D.CardSlotDeck;
@@ -253,7 +253,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         // we're either drag/dropping from the Shop scene or we are
         // drag/dropping in the build deck -- reordering cards in the same deck
         Card sourceCard = null;
-        CardArea2D sourceCardArea2D = GameSingleton.Instance.DragSource;
+        CardArea2D sourceCardArea2D = GameSingleton.Instance.DragSource as CardArea2D;
         // if reordering cards within the same deck 
         if (sourceCardArea2D.CardSlotNode2D.CardSlotDeck == this)
         {

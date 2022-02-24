@@ -20,10 +20,12 @@ namespace AutoPets
         int _round;
         int _shopSlots;
         List<Ability> _tierAbilities;
+        List<Food> _tierFood;
         int _updateCount;
         bool _fighting;
 
         public const int PetCost = 3;
+        public const int FoodCost = 3;
         public const int RollCost = 1;
         public const int GoldPerTurn = 10;
         public const int BuildDeckSlots = 5;
@@ -39,6 +41,8 @@ namespace AutoPets
         public Player Player1 { get { return _player1; } }
         public Player Player2 { get { return _player2; } }
         public bool Fighting { get { return _fighting; } }
+        public List<Ability> TierAbilities { get { return _tierAbilities; } }
+        public List<Food> TierFood { get { return _tierFood; } }
 
         public event EventHandler AttackEvent;
         public event CardEventHandler CardFaintedEvent;
@@ -87,6 +91,7 @@ namespace AutoPets
         public void NewGame()
         {
             _tierAbilities = new List<Ability>();
+            _tierFood = new List<Food>();
             _player1.NewGame();
             _player2.NewGame();
             NewRound();
@@ -99,23 +104,29 @@ namespace AutoPets
                 case int i when i >= 1 && i <= 2:
                     _shopSlots = 3;
                     _tierAbilities.AddRange(AbilityList.Instance.TierOneAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierOneFood);
                     break;
                 case int i when i >= 3 && i <= 4:
                     _tierAbilities.AddRange(AbilityList.Instance.TierTwoAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierTwoFood);
                     break;
                 case int i when i >= 5 && i <= 6:
                     _shopSlots = 4;
                     _tierAbilities.AddRange(AbilityList.Instance.TierThreeAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierThreeFood);
                     break;
                 case int i when i >= 7 && i <= 8:
                     _tierAbilities.AddRange(AbilityList.Instance.TierFourAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierFourFood);
                     break;
                 case int i when i >= 9 && i <= 10:
                     _shopSlots = 5;
                     _tierAbilities.AddRange(AbilityList.Instance.TierFiveAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierFiveFood);
                     break;
                 case int i when i >= 11:
                     _tierAbilities.AddRange(AbilityList.Instance.TierSixAbilities);
+                    _tierFood.AddRange(FoodList.Instance.TierSixFood);
                     break;
                 default:
                     break;
@@ -125,6 +136,7 @@ namespace AutoPets
         public void NewRound()
         {
             _round++;
+            CheckNewTier();
             // assign Gold before calling Player.NewRound() because card abilities
             // can be invoked in Player.NewRound() which can buff Gold
             _player1.Gold = GoldPerTurn;
@@ -133,23 +145,8 @@ namespace AutoPets
                 _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
             _player2.NewRound(_player2.BattleDeck.GetCardCount() > 0, 
                 _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
-            CheckNewTier();
-            Roll(_player1, deductGold: false);
-            Roll(_player2, deductGold: false);
-        }
-
-        public void Roll(Player player, bool deductGold = true)
-        {
-            if (player.Gold < RollCost)
-                throw new Exception("Not enough gold for Roll.");
-            if (deductGold)
-                player.Gold -= RollCost;
-            player.ShopDeck.Clear();
-            for (int i = 0; i < _shopSlots; i++)
-            {
-                int rand = Random.Next(_tierAbilities.Count);
-                player.ShopDeck.SetCard(new Card(player.ShopDeck, _tierAbilities[rand]), i);
-            }
+            _player1.Roll(deductGold: false);
+            _player2.Roll(deductGold: false);
         }
 
         public void BuyFromShop(int shopIndex, int buildIndex, Player player)

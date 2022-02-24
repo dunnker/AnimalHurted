@@ -53,9 +53,9 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
     // IDragParent
     public void DragDropped()
     {
-        if (GameSingleton.Instance.DragTarget != null)
+        if (GameSingleton.Instance.DragTarget != null && GameSingleton.Instance.DragSource is CardArea2D)
         {
-            var sourceCardArea2D = GameSingleton.Instance.DragSource;
+            var sourceCardArea2D = GameSingleton.Instance.DragSource as CardArea2D;
             var targetCardArea2D = GameSingleton.Instance.DragTarget;
             var sourceDeck = sourceCardArea2D.CardSlotNode2D.CardSlotDeck;
             var targetDeck = targetCardArea2D.CardSlotNode2D.CardSlotDeck;

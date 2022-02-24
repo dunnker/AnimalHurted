@@ -7,6 +7,7 @@ namespace AutoPets
     {
         readonly Deck _deck;
         readonly Ability _ability;
+        FoodAbility _foodAbility;
         int _index;
         int _hitPoints;
         int _attackPoints;
@@ -45,6 +46,8 @@ namespace AutoPets
         public int Index { get { return _index; } }
 
         public Ability Ability { get { return _ability; } }
+
+        public FoodAbility FoodAbility { get { return _foodAbility; } set { _foodAbility = value; } }
 
         public int HitPoints { get { return _hitPoints; } set { _hitPoints = value; } }
 

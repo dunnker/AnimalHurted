@@ -31,8 +31,10 @@ public class BuildNode : Node
     public void _on_RollButton_pressed()
     {
         if (_player.Gold >= Game.RollCost)
-            GameSingleton.Instance.Game.Roll(_player);
+            _player.Roll();
         ShopNode2D.RenderShop();
+        RenderFood(1, _player.ShopFood1);
+        RenderFood(2, _player.ShopFood2);
     }
 
     public void _on_ContinueButton_pressed()
@@ -124,9 +126,27 @@ public class BuildNode : Node
         PlayerNameLabel.Text = _player.Name;
         DeckNode2D.RenderDeck(_player.BuildDeck);
         ShopNode2D.RenderShop();
+        RenderFood(1, _player.ShopFood1);
+        RenderFood(2, _player.ShopFood2);
 
         Connect("SellOverSignal", this, "_signal_SellOver", null, 
             (int)ConnectFlags.Deferred);
+    }
+
+    public void RenderFood(int index, Food playerFood)
+    {
+        var foodSlot = GetNode($"FoodSlotNode2D{index}");
+        var foodArea2D = foodSlot.GetNode<FoodArea2D>("Area2D");
+        foodArea2D.Index = index;
+        var sprite = foodSlot.GetNode<Sprite>("Area2D/Sprite");
+        if (playerFood == null)
+            sprite.Hide();
+        else
+        {
+            var res = GD.Load($"res://Assets/Food/{playerFood.GetType().Name}.png");
+            sprite.Texture = res as Godot.Texture;
+            sprite.Show();
+        }
     }
 
     public void _GoldChangedEvent(object sender, int oldValue)

@@ -78,7 +78,8 @@ public class CardArea2D : Area2D
         if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource != this)
         {
             GameSingleton.Instance.DragTarget = this;
-            if (Sprite.Visible)
+            // check make sure we're visible and not dragging food
+            if (Sprite.Visible && GameSingleton.Instance.DragSource is CardArea2D)
             {
                 // every card has their own timer which can start from a mouse entered event
                 // and is stopped from a card exit event

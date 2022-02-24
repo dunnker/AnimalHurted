@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Scenes/BuildNode.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Assets/background.png" type="Texture" id=4]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://Scenes/PlayerAttrsNode2D.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Scenes/FoodSlotNode2D.tscn" type="PackedScene" id=7]
 
 [sub_resource type="DynamicFont" id=3]
 size = 24
@@ -67,8 +68,26 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ColorRect4" type="ColorRect" parent="."]
+modulate = Color( 1, 1, 1, 0.254902 )
+margin_left = 848.0
+margin_top = 392.0
+margin_right = 1224.0
+margin_bottom = 656.0
+mouse_filter = 2
+color = Color( 0.796078, 0.917647, 0.529412, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ShopNode2D" parent="." instance=ExtResource( 3 )]
 position = Vector2( 128, 416 )
+
+[node name="FoodSlotNode2D1" parent="." instance=ExtResource( 7 )]
+position = Vector2( 928, 480 )
+
+[node name="FoodSlotNode2D2" parent="." instance=ExtResource( 7 )]
+position = Vector2( 1056, 480 )
 
 [node name="QuitGameButton" type="Button" parent="."]
 margin_left = 848.0

@@ -15,7 +15,7 @@ public class GameSingleton
     public bool Dragging { get; set; }
     
     public CardArea2D DragTarget { get; set; }
-    public CardArea2D DragSource { get; set; }
+    public object DragSource { get; set; }
 
     public static GameSingleton Instance
     {

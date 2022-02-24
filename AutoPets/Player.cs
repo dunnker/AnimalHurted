@@ -18,6 +18,8 @@ namespace AutoPets
         int _gold;
         readonly Deck _shopDeck;
         readonly Deck _buildDeck;
+        Food _shopFood1;
+        Food _shopFood2;
         Deck _battleDeck;
         int _updateCount;
 
@@ -28,6 +30,9 @@ namespace AutoPets
         public Deck BattleDeck { get { return _battleDeck; } }
 
         public Deck ShopDeck { get { return _shopDeck; } }
+
+        public Food ShopFood1 { get { return _shopFood1; } }
+        public Food ShopFood2 { get { return _shopFood2; } }
 
         public int Gold { 
             get
@@ -101,6 +106,44 @@ namespace AutoPets
             // so CloneTo creates new card instances for the deck, but the deck reference
             // itself remains
             _buildDeck.CloneTo(_battleDeck);
+        }
+
+        public void Roll(bool deductGold = true)
+        {
+            if (Gold < Game.RollCost)
+                throw new Exception("Not enough gold for Roll.");
+            if (deductGold)
+                Gold -= Game.RollCost;
+            _shopDeck.Clear();
+            for (int i = 0; i < Game.ShopSlots; i++)
+            {
+                int rand = Game.Random.Next(Game.TierAbilities.Count);
+                _shopDeck.SetCard(new Card(_shopDeck, Game.TierAbilities[rand]), i);
+            }
+            NewShopFood();
+        }
+
+        public void BuyFood(Card card, int index)
+        {
+            if (Gold < Game.FoodCost)
+                throw new Exception("Not enough gold to buy food.");
+            if (index == 1)
+            {
+                _shopFood1.Execute(card);
+                _shopFood1 = null;
+            }
+            else
+            {
+                _shopFood2.Execute(card);
+                _shopFood2 = null;
+            }
+            Gold -= Game.FoodCost;
+        }
+
+        void NewShopFood()
+        {
+            _shopFood1 = _game.TierFood[_game.Random.Next(0, _game.TierFood.Count)];
+            _shopFood2 = _game.TierFood[_game.Random.Next(0, _game.TierFood.Count)];
         }
 
         public void NewRound(bool won, bool lost, int round)
