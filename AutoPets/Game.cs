@@ -124,23 +124,26 @@ namespace AutoPets
 
         public void NewRound()
         {
-            _player1.RoundOver(_player1.BattleDeck.GetCardCount() > 0, 
-                _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
-            _player2.RoundOver(_player2.BattleDeck.GetCardCount() > 0, 
-                _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
             _round++;
+            // assign Gold before calling Player.NewRound() because card abilities
+            // can be invoked in Player.NewRound() which can buff Gold
+            _player1.Gold = GoldPerTurn;
+            _player2.Gold = GoldPerTurn;
+            _player1.NewRound(_player1.BattleDeck.GetCardCount() > 0, 
+                _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
+            _player2.NewRound(_player2.BattleDeck.GetCardCount() > 0, 
+                _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
             CheckNewTier();
-            _player1.Gold = GoldPerTurn + 1;
-            _player2.Gold = GoldPerTurn + 1;
-            Roll(_player1);
-            Roll(_player2);
+            Roll(_player1, deductGold: false);
+            Roll(_player2, deductGold: false);
         }
 
-        public void Roll(Player player)
+        public void Roll(Player player, bool deductGold = true)
         {
             if (player.Gold < RollCost)
                 throw new Exception("Not enough gold for Roll.");
-            player.Gold -= RollCost;
+            if (deductGold)
+                player.Gold -= RollCost;
             player.ShopDeck.Clear();
             for (int i = 0; i < _shopSlots; i++)
             {

@@ -22,6 +22,11 @@ namespace AutoPets
             return string.Empty;
         }
 
+        public virtual void NewRoundStarted(Card card)
+        {
+
+        }
+
         virtual public void BattleStarted(CardCommandQueue queue, Card card)
         {
 
@@ -53,6 +58,11 @@ namespace AutoPets
         }
 
         virtual public void Sold(Card card, int index)
+        {
+
+        }
+
+        virtual public void FriendSold(Card card, Card soldCard)
         {
 
         }

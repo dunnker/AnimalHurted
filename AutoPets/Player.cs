@@ -103,7 +103,7 @@ namespace AutoPets
             _buildDeck.CloneTo(_battleDeck);
         }
 
-        public void RoundOver(bool won, bool lost, int round)
+        public void NewRound(bool won, bool lost, int round)
         {
             if (won)
                 _wins += 1;
@@ -118,6 +118,8 @@ namespace AutoPets
                 if (_lives < 0)
                     _lives = 0;
             };
+            foreach (var c in _buildDeck)
+                c.Ability.NewRoundStarted(c);
         }
     }
 }

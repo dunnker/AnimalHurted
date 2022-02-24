@@ -472,7 +472,20 @@ namespace AutoPets
             DefaultHP = 3;
             DefaultAttack = 2;
         }
-    }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend sold => Give a random friend +{card.Level} health.";
+        }
+
+        public override void FriendSold(Card card, Card soldCard)
+        {
+            base.FriendSold(card, soldCard);
+            var buffCard = card.Deck.GetRandomCard(new HashSet<int> { card.Index });
+            if (buffCard != null)
+                buffCard.Buff(card.Index, card.Level, 0);
+        }
+    }   
 
     public class SpiderAbility : Ability
     {
@@ -489,6 +502,17 @@ namespace AutoPets
         {
             DefaultHP = 3;
             DefaultAttack = 3;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of turn => Gain {card.Level} gold.";
+        }
+
+        public override void NewRoundStarted(Card card)
+        {
+            base.NewRoundStarted(card);
+            card.Deck.Player.Gold += card.Level;
         }
     }
 

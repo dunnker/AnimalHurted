@@ -176,6 +176,9 @@ namespace AutoPets
             _deck.Remove(_index);
             _deck.Player.Gold += Level;
             _ability.Sold(this, saveIndex);
+            foreach (var c in _deck)
+                if (c != this)
+                    c._ability.FriendSold(c, this);
         }
 
         public void Hurt(int damage, Deck sourceDeck, int sourceIndex)
