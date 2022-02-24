@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/58.png-fa611e5819cceb641f30576157d75cb7.stex"
+path="res://.import/MosquitoAbility.png-7b7d2a05e94ddd5bd825ef5368452611.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/58.png"
-dest_files=[ "res://.import/58.png-fa611e5819cceb641f30576157d75cb7.stex" ]
+source_file="res://Assets/Pets/MosquitoAbility.png"
+dest_files=[ "res://.import/MosquitoAbility.png-7b7d2a05e94ddd5bd825ef5368452611.stex" ]
 
 [params]
 

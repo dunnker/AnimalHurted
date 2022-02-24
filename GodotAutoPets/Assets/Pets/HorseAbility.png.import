@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/9.png-3d2000dce83cca754d50911e542846d3.stex"
+path="res://.import/HorseAbility.png-9bacd630fe7d6844a48e42f22851bc1d.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/9.png"
-dest_files=[ "res://.import/9.png-3d2000dce83cca754d50911e542846d3.stex" ]
+source_file="res://Assets/Pets/HorseAbility.png"
+dest_files=[ "res://.import/HorseAbility.png-9bacd630fe7d6844a48e42f22851bc1d.stex" ]
 
 [params]
 

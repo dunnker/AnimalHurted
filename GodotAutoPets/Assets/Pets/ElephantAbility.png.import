@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/4.png-f98c78059161298cf232c222a6da1069.stex"
+path="res://.import/ElephantAbility.png-0abbb35a5716518716a15dfb993b852c.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/4.png"
-dest_files=[ "res://.import/4.png-f98c78059161298cf232c222a6da1069.stex" ]
+source_file="res://Assets/Pets/ElephantAbility.png"
+dest_files=[ "res://.import/ElephantAbility.png-0abbb35a5716518716a15dfb993b852c.stex" ]
 
 [params]
 

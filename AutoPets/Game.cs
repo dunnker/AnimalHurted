@@ -10,7 +10,7 @@ namespace AutoPets
 {
     public delegate void CardEventHandler(object sender, Card card, int index);
     public delegate void CardBuffedEventHandler(object sender, Card card, int sourceIndex);
-    public delegate void CardHurtEventHandler(object sender, Card card, Card sourceCard);
+    public delegate void CardHurtEventHandler(object sender, Card card, Deck sourceDeck, int sourceIndex);
 
     public class Game
     {
@@ -70,10 +70,10 @@ namespace AutoPets
                 CardBuffedEvent?.Invoke(this, card, sourceIndex);
         }
 
-        public void OnCardHurtEvent(Card card, Card sourceCard)
+        public void OnCardHurtEvent(Card card, Deck sourceDeck, int sourceIndex)
         {
             if (_updateCount == 0)
-                CardHurtEvent?.Invoke(this, card, sourceCard);
+                CardHurtEvent?.Invoke(this, card, sourceDeck, sourceIndex);
         }
 
         public Game()

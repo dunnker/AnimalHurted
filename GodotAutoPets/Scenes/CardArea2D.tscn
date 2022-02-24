@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scenes/CardArea2D.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/CardAttrsNode2D.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Assets/Pets/0.png" type="Texture" id=3]
+[ext_resource path="res://Assets/Pets/AntAbility.png" type="Texture" id=3]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]

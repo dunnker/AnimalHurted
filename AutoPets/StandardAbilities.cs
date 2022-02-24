@@ -31,7 +31,7 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            var buffCard = card.Deck.GetRandomCard(index);
+            var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { index });
             if (buffCard != null)
                 queue.Add(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
         }
@@ -85,7 +85,7 @@ namespace AutoPets
         {
             base.Bought(card);
             // find and buff a random card that is not the otter
-            var buffCard = card.Deck.GetRandomCard(card.Index);
+            var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { card.Index });
             if (buffCard != null)
                 buffCard.Buff(card.Index, card.Level, card.Level);
         }
@@ -113,8 +113,8 @@ namespace AutoPets
             // probably best way to implement that would be to dynamically create a 
             // new array of pets that are exclusive to the otter and the first pet we found
             // and then get a random pet from that array
-            var buffCard1 = card.Deck.GetRandomCard(index);
-            var buffCard2 = card.Deck.GetRandomCard(index);
+            var buffCard1 = card.Deck.GetRandomCard(new HashSet<int>() { index });
+            var buffCard2 = card.Deck.GetRandomCard(new HashSet<int>() { index });
             if (buffCard1 != null && buffCard2 != null)
             {
                 buffCard1.Buff(index, card.Level, 0);
@@ -139,12 +139,17 @@ namespace AutoPets
         public override void BattleStarted(CardCommandQueue queue, Card card)
         {
             var opponent = card.Deck.Player.GetOpponentPlayer();
-            //TODO: are the random enemies found all unique?
+            var excludingIndexes = new HashSet<int>();
             for (int i = 1; i <= card.Level; i++)
             {
-                var randomCard = opponent.BattleDeck.GetRandomCard();
+                var randomCard = opponent.BattleDeck.GetRandomCard(excludingIndexes);
                 if (randomCard != null)
-                    queue.Add(new HurtCardCommand(randomCard, 1, card));
+                {
+                    queue.Add(new HurtCardCommand(randomCard, 1, card.Deck, card.Index));
+                    // ensures we won't pick the same pet more than once when getting the
+                    // next random card
+                    excludingIndexes.Add(randomCard.Index);
+                }
             }
         }
     }
@@ -206,13 +211,10 @@ namespace AutoPets
         public override void LeveledUp(Card card)
         {
             base.LeveledUp(card);
-            if (card.Deck.GetCardCount() > 0)
+            foreach (var tempCard in card.Deck)
             {
-                foreach (var tempCard in card.Deck)
-                {
-                    if (tempCard != card)
-                        tempCard.Buff(card.Index, card.Level - 1, card.Level - 1);
-                }
+                if (tempCard != card)
+                    tempCard.Buff(card.Index, card.Level - 1, card.Level - 1);
             }
         }
     }
@@ -343,7 +345,7 @@ namespace AutoPets
             if (card.Index > 0)
                 priorCard = card.Deck[card.Index - 1];
             if (priorCard != null)
-                queue.Add(new HurtCardCommand(priorCard, card.Level, card));
+                queue.Add(new HurtCardCommand(priorCard, card.Level, card.Deck, card.Index));
         }
     }
 
@@ -363,18 +365,17 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            Card priorCard1 = null;
             if (index > 0)
-                priorCard1 = card.Deck[index - 1];
-            Card priorCard2 = null;
-            if (index > 1)
-                priorCard2 = card.Deck[index - 2];
-            if (priorCard1 != null || priorCard2 != null)
             {
-                if (priorCard1 != null)
-                    queue.Add(new BuffCardCommand(priorCard1, index, card.Level, card.Level));
-                if (priorCard2 != null)
-                    queue.Add(new BuffCardCommand(priorCard2, index, card.Level, card.Level));
+                var priorCard = card.Deck[index - 1];
+                if (priorCard != null)
+                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level));
+            }
+            if (index > 1)
+            {
+                var priorCard = card.Deck[index - 2];
+                if (priorCard != null)
+                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level));
             }
         }
     }
@@ -396,15 +397,15 @@ namespace AutoPets
         {
             base.Fainted(queue, card, index);
             var opponent = card.Deck.Player.GetOpponentPlayer();
-            if (card.Deck.GetCardCount() > 0 || 
-                (card.Deck.Player.Game.Fighting && opponent.BattleDeck.GetCardCount() > 0))
-            {
-                foreach (var c in card.Deck)
-                    queue.Add(new HurtCardCommand(c, 2 * card.Level, card));
-                if (card.Deck.Player.Game.Fighting)
-                    foreach (var c in opponent.BattleDeck)
-                        queue.Add(new HurtCardCommand(c, 2 * card.Level, card));
-            }
+            foreach (var c in card.Deck)
+				// checking HitPoints > 0; see comments in HurtCommand
+                if (c != card && c.HitPoints > 0)
+                    queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
+            if (card.Deck.Player.Game.Fighting)
+                foreach (var c in opponent.BattleDeck)
+					// checking HitPoints > 0; see comments in HurtCommand
+                    if (c.HitPoints > 0)
+                        queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
         }
     }
 

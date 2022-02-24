@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/12.png-d174befcfa161c1e5e77f38eb83f3cf5.stex"
+path="res://.import/AntAbility.png-0fa29ac60b3017bd1274e773ad8447ec.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/12.png"
-dest_files=[ "res://.import/12.png-d174befcfa161c1e5e77f38eb83f3cf5.stex" ]
+source_file="res://Assets/Pets/AntAbility.png"
+dest_files=[ "res://.import/AntAbility.png-0fa29ac60b3017bd1274e773ad8447ec.stex" ]
 
 [params]
 

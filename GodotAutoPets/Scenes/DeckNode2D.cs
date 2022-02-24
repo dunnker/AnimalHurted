@@ -312,13 +312,13 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         }
     }
 
-    public void _game_CardHurtEvent(object sender, Card card, Card sourceCard)
+    public void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
     {
         // see also BattleNode where its _game_CardHurtEvent handles 
         // the case where source card deck is an opponent
-        if (card.Deck == this._deck && sourceCard.Deck == card.Deck)
+        if (card.Deck == this._deck && sourceDeck == card.Deck)
         {
-            EmitSignal("CardHurtSignal", card.Index, sourceCard.Index);
+            EmitSignal("CardHurtSignal", card.Index, sourceIndex);
             GameSingleton.autoResetEvent.WaitOne();
         }
     }

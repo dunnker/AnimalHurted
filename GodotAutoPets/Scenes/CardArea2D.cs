@@ -58,8 +58,7 @@ public class CardArea2D : Area2D
             HideCard();
         else
         {
-            int abilityIndex = AbilityList.Instance.AllAbilities.IndexOf(card.Ability);
-            var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", abilityIndex));
+            var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", card.Ability.GetType().Name));
             Sprite.Texture = res as Godot.Texture;
             AttackPointsLabel.Text = card.AttackPoints.ToString();
             HitPointsLabel.Text = card.HitPoints.ToString();

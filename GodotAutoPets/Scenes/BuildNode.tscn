@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scenes/BuildNode.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
@@ -13,6 +13,9 @@ font_data = ExtResource( 5 )
 
 [sub_resource type="DynamicFont" id=4]
 size = 24
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=5]
 font_data = ExtResource( 5 )
 
 [node name="Node" type="Node"]
@@ -111,7 +114,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ShopPetLineEdit" type="LineEdit" parent="."]
+visible = false
+margin_left = 856.0
+margin_top = 392.0
+margin_right = 1056.0
+margin_bottom = 424.0
+custom_fonts/font = SubResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ShopPetOKButton" type="Button" parent="."]
+visible = false
+margin_left = 1072.0
+margin_top = 392.0
+margin_right = 1158.0
+margin_bottom = 428.0
+custom_fonts/font = SubResource( 3 )
+text = "OK"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="QuitGameButton" to="." method="_on_QuitGameButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="RollButton" to="." method="_on_RollButton_pressed"]
 [connection signal="pressed" from="SellButton" to="." method="_on_SellButton_pressed"]
+[connection signal="pressed" from="ShopPetOKButton" to="." method="_on_ShopPetOKButton_pressed"]

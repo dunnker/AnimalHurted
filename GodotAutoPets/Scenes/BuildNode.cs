@@ -74,12 +74,37 @@ public class BuildNode : Node
         ShopNode2D.RenderShop();
     }
 
+    public void _on_ShopPetOKButton_pressed()
+    {
+        var typeName = $"AutoPets.{GetNode<LineEdit>("ShopPetLineEdit").Text}Ability, AutoPets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"; 
+        var type = Type.GetType(typeName);
+        if (type != null)
+        {
+            var ability = AbilityList.Instance.AllAbilities.Find((x) => x.GetType() == type);
+            if (ability != null)
+            {
+                if (ShopNode2D.Deck[0] != null)
+                    ShopNode2D.Deck.Remove(0);
+                var card = new Card(ShopNode2D.Deck, ability);
+                card.Summon(0);
+            }
+            ShopNode2D.RenderShop();
+        }
+        GetNode<Button>("ShopPetOKButton").Hide();
+        GetNode<LineEdit>("ShopPetLineEdit").Hide();
+    }
+
     public override void _Input(InputEvent @event)
     {
         #if CHEATS_ENABLED
         if (Input.IsActionPressed("give_gold"))
         {
             _player.Gold += 1;
+        }
+        if (Input.IsActionPressed("give_shop_pet"))
+        {
+            GetNode<Button>("ShopPetOKButton").Show();
+            GetNode<LineEdit>("ShopPetLineEdit").Show();
         }
         #endif
     } 

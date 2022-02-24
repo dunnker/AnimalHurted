@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/8.png-3f9ca9ed99e2bbe9c4af6673dc606813.stex"
+path="res://.import/OtterAbility.png-4124d8becb8f7f525b3eb9be82413dfd.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/8.png"
-dest_files=[ "res://.import/8.png-3f9ca9ed99e2bbe9c4af6673dc606813.stex" ]
+source_file="res://Assets/Pets/OtterAbility.png"
+dest_files=[ "res://.import/OtterAbility.png-4124d8becb8f7f525b3eb9be82413dfd.stex" ]
 
 [params]
 

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/3.png-70c5af302b6c4bb48c0d15b5dbb8b573.stex"
+path="res://.import/DuckAbility.png-d9b321d8f3c23567fbf7c7e5dc8b32e0.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/3.png"
-dest_files=[ "res://.import/3.png-70c5af302b6c4bb48c0d15b5dbb8b573.stex" ]
+source_file="res://Assets/Pets/DuckAbility.png"
+dest_files=[ "res://.import/DuckAbility.png-d9b321d8f3c23567fbf7c7e5dc8b32e0.stex" ]
 
 [params]
 

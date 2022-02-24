@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/11.png-dd8075b7d7acb4cfd862f96cd5af5548.stex"
+path="res://.import/CrabAbility.png-23c5c8e7728b471ff00ff3b125bc20fd.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/11.png"
-dest_files=[ "res://.import/11.png-dd8075b7d7acb4cfd862f96cd5af5548.stex" ]
+source_file="res://Assets/Pets/CrabAbility.png"
+dest_files=[ "res://.import/CrabAbility.png-23c5c8e7728b471ff00ff3b125bc20fd.stex" ]
 
 [params]
 

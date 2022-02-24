@@ -178,12 +178,12 @@ namespace AutoPets
             _ability.Sold(this, saveIndex);
         }
 
-        public void Hurt(int damage, Card sourceCard)
+        public void Hurt(int damage, Deck sourceDeck, int sourceIndex)
         {
             if (damage > 0)
             {
                 _hitPoints -= damage;
-                _deck.Player.Game.OnCardHurtEvent(this, sourceCard);
+                _deck.Player.Game.OnCardHurtEvent(this, sourceDeck, sourceIndex);
             }
         }
 

@@ -102,32 +102,38 @@ namespace AutoPets
     public class HurtCardCommand : CardCommand
     {
         int _sourceIndex;
-        Deck _sourceDeck;
         int _damage;
-        bool _canFaint;
+        Deck _sourceDeck;
+        int _saveHitPoints;
 
-        public HurtCardCommand(Card card, int damage, Card sourceCard) : base(card)
+        public HurtCardCommand(Card card, int damage, Deck sourceDeck, int sourceIndex) : base(card)
         {
             _damage = damage;
-            _sourceIndex = sourceCard.Index;
-            _sourceDeck = sourceCard.Deck;
+            _sourceIndex = sourceIndex;
+            _sourceDeck = sourceDeck;
         }
 
         public override CardCommand Execute()
         {
-            if (Card.HitPoints > 0)
-                _canFaint = true;
-            Card.Hurt(_damage, _sourceDeck[_sourceIndex]);
+            _saveHitPoints = Card.HitPoints;
+            Card.Hurt(_damage, _sourceDeck, _sourceIndex);
             return this;
         }
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
             Card.Ability.Hurt(queue, Card);
-            // a card can be hurt multiple times in succession, e.g. from many mosquito attacks
-            // and for each HurtCommand, we don't need to queue up multiple Faint commands
-            // so using _canFaint to prevent multiple Faint commands being added to queue
-            if (_canFaint && Card.HitPoints <= 0)
+
+            // Prevent queuing up more than one FaintCommand by checking _saveHitPoints.
+            // HurtCommand's can queue multiple times for one card.
+            // An example of this would be a bunch of mosquito's vs one duck. If the mosquito
+            // ability were allowed to damage the duck over and over, then we would be 
+            // queuing up multiple FaintCommand's for the duck. So the mosquito ability is
+            // coded to Hurt the duck just once to cause it to faint. (see GetRandomCard, checks HitPoints >= 0)
+            // However, the other mosquito ability methods will be hurting the same duck!
+            // So it seems we can't avoid multiple HurtCommands from queuing up, so at least
+            // we avoid queuing up more than one FaintCommand:
+            if (_saveHitPoints > 0 && Card.HitPoints <= 0)
                 queue.Add(new FaintCardCommand(Card));
             return this;
         }

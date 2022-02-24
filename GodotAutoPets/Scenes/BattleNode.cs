@@ -134,23 +134,23 @@ public class BattleNode : Node
         GameSingleton.autoResetEvent.WaitOne();
     }
 
-    public void _game_CardHurtEvent(object sender, Card card, Card sourceCard)
+    public void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
     {
         // see also DeckNode2D where its _game_CardHurtEvent handles 
         // the case where source card deck is the same as the card
-        if (sourceCard.Deck != card.Deck)
+        if (sourceDeck != card.Deck)
         {
-            DeckNode2D deck;
-            DeckNode2D sourceDeck;
+            DeckNode2D deckNode2D;
+            DeckNode2D sourceDeckNode2D;
             if (card.Deck.Player == GameSingleton.Instance.Game.Player1)
-                deck = Player1DeckNode2D;
+                deckNode2D = Player1DeckNode2D;
             else
-                deck = Player2DeckNode2D;
-            if (sourceCard.Deck.Player == GameSingleton.Instance.Game.Player1)
-                sourceDeck = Player1DeckNode2D;
+                deckNode2D = Player2DeckNode2D;
+            if (sourceDeck.Player == GameSingleton.Instance.Game.Player1)
+                sourceDeckNode2D = Player1DeckNode2D;
             else
-                sourceDeck = Player2DeckNode2D;
-            EmitSignal("CardHurtSignal", deck, card.Index, sourceDeck, sourceCard.Index);
+                sourceDeckNode2D = Player2DeckNode2D;
+            EmitSignal("CardHurtSignal", deckNode2D, card.Index, sourceDeckNode2D, sourceIndex);
             GameSingleton.autoResetEvent.WaitOne();
         }
     }

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/1.png-7b07c2cd91b538dcfc15d2f90bb5a32e.stex"
+path="res://.import/ZombieCricketAbility.png-9786481fd64a198d70c52a2134d256e0.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pets/1.png"
-dest_files=[ "res://.import/1.png-7b07c2cd91b538dcfc15d2f90bb5a32e.stex" ]
+source_file="res://Assets/Pets/ZombieCricketAbility.png"
+dest_files=[ "res://.import/ZombieCricketAbility.png-9786481fd64a198d70c52a2134d256e0.stex" ]
 
 [params]
 

@@ -116,23 +116,27 @@ namespace AutoPets
             return moved;
         }
 
-        public Card GetRandomCard(int excludingIndex = -1)
+        public Card GetRandomCard(HashSet<int> excludingIndexes = null)
         {
-            int count = GetCardCount();
-            // if there are no cards
-            if (count == 0 ||
-                // ...or we are excluding a position and there is no card prior or after this position
-                (excludingIndex >= 0 && GetNextCard(excludingIndex) == null && GetPriorCard(excludingIndex) == null))
-                return null;
-            else
+            // Make sure there is at least one card that matches the criteria of what
+            // we're looking for in order to avoid infinite loop below.
+            // We're excluding cards that are HitPoints <= 0 because we should not be Buffing or Hurting
+            // cards that are about to faint
+            int count = _cards.Count(c => c != null && c.HitPoints > 0 && 
+                (excludingIndexes == null || !excludingIndexes.Contains(c.Index)));
+            if (count > 0)
             {
                 do
                 {
                     int i = _player.Game.Random.Next(0, _cards.Length);
-                    if ((excludingIndex == -1 || i != excludingIndex) && _cards[i] != null && _cards[i].HitPoints > 0)
+                    var c = _cards[i];
+                    if (c != null && c.HitPoints > 0 && 
+                        (excludingIndexes == null || !excludingIndexes.Contains(c.Index)))
                         return _cards[i];
                 } while (true);
             }
+            else
+                return null;
         }
 
         public void CloneTo(Deck deck)
