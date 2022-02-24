@@ -56,16 +56,12 @@ namespace AutoPets
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Add(new SummonCardCommand(card, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
         }
     }
 
     public class ZombieCricketAbility : NoAbility
     {
-        public override string ToString()
-        {
-            return "* Cricket";
-        }
     }
 
     public class OtterAbility : Ability
@@ -416,6 +412,28 @@ namespace AutoPets
             DefaultHP = 5;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Hurt => Gain 50% of attack points, {card.Level} time(s).";
+        }
+
+        public override void Hurt(CardCommandQueue queue, Card card)
+        {
+            base.Hurt(queue, card);
+            // if not about to faint, then buff itself
+            if (card.HitPoints > 0)
+                queue.Add(new BuffCardCommand(card, card.Index, 0, (card.AttackPoints / 2) * card.Level));
+        }
+    }
+
+    public class DirtyRatAbility : NoAbility
+    {
+        public DirtyRatAbility() : base()
+        {
+            DefaultHP = 1;
+            DefaultAttack = 1;
+        }
     }
 
     public class RatAbility : Ability
@@ -424,6 +442,26 @@ namespace AutoPets
         {
             DefaultHP = 5;
             DefaultAttack = 4;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Faint => Summon {card.Level} dirty rat(s) for the opponent.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            if (card.Deck.Player.Game.Fighting)
+            {
+                for (int i = 1; i <= card.Level; i++)
+                {
+                    var opponent = card.Deck.Player.GetOpponentPlayer();
+                    if (opponent.BattleDeck[opponent.BattleDeck.Size - i] == null)
+                        queue.Add(new SummonCardCommand(card, opponent.BattleDeck, opponent.BattleDeck.Size - i, 
+                            AbilityList.Instance.DirtyRatAbility, 1, 1));
+                }
+            }
         }
     }
 

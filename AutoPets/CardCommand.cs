@@ -165,10 +165,12 @@ namespace AutoPets
         int _atIndex;
         int _hitPoints;
         int _attackPoints;
+        Deck _atDeck;
         Card _summonedCard;
 
-        public SummonCardCommand(Card card, int atIndex, Ability ability, int hitPoints, int attackPoints) : base(card)
+        public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints) : base(card)
         {
+            _atDeck = atDeck;
             _ability = ability;
             _atIndex = atIndex;
             _hitPoints = hitPoints;
@@ -177,7 +179,7 @@ namespace AutoPets
 
         public override CardCommand Execute()
         {
-            _summonedCard = new Card(Deck, _ability)
+            _summonedCard = new Card(_atDeck, _ability)
             {
                 HitPoints = _hitPoints,
                 AttackPoints = _attackPoints
@@ -188,7 +190,7 @@ namespace AutoPets
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            foreach (var c in Deck)
+            foreach (var c in _atDeck)
             {
                 if (c != _summonedCard)
                     c.Ability.FriendSummoned(queue, c, _summonedCard);

@@ -41,6 +41,7 @@ namespace AutoPets
         public CricketAbility CricketAbility { get; }
         public MosquitoAbility MosquitoAbility { get; }
         public ZombieCricketAbility ZombieCricketAbility { get; }
+        public DirtyRatAbility DirtyRatAbility { get; }
 
         // Tier 2
         public CrabAbility CrabAbility { get; }
@@ -249,6 +250,8 @@ namespace AutoPets
 
             ZombieCricketAbility = new ZombieCricketAbility();
             AllAbilities.Add(ZombieCricketAbility);
+            DirtyRatAbility = new DirtyRatAbility();
+            AllAbilities.Add(DirtyRatAbility);
         }
     }
 }
