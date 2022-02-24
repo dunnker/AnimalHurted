@@ -40,16 +40,16 @@ namespace AutoPets
         public Player Player2 { get { return _player2; } }
         public bool Fighting { get { return _fighting; } }
 
-        public event EventHandler FightEvent;
+        public event EventHandler AttackEvent;
         public event CardEventHandler CardFaintedEvent;
         public event CardEventHandler CardSummonedEvent;
         public event CardBuffedEventHandler CardBuffedEvent;
         public event CardHurtEventHandler CardHurtEvent;
 
-        public void OnFightEvent()
+        public void OnAttackEvent()
         {
             if (_updateCount == 0)
-                FightEvent?.Invoke(this, EventArgs.Empty);
+                AttackEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public void OnCardFaintedEvent(Card card, int index)

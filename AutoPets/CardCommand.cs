@@ -54,7 +54,7 @@ namespace AutoPets
             Card.HitPoints -= _opponentDamage;
             OpponentCard.HitPoints -= _damage;
 
-            Card.Deck.Player.Game.OnFightEvent();
+            Card.Deck.Player.Game.OnAttackEvent();
 
             return this;
         }

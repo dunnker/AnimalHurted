@@ -386,6 +386,9 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
     public async void _signal_CardHurt(int index, int sourceIndex)
     {
+        // see also BattleNode where its _game_CardHurtEvent handles 
+        // the case where source card deck is different than the card
+
         var cardSlot = GetCardSlotNode2D(index + 1);
         var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
 
@@ -393,7 +396,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
         var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
         Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;
-        AddChild(damageArea2D);
+        GetParent().AddChild(damageArea2D);
         damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
 
         await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);

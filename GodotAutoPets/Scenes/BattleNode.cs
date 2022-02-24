@@ -19,7 +19,7 @@ public class BattleNode : Node
     public Godot.Timer BeginBattleTimer { get { return GetNode<Godot.Timer>("BeginBattleTimer"); } }
 
     [Signal]
-    public delegate void FightEventSignal();
+    public delegate void AttackEventSignal();
 
     [Signal]
     public delegate void CardHurtSignal(int index, int sourceIndex);
@@ -36,7 +36,7 @@ public class BattleNode : Node
         // may not have a Game when designing
         if (GameSingleton.Instance.Game != null)
         {
-            GameSingleton.Instance.Game.FightEvent -= _game_FightEvent;
+            GameSingleton.Instance.Game.AttackEvent -= _game_AttackEvent;
             GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
         }
     }
@@ -46,11 +46,11 @@ public class BattleNode : Node
         _player1DeckPosition = Player1DeckNode2D.Position;
         _player2DeckPosition = Player2DeckNode2D.Position;
 
-        GameSingleton.Instance.Game.FightEvent += _game_FightEvent;
+        GameSingleton.Instance.Game.AttackEvent += _game_AttackEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
 
         // using Deferred to ensure the event fires on the main thread
-        Connect("FightEventSignal", this, "_signal_FightEvent", null, 
+        Connect("AttackEventSignal", this, "_signal_AttackEvent", null, 
             (int)ConnectFlags.Deferred);
         Connect("CardHurtSignal", this, "_signal_CardHurt", null, 
             (int)ConnectFlags.Deferred);
@@ -128,9 +128,9 @@ public class BattleNode : Node
     // Other nodes may get the same event, but only one event should
     // call WaitOne(), and only one spawning signal should reset the thread
     // with GameSingleton.autoResetEvent.Reset()
-    public void _game_FightEvent(object sender, EventArgs e)
+    public void _game_AttackEvent(object sender, EventArgs e)
     {
-        EmitSignal("FightEventSignal");
+        EmitSignal("AttackEventSignal");
         GameSingleton.autoResetEvent.WaitOne();
     }
 
@@ -156,7 +156,7 @@ public class BattleNode : Node
     }
 
     // signal events on main thread
-    public async void _signal_FightEvent()
+    public async void _signal_AttackEvent()
     {
         await PositionDecks();
 
