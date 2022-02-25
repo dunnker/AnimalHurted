@@ -73,8 +73,12 @@ public class CardArea2D : Area2D
         {
             var res = GD.Load($"res://Assets/Pets/{card.Ability.GetType().Name}.png");
             Sprite.Texture = res as Godot.Texture;
-            AttackPointsLabel.Text = card.AttackPoints.ToString();
-            HitPointsLabel.Text = card.HitPoints.ToString();
+            AttackPointsLabel.Text = card.TotalAttackPoints.ToString();
+            if (card.BuildAttackPoints > 0)
+                AttackPointsLabel.Text += "*";
+            HitPointsLabel.Text = card.TotalHitPoints.ToString();
+            if (card.BuildHitPoints > 0)
+                HitPointsLabel.Text += "*";
             LevelLabel.Text = string.Format("Lvl{0}{1}", card.Level, new string('+', card.XPRemainder));
             ShowCard();
             if (card.FoodAbility != null)

@@ -65,9 +65,9 @@ namespace AutoPets
                 Card.Ability.Hurt(queue, Card);
             if (_damage > 0)
                 OpponentCard.Ability.Hurt(queue, OpponentCard);
-            if (Card.HitPoints <= 0)
+            if (Card.TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(Card));
-            if (OpponentCard.HitPoints <= 0)
+            if (OpponentCard.TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(OpponentCard));
             return this;
         }
@@ -117,7 +117,7 @@ namespace AutoPets
 
         public override CardCommand Execute()
         {
-            _saveHitPoints = Card.HitPoints;
+            _saveHitPoints = Card.TotalHitPoints;
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
             return this;
         }
@@ -135,7 +135,7 @@ namespace AutoPets
             // However, the other mosquito ability methods will be hurting the same duck!
             // So it seems we can't avoid multiple HurtCommands from queuing up, so at least
             // we avoid queuing up more than one FaintCommand:
-            if (_saveHitPoints > 0 && Card.HitPoints <= 0)
+            if (_saveHitPoints > 0 && Card.TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(Card));
             return this;
         }

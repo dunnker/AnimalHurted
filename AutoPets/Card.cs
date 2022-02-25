@@ -12,6 +12,8 @@ namespace AutoPets
         int _hitPoints;
         int _attackPoints;
         int _xp;
+        int _buildHitPoints;
+        int _buildAttackPoints;
         
         public Card(Deck deck, Ability ability) : base()
         {
@@ -36,6 +38,8 @@ namespace AutoPets
             _index = -1;
             _hitPoints = card._hitPoints;
             _attackPoints = card._attackPoints;
+            _buildHitPoints = card._buildHitPoints;
+            _buildAttackPoints = card._buildAttackPoints;
             _xp = card._xp;
 		}
 
@@ -53,6 +57,16 @@ namespace AutoPets
         public int HitPoints { get { return _hitPoints; } set { _hitPoints = value; } }
 
         public int AttackPoints { get { return _attackPoints; } set { _attackPoints = value; } }
+
+        // additional hit points that have been acquired during the build but are reset
+        // after a battle. For instance, from a cupkake
+        public int BuildHitPoints { get { return _buildHitPoints; } set { _buildHitPoints = value; } }
+
+        // see comments on BuildHitPoints
+        public int BuildAttackPoints { get { return _buildAttackPoints; } set { _buildAttackPoints = value; } }
+
+        public int TotalHitPoints { get { return _buildHitPoints + _hitPoints; } }
+        public int TotalAttackPoints { get { return _buildAttackPoints + _attackPoints; } }
 
         public int XP { get { return _xp; } set { _xp = value; } }
 
@@ -108,6 +122,13 @@ namespace AutoPets
         public void SetIndex(int index)
         {
             _index = index;
+        }
+
+        public void NewRound()
+        {
+            _buildAttackPoints = 0;
+            _buildHitPoints = 0;
+            _ability.NewRoundStarted(this);
         }
 
         public void GainXP(Card fromCard)

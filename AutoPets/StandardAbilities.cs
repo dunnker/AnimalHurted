@@ -254,8 +254,10 @@ namespace AutoPets
         public override void Bought(Card card)
         {
             base.Bought(card);
-            var maxCard = card.Deck.OrderByDescending(c => c.HitPoints).First();
-            card.HitPoints = maxCard.HitPoints;
+            var maxCard = card.Deck.OrderByDescending(c => c.TotalHitPoints).First();
+            // if maxCard was buffed by a cupcake, then we're taking on those hit points
+            // as well. not sure what SAP does in this case
+            card.HitPoints = maxCard.TotalHitPoints;
         }
     }
 
@@ -274,17 +276,17 @@ namespace AutoPets
                 // buff 50% of dodo's attack
                 case 1:
                     // doing integer division, so adding +1 to card.AttackPoints to round up
-                    attackPoints = (card.AttackPoints + 1) / 2;
+                    attackPoints = (card.TotalAttackPoints + 1) / 2;
                     attackPercent = 50;
                     break;
                 // buff 100% of dodo's attack
                 case 2:
-                    attackPoints = card.AttackPoints;
+                    attackPoints = card.TotalAttackPoints;
                     attackPercent = 100;
                     break;
                 // buff 150% of dodo's attack
                 case 3:
-                    attackPoints = card.AttackPoints + ((card.AttackPoints + 1) / 2);
+                    attackPoints = card.TotalAttackPoints + ((card.TotalAttackPoints + 1) / 2);
                     attackPercent = 150;
                     break;
                 default:
@@ -394,13 +396,13 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             var opponent = card.Deck.Player.GetOpponentPlayer();
             foreach (var c in card.Deck)
-				// checking HitPoints > 0; see comments in HurtCommand
-                if (c != card && c.HitPoints > 0)
+				// checking TotalHitPoints > 0; see comments in HurtCommand
+                if (c != card && c.TotalHitPoints > 0)
                     queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
             if (card.Deck.Player.Game.Fighting)
                 foreach (var c in opponent.BattleDeck)
-					// checking HitPoints > 0; see comments in HurtCommand
-                    if (c.HitPoints > 0)
+					// checking TotalHitPoints > 0; see comments in HurtCommand
+                    if (c.TotalHitPoints > 0)
                         queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
         }
     }
@@ -422,8 +424,8 @@ namespace AutoPets
         {
             base.Hurt(queue, card);
             // if not about to faint, then buff itself
-            if (card.HitPoints > 0)
-                queue.Add(new BuffCardCommand(card, card.Index, 0, (card.AttackPoints / 2) * card.Level));
+            if (card.TotalHitPoints > 0)
+                queue.Add(new BuffCardCommand(card, card.Index, 0, (card.TotalAttackPoints / 2) * card.Level));
         }
     }
 

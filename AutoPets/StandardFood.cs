@@ -24,17 +24,28 @@ namespace AutoPets
 
     public class CupcakeFood : Food
     {
-        
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.BuildHitPoints += 3;
+            card.BuildAttackPoints += 3;
+        }
     }
 
     public class MeatBoneFood : Food
     {
-        
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+        }
     }
 
     public class SleepingPillFood : Food
     {
-        
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+        }
     }
 
     public class GarlicFood : Food

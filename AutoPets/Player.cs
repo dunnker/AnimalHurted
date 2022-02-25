@@ -162,7 +162,7 @@ namespace AutoPets
                     _lives = 0;
             };
             foreach (var c in _buildDeck)
-                c.Ability.NewRoundStarted(c);
+                c.NewRound();
         }
     }
 }

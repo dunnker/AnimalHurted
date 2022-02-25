@@ -120,9 +120,9 @@ namespace AutoPets
         {
             // Make sure there is at least one card that matches the criteria of what
             // we're looking for in order to avoid infinite loop below.
-            // We're excluding cards that are HitPoints <= 0 because we should not be Buffing or Hurting
+            // We're excluding cards that are TotalHitPoints <= 0 because we should not be Buffing or Hurting
             // cards that are about to faint
-            int count = _cards.Count(c => c != null && c.HitPoints > 0 && 
+            int count = _cards.Count(c => c != null && c.TotalHitPoints > 0 && 
                 (excludingIndexes == null || !excludingIndexes.Contains(c.Index)));
             if (count > 0)
             {
@@ -130,7 +130,7 @@ namespace AutoPets
                 {
                     int i = _player.Game.Random.Next(0, _cards.Length);
                     var c = _cards[i];
-                    if (c != null && c.HitPoints > 0 && 
+                    if (c != null && c.TotalHitPoints > 0 && 
                         (excludingIndexes == null || !excludingIndexes.Contains(c.Index)))
                         return _cards[i];
                 } while (true);
