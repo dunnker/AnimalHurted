@@ -716,6 +716,18 @@ namespace AutoPets
             DefaultHP = 4;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend ahead faints => Gain melon armor and +{card.Level * 2} attack.";
+        }    
+
+        public override void FriendAheadFaints(CardCommandQueue queue, Card card, int faintedIndex)
+        {
+            base.FriendAheadFaints(queue, card, faintedIndex);
+            queue.Add(new GainFoodAbilityCommand(card, new MelonArmorAbility()));
+            queue.Add(new BuffCardCommand(card, faintedIndex, 0, card.Level * 2));
+        }
     }
 
     public class RabbitAbility : Ability

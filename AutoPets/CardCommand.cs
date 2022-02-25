@@ -52,6 +52,11 @@ namespace AutoPets
 
         public override CardCommand Execute()
         {
+            if (Card.FoodAbility != null)
+                Card.FoodAbility.Hurting(Card, ref _opponentDamage);
+            if (OpponentCard.FoodAbility != null)
+                OpponentCard.FoodAbility.Hurting(OpponentCard, ref _damage);
+
             Card.HitPoints -= _opponentDamage;
             OpponentCard.HitPoints -= _damage;
 
@@ -76,6 +81,22 @@ namespace AutoPets
         }
     }
 
+    public class GainFoodAbilityCommand : CardCommand
+    {
+        FoodAbility _foodAbility;
+
+        public GainFoodAbilityCommand(Card card, FoodAbility foodAbility) : base(card)
+        {
+            _foodAbility = foodAbility;
+        }   
+
+        public override CardCommand Execute()
+        {
+            Card.FoodAbility = _foodAbility;
+            return this;
+        }
+    }
+
     public class FaintCardCommand : CardCommand
     {
         Card _faintedCard;
@@ -94,6 +115,9 @@ namespace AutoPets
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
+            var priorCard = Deck.LastOrDefault(c => c != null && c.Index < Index && c.TotalHitPoints > 0);
+            priorCard?.Ability.FriendAheadFaints(queue, priorCard, Index);
+
             // Execute() is always called before ExecuteAbility() and the Card property is not a direct
             // reference, but a lookup based on Index. Once Card.Faint() is called, the Card instance
             // can no longer be looked up. So we stored Card in _faintedCard in Execute()

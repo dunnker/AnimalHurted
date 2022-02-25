@@ -49,6 +49,11 @@ namespace AutoPets
 
         }
 
+        public virtual void FriendAheadFaints(CardCommandQueue queue, Card card, int faintedIndex)
+        {
+
+        }
+
         public virtual void Fainted(CardCommandQueue queue, Card card, int index)
         {
 

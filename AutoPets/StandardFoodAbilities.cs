@@ -16,6 +16,7 @@ namespace AutoPets
     {
         public override void Attacking(Card card, ref int damage)
         {
+            base.Attacking(card, ref damage);
             damage += 5;
         }
     }
@@ -23,5 +24,15 @@ namespace AutoPets
     public class GarlicAbility : FoodAbility
     {
         
+    }
+
+    public class MelonArmorAbility : FoodAbility
+    {
+        public override void Hurting(Card card, ref int damage)
+        {
+            base.Hurting(card, ref damage);
+            damage = Math.Max(0, damage - 20);
+            card.FoodAbility = null; // remove the melon armor after first damage
+        }
     }
 }

@@ -221,6 +221,8 @@ namespace AutoPets
         {
             if (damage > 0)
             {
+                if (_foodAbility != null)
+                    _foodAbility.Hurting(this, ref damage);
                 _hitPoints -= damage;
                 _deck.Player.Game.OnCardHurtEvent(this, sourceDeck, sourceIndex);
             }
