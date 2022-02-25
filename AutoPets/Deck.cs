@@ -61,7 +61,7 @@ namespace AutoPets
 
         public Card GetLastCard()
         {
-            return _cards.Last(c => c != null);
+            return _cards.LastOrDefault(c => c != null);
         }
 
         public Card GetPriorCard(int cardIndex)

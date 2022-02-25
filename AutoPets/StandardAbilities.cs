@@ -553,6 +553,37 @@ namespace AutoPets
             DefaultHP = 4;
             DefaultAttack = 5;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Fainted => Deal damage - {card.Level} times attack - to adjacent pets.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+        	// checking TotalHitPoints > 0; see comments in HurtCommand
+            // find card prior to the badger that is not fainting
+            Card adjacentCard = card.Deck.LastOrDefault(c => c != null && c.Index < index && c.TotalHitPoints > 0);
+            int damage = card.TotalAttackPoints * card.Level;
+            if (adjacentCard != null)
+                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+            // find card after the badger that is not fainting
+            adjacentCard = card.Deck.FirstOrDefault(c => c != null && c.Index > index && c.TotalHitPoints > 0);
+            if (adjacentCard != null)
+                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+            else
+            {
+                var opponent = card.Deck.Player.GetOpponentPlayer();
+                if (opponent.Game.Fighting)
+                {
+                    // last card for the opponent that is not fainting
+                    adjacentCard = opponent.BattleDeck.LastOrDefault(c => c != null && c.TotalHitPoints > 0);
+                    if (adjacentCard != null)
+                        queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+                }
+            }
+        }
     }
 
     public class BlowfishAbility : Ability
