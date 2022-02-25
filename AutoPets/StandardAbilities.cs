@@ -593,6 +593,23 @@ namespace AutoPets
             DefaultHP = 5;
             DefaultAttack = 3;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Hurt => Deal {card.Level * 2} damage to a random enemy.";
+        }
+
+        public override void Hurt(CardCommandQueue queue, Card card)
+        {
+            base.Hurt(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            if (opponent.Game.Fighting)
+            {
+                var opponentCard = opponent.BattleDeck.GetRandomCard();
+                if (opponentCard != null)
+                    queue.Add(new HurtCardCommand(opponentCard, card.Level * 2, card.Deck, card.Index));
+            }
+        }
     }
 
     public class CamelAbility : Ability
