@@ -425,7 +425,12 @@ namespace AutoPets
             base.Hurt(queue, card);
             // if not about to faint, then buff itself
             if (card.TotalHitPoints > 0)
-                queue.Add(new BuffCardCommand(card, card.Index, 0, (card.TotalAttackPoints / 2) * card.Level));
+            {
+                int attackPoints = (int)Math.Round(((double)card.TotalAttackPoints / 2) * card.Level, 
+                    // if 0.5 then round up
+                    MidpointRounding.AwayFromZero);
+                queue.Add(new BuffCardCommand(card, card.Index, 0, attackPoints));
+            }
         }
     }
 

@@ -116,7 +116,9 @@ namespace AutoPets
 
         public int GetDamage()
         {
-            return _attackPoints;
+            int damage = TotalAttackPoints;
+            _foodAbility?.Attacking(this, ref damage);
+            return damage;
         }
 
         public void SetIndex(int index)

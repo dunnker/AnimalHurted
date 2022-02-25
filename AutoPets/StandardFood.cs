@@ -37,6 +37,7 @@ namespace AutoPets
         public override void Execute(Card card)
         {
             base.Execute(card);
+            card.FoodAbility = new BoneAttackAbility();
         }
     }
 

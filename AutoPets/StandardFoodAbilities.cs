@@ -14,7 +14,10 @@ namespace AutoPets
 
     public class BoneAttackAbility : FoodAbility
     {
-
+        public override void Attacking(Card card, ref int damage)
+        {
+            damage += 5;
+        }
     }
 
     public class GarlicAbility : FoodAbility

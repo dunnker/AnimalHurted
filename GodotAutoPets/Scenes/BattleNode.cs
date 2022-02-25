@@ -17,6 +17,7 @@ public class BattleNode : Node
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
     public AudioStreamPlayer FightPlayer { get { return GetNode<AudioStreamPlayer>("FightPlayer"); } }
     public Godot.Timer BeginBattleTimer { get { return GetNode<Godot.Timer>("BeginBattleTimer"); } }
+    public Button ReplayButton { get { return GetNode<Button>("ReplayButton"); } }
 
     [Signal]
     public delegate void AttackEventSignal();
@@ -88,6 +89,7 @@ public class BattleNode : Node
 
     public void _on_ReplayButton_pressed()
     {
+        ReplayButton.Disabled = true;
         Player1DeckNode2D.Position = _player1DeckPosition;
         Player2DeckNode2D.Position = _player2DeckPosition;
 
@@ -102,7 +104,7 @@ public class BattleNode : Node
     async void ReplayBattle()
     {
         await PositionDecks();
-        
+
         _gameThread = new System.Threading.Thread(() => 
         {
             // each press of the 'Play' button
@@ -222,6 +224,7 @@ public class BattleNode : Node
     public async void _signal_FightOver()
     {
         await PositionDecks();
+        ReplayButton.Disabled = false;
     }
 
     public async Task PositionDecks()
