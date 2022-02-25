@@ -54,6 +54,16 @@ namespace AutoPets
 
         }
 
+        public virtual void AteFood(Card card)
+        {
+
+        }
+
+        public virtual void FriendAteFood(Card card, Card friendCard)
+        {
+            
+        }
+
         public virtual void Fainted(CardCommandQueue queue, Card card, int index)
         {
 
@@ -70,6 +80,11 @@ namespace AutoPets
         }
 
         public virtual void Bought(Card card)
+        {
+
+        }
+
+        public virtual void FriendBought(Card card, Card friendCard)
         {
 
         }

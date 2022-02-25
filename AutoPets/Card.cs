@@ -203,6 +203,9 @@ namespace AutoPets
         {
             Summon(atIndex);
             _ability.Bought(this);
+            foreach (var card in _deck)
+                if (card != this)
+                    card._ability.FriendBought(card, this);
         }
 
         public void Sell()
@@ -234,6 +237,15 @@ namespace AutoPets
             _hitPoints += hitPoints;
             _attackPoints += attackPoints;
             _deck.Player.Game.OnCardBuffedEvent(this, sourceIndex);
+        }
+
+        public void Eat(CardCommandQueue queue, Food food)
+        {
+            food.Execute(queue, this);
+            _ability.AteFood(this);
+            foreach (var card in _deck)
+                if (card != this)
+                    card._ability.FriendAteFood(card, this);
         }
     }
 }

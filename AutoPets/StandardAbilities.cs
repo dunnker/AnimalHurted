@@ -737,6 +737,17 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 3;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend eats shop food => Give it +{card.Level} health.";
+        }
+
+        public override void FriendAteFood(Card card, Card friendCard)
+        {
+            base.FriendAteFood(card, friendCard);
+            friendCard.Buff(card.Index, card.Level, 0);
+        }
     }
 
     public class SheepAbility : Ability
