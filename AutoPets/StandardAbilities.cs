@@ -757,6 +757,31 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 2;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Faint => Summon two {card.Level * 2}/{card.Level * 2} rams.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
+                card.Level * 2, card.Level * 2));
+            // see comments in SummonCardCommand, it will only summon the card if it can find room for it
+            // either at index, or past index
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
+                card.Level * 2, card.Level * 2));
+        }
+    }
+
+    public class ZombieRamAbility : NoAbility
+    {
+        public ZombieRamAbility()
+        {
+            DefaultAttack = 2;
+            DefaultHP = 2;
+        }
     }
 
     public class SnailAbility : Ability
