@@ -197,9 +197,17 @@ namespace AutoPets
                     summonIndex = i;
                     break;
                 }
+
+            //TODO: it's easy enough to move pets, but what happens is the subsequent
+            // call to ExecuteAbility will queue up additional commands that will be 
+            // associated with a card whose index may change later if MakeRoomAt is called 
+            // a test case is when several horses are buffing a honey cricket at the end of the deck.
+            // the horses will end up buffing the summoned bee instead of the summoned cricket
+
             // push pets if we couldn't find room after _atIndex
-            if (summonIndex == -1 && _atDeck.MakeRoomAt(_atIndex))
-                summonIndex = _atIndex;
+            //if (summonIndex == -1 && _atDeck.MakeRoomAt(_atIndex))
+            //    summonIndex = _atIndex;
+
             if (summonIndex != -1)
             {
                 _summonedCard = new Card(_atDeck, _ability)
@@ -215,11 +223,12 @@ namespace AutoPets
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            foreach (var c in _atDeck)
-            {
-                if (c != _summonedCard)
-                    c.Ability.FriendSummoned(queue, c, _summonedCard);
-            }
+            if (_summonedCard != null)
+                foreach (var c in _atDeck)
+                {
+                    if (c != _summonedCard)
+                        c.Ability.FriendSummoned(queue, c, _summonedCard);
+                }
             return this;
         }
     }
