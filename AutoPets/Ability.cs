@@ -29,52 +29,57 @@ namespace AutoPets
         }
 
         // "End of turn"
-        virtual public void RoundEnded(CardCommandQueue queue, Card card)
+        public virtual void RoundEnded(CardCommandQueue queue, Card card)
         {
 
         }
 
-        virtual public void BattleStarted(CardCommandQueue queue, Card card)
+        public virtual void BattleStarted(CardCommandQueue queue, Card card)
         {
 
         }
 
-        virtual public void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
+        public virtual void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
         {
 
         }
 
-        virtual public void Fainted(CardCommandQueue queue, Card card, int index)
+        public virtual void FriendAheadAttacks(CardCommandQueue queue, Card card)
         {
 
         }
 
-        virtual public void BeforeAttack(CardCommandQueue queue, Card card)
+        public virtual void Fainted(CardCommandQueue queue, Card card, int index)
         {
 
         }
 
-        virtual public void Hurt(CardCommandQueue queue, Card card)
+        public virtual void BeforeAttack(CardCommandQueue queue, Card card)
         {
 
         }
 
-        virtual public void Bought(Card card)
+        public virtual void Hurt(CardCommandQueue queue, Card card)
         {
 
         }
 
-        virtual public void Sold(Card card, int index)
+        public virtual void Bought(Card card)
         {
 
         }
 
-        virtual public void FriendSold(Card card, Card soldCard)
+        public virtual void Sold(Card card, int index)
         {
 
         }
 
-        virtual public void LeveledUp(Card card)
+        public virtual void FriendSold(Card card, Card soldCard)
+        {
+
+        }
+
+        public virtual void LeveledUp(Card card)
         {
 
         }

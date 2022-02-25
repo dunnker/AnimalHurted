@@ -696,6 +696,17 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend ahead attacks => Gain +{card.Level * 2} attack and +{card.Level * 2} health.";
+        }    
+
+        public override void FriendAheadAttacks(CardCommandQueue queue, Card card)
+        {
+            base.FriendAheadAttacks(queue, card);
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
+        }
     }
 
     public class OxAbility : Ability

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace AutoPets
 {
@@ -61,6 +62,8 @@ namespace AutoPets
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
+            var priorCard = Card.Deck.LastOrDefault(c => c != null && c.Index < Card.Index && c.TotalHitPoints > 0);
+            priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
             if (_opponentDamage > 0)
                 Card.Ability.Hurt(queue, Card);
             if (_damage > 0)
