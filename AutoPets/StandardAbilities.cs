@@ -503,6 +503,19 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 2;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Fainted => Summon a level {card.Level} tier 3 pet as 2/2.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            int randIndex = card.Deck.Player.Game.Random.Next(0, AbilityList.Instance.TierThreeAbilities.Count);
+            var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
+            queue.Add(new SummonCardCommand(card, card.Deck, index, ability, 2, 2, card.Level));
+        }
     }
 
     public class SwanAbility : Ability

@@ -167,16 +167,19 @@ namespace AutoPets
         int _atIndex;
         int _hitPoints;
         int _attackPoints;
+        int _level;
         Deck _atDeck;
         Card _summonedCard;
 
-        public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints) : base(card)
+        public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints,
+            int level = 1) : base(card)
         {
             _atDeck = atDeck;
             _ability = ability;
             _atIndex = atIndex;
             _hitPoints = hitPoints;
             _attackPoints = attackPoints;
+            _level = level;
         }
 
         public override CardCommand Execute()
@@ -201,6 +204,7 @@ namespace AutoPets
                     HitPoints = _hitPoints,
                     AttackPoints = _attackPoints
                 };
+                _summonedCard.XP = Card.GetXPFromLevel(_level);
                 _summonedCard.Summon(summonIndex);
             }
             return this;

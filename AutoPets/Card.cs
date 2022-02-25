@@ -54,19 +54,23 @@ namespace AutoPets
 
         public int AttackPoints { get { return _attackPoints; } set { _attackPoints = value; } }
 
-        public int XP { get { return _xp; } }
+        public int XP { get { return _xp; } set { _xp = value; } }
 
         public int Level
         {
             get 
             {
-                if (_xp < 3)
-                    return 1;
-                else if (_xp >= 3 && _xp < 6 )
-                    return 2;
-                else
-                    return 3;
+                // 1,2 = 1
+                // 3,4,5 = 2
+                // 6+ = 3
+                return (_xp / 3) + 1;
             }
+        }
+
+        public static int GetXPFromLevel(int level)
+        {
+            // xp starts at 1, so ensure it's at least 1
+            return Math.Max(1, (level - 1) * 3);
         }
 
         public int XPRemainder
