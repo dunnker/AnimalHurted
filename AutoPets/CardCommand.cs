@@ -197,6 +197,9 @@ namespace AutoPets
                     summonIndex = i;
                     break;
                 }
+            // push pets if we couldn't find room after _atIndex
+            if (summonIndex == -1 && _atDeck.MakeRoomAt(_atIndex))
+                summonIndex = _atIndex;
             if (summonIndex != -1)
             {
                 _summonedCard = new Card(_atDeck, _ability)

@@ -359,7 +359,10 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             //await PositionDecks();
         }
 
-        cardSlot.CardArea2D.RenderCard(_deck[index], index);
+        // rendering entire deck because pets may have been moved to make room for summoned card
+        // see SummonCardCommand's call to MakeRoomAt
+        RenderDeck(_deck);
+        //cardSlot.CardArea2D.RenderCard(_deck[index], index);
 
         GameSingleton.autoResetEvent.Set();
     }
