@@ -130,7 +130,12 @@ namespace AutoPets
         {
             _buildAttackPoints = 0;
             _buildHitPoints = 0;
-            _ability.NewRoundStarted(this);
+            _ability.RoundStarted(this);
+        }
+
+        public void BuildEnded(CardCommandQueue queue)
+        {
+            _ability.RoundEnded(queue, this);
         }
 
         public void GainXP(Card fromCard)

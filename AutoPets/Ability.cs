@@ -22,7 +22,14 @@ namespace AutoPets
             return string.Empty;
         }
 
-        public virtual void NewRoundStarted(Card card)
+        // "Start of turn"
+        public virtual void RoundStarted(Card card)
+        {
+
+        }
+
+        // "End of turn"
+        virtual public void RoundEnded(CardCommandQueue queue, Card card)
         {
 
         }

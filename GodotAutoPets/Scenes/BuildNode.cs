@@ -7,6 +7,7 @@ public class BuildNode : Node
 {
     Player _player;
     System.Threading.Thread _gameThread;
+    bool _pauseBeforeContinue;
 
     public ShopNode2D ShopNode2D { get { return GetNode<ShopNode2D>("ShopNode2D"); } }
 
@@ -22,6 +23,9 @@ public class BuildNode : Node
 
     [Signal]
     public delegate void SellOverSignal();
+
+    [Signal]
+    public delegate void RoundOverSignal();
 
     public void _on_QuitGameButton_pressed()
     {
@@ -39,7 +43,31 @@ public class BuildNode : Node
 
     public void _on_ContinueButton_pressed()
     {
+        GetNode<Button>("ContinueButton").Disabled = true;
+
+        _gameThread = new System.Threading.Thread(() => 
+        {
+            // from here events can be invoked in DeckNode2D, which send
+            // signals on main thread to render changes
+            var queue = new CardCommandQueue();
+            _player.BuildEnded(queue);
+            if (queue.Count > 0)
+            {
+                _pauseBeforeContinue = true;
+                queue.Execute();
+            }
+
+            this.EmitSignal("RoundOverSignal");
+        });
+        _gameThread.Start();
+    }
+
+    public async void _signal_RoundOver()
+    {
+        if (_pauseBeforeContinue)
+            await ToSignal(GetTree().CreateTimer(1f), "timeout");
         _player.GoldChangedEvent -= _GoldChangedEvent;
+
         if (_player == GameSingleton.Instance.Game.Player1)
         {
             GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
@@ -130,6 +158,8 @@ public class BuildNode : Node
         RenderFood(2, _player.ShopFood2);
 
         Connect("SellOverSignal", this, "_signal_SellOver", null, 
+            (int)ConnectFlags.Deferred);
+        Connect("RoundOverSignal", this, "_signal_RoundOver", null, 
             (int)ConnectFlags.Deferred);
     }
 

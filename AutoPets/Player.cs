@@ -151,6 +151,12 @@ namespace AutoPets
             _shopFood2 = _game.TierFood[_game.Random.Next(0, _game.TierFood.Count)];
         }
 
+        public void BuildEnded(CardCommandQueue queue)
+        {
+            foreach (var c in _buildDeck)
+                c.BuildEnded(queue);
+        }
+
         public void NewRound(bool won, bool lost, int round)
         {
             if (won)

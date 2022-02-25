@@ -538,9 +538,9 @@ namespace AutoPets
             return $"Start of turn => Gain {card.Level} gold.";
         }
 
-        public override void NewRoundStarted(Card card)
+        public override void RoundStarted(Card card)
         {
-            base.NewRoundStarted(card);
+            base.RoundStarted(card);
             card.Deck.Player.Gold += card.Level;
         }
     }
@@ -619,6 +619,19 @@ namespace AutoPets
             DefaultHP = 5;
             DefaultAttack = 2;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Hurt => Give friend behind +{card.Level} attack and +{card.Level * 2} health.";
+        }
+
+        public override void Hurt(CardCommandQueue queue, Card card)
+        {
+            base.Hurt(queue, card);
+            Card priorCard = card.Deck.LastOrDefault(c => c != null && c.Index < card.Index && c.TotalHitPoints > 0);
+            if (priorCard != null)
+                queue.Add(new BuffCardCommand(priorCard, card.Index, card.Level * 2, card.Level));
+        }
     }
 
     public class DogAbility : Ability
@@ -628,6 +641,24 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 2;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend summoned => Gain +{card.Level} attack or health.";
+        }
+
+        public override void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
+        {
+            base.FriendSummoned(queue, card, summonedCard);
+            int hitPoints = 0;
+            int attackPoints = 0;
+            // 50/50 chance either 0 or 1
+            if (card.Deck.Player.Game.Random.Next(0, 2) == 0)
+                hitPoints = card.Level;
+            else
+                attackPoints = card.Level;
+            queue.Add(new BuffCardCommand(card, card.Index, hitPoints, attackPoints));
+        }
     }
 
     public class GiraffeAbility : Ability
@@ -636,6 +667,25 @@ namespace AutoPets
         {
             DefaultHP = 5;
             DefaultAttack = 2;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"End of turn => Give {card.Level} friend(s) ahead +1/+1.";
+        }    
+
+        public override void RoundEnded(CardCommandQueue queue, Card card)
+        {
+            base.RoundEnded(queue, card);
+            for (int i = 1; i <= card.Level; i++)
+            {
+                if (i >= card.Deck.Size)
+                    break;
+                // not checking buffCard.TotalHitPoints > 0 because we aren't in a battle
+                var buffCard = card.Deck[card.Index + i];
+                if (buffCard != null)
+                    queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1));
+            }
         }
     }
 
