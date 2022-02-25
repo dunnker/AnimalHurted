@@ -31,6 +31,7 @@ namespace AutoPets
         public Card(Deck deck, Card card)
         {
             _ability = card._ability;
+            _foodAbility = card._foodAbility;
             _deck = deck;
             _index = -1;
             _hitPoints = card._hitPoints;

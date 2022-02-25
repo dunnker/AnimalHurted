@@ -5,7 +5,7 @@ namespace AutoPets
 {
     public class FoodAbility
     {
-        public virtual void Fainted(Card card)
+        public virtual void Fainted(CardCommandQueue queue, Card card, int index)
         {
 
         }

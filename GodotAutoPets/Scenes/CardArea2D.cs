@@ -10,12 +10,16 @@ public class CardArea2D : Area2D
     int _cardIndex;
     bool _cancelCardReorder = true;
     bool _showLevelLabel;
+    float[] _foodAbilityModulateValues = new float[2] { 0.0f, 1.0f };
 
     public CardSlotNode2D CardSlotNode2D { get { return GetParent() as CardSlotNode2D; } }
 
     public int CardIndex { get { return _cardIndex; } }
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
+    public Sprite FoodAbilitySprite { get { return GetNode<Sprite>("FoodAbilitySprite"); } }
+    public Tween FoodAbilityModulateTween { get { return GetNode<Tween>("FoodAbilityModulateTween"); } }
+    public Tween FoodAbilityPositionTween { get { return GetNode<Tween>("FoodAbilityPositionTween"); } }
     public CollisionShape2D CollisionShape2D { get { return GetNode<CollisionShape2D>("CollisionShape2D"); } }
 
     public CardAttrsNode2D CardAttrsNode2D { get { return GetNode<CardAttrsNode2D>("CardAttrsNode2D"); } }
@@ -36,6 +40,7 @@ public class CardArea2D : Area2D
     public void HideCard()
     {
         Sprite.Hide();
+        FoodAbilitySprite.Hide();
         CardAttrsNode2D.Hide();
         LevelLabel.Hide();
     }
@@ -48,6 +53,14 @@ public class CardArea2D : Area2D
             LevelLabel.Show();
     }
 
+    void StartFoodAbilityModulateTween()
+    {
+        FoodAbilityModulateTween.InterpolateProperty(FoodAbilitySprite, "modulate:a",
+            _foodAbilityModulateValues[0], _foodAbilityModulateValues[1], 2f, 
+            Tween.TransitionType.Linear, Tween.EaseType.In);
+        FoodAbilityModulateTween.Start();
+    }
+
     public void RenderCard(AutoPets.Card card, int index, bool showLevelLabel = true)
     {
         _cardIndex = index;
@@ -58,13 +71,28 @@ public class CardArea2D : Area2D
             HideCard();
         else
         {
-            var res = GD.Load(string.Format("res://Assets/Pets/{0}.png", card.Ability.GetType().Name));
+            var res = GD.Load($"res://Assets/Pets/{card.Ability.GetType().Name}.png");
             Sprite.Texture = res as Godot.Texture;
             AttackPointsLabel.Text = card.AttackPoints.ToString();
             HitPointsLabel.Text = card.HitPoints.ToString();
             LevelLabel.Text = string.Format("Lvl{0}{1}", card.Level, new string('+', card.XPRemainder));
             ShowCard();
+            if (card.FoodAbility != null)
+            {
+                res = GD.Load($"res://Assets/FoodAbilities/{card.FoodAbility.GetType().Name}.png");
+                FoodAbilitySprite.Texture = res as Godot.Texture;
+                FoodAbilitySprite.Show();
+            }
+            else
+                FoodAbilitySprite.Hide();
         }
+    }
+
+    public void _on_FoodAbilityModulateTween_tween_completed(object Object, NodePath key)
+    {
+        // reverse back and forth from visible to not
+        Array.Reverse( _foodAbilityModulateValues);
+        StartFoodAbilityModulateTween();
     }
 
     public void _on_Area2D_mouse_entered()
@@ -200,6 +228,12 @@ public class CardArea2D : Area2D
         Connect("StartStopDragSignal", this, "_signal_StartStopDrag");
         _defaultPosition = Position;
         _defaultZIndex = ZIndex;
+        StartFoodAbilityModulateTween();
+        FoodAbilityPositionTween.InterpolateProperty(FoodAbilitySprite, "position",
+            new Vector2(Sprite.Position.x + 40, Sprite.Position.y + 40), 
+            new Vector2(Sprite.Position.x - 40, Sprite.Position.y - 40), 4f, 
+            Tween.TransitionType.Linear, Tween.EaseType.In);
+        FoodAbilityPositionTween.Start();
     }
 
     public override void _Process(float delta)

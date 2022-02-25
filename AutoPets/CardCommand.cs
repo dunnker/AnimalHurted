@@ -95,6 +95,8 @@ namespace AutoPets
             // reference, but a lookup based on Index. Once Card.Faint() is called, the Card instance
             // can no longer be looked up. So we stored Card in _faintedCard in Execute()
             _faintedCard.Ability.Fainted(queue, _faintedCard, Index);
+            if (_faintedCard.FoodAbility != null)
+                _faintedCard.FoodAbility.Fainted(queue, _faintedCard, Index);
             return this;
         }
     }
@@ -179,12 +181,28 @@ namespace AutoPets
 
         public override CardCommand Execute()
         {
-            _summonedCard = new Card(_atDeck, _ability)
+            // normally it wouldn't be necessary to find an empty slot because
+            // an ability would check this before creating the Summon command, however
+            // food abilities can't know if a pet ability summoned something. For example
+            // a cricket with a honey ability will try and summon both a cricket and a bee
+
+            int summonIndex = -1;
+            // find the first empty slot on or after _atIndex
+            for (int i = _atIndex; i < _atDeck.Size; i++)
+                if (_atDeck[i] == null)
+                {
+                    summonIndex = i;
+                    break;
+                }
+            if (summonIndex != -1)
             {
-                HitPoints = _hitPoints,
-                AttackPoints = _attackPoints
-            };
-            _summonedCard.Summon(_atIndex);
+                _summonedCard = new Card(_atDeck, _ability)
+                {
+                    HitPoints = _hitPoints,
+                    AttackPoints = _attackPoints
+                };
+                _summonedCard.Summon(summonIndex);
+            }
             return this;
         }
 

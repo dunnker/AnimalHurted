@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scenes/CardArea2D.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/CardAttrsNode2D.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Assets/Pets/AntAbility.png" type="Texture" id=3]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/FoodAbilities/HoneyBeeAbility.png" type="Texture" id=5]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 64, 64 )
@@ -26,6 +27,15 @@ __meta__ = {
 "_edit_group_": true
 }
 
+[node name="FoodAbilitySprite" type="Sprite" parent="."]
+texture = ExtResource( 5 )
+
+[node name="FoodAbilityModulateTween" type="Tween" parent="."]
+
+[node name="FoodAbilityPositionTween" type="Tween" parent="."]
+repeat = true
+playback/repeat = true
+
 [node name="CardAttrsNode2D" parent="." instance=ExtResource( 2 )]
 position = Vector2( -29, 56 )
 
@@ -46,4 +56,5 @@ __meta__ = {
 [connection signal="input_event" from="." to="." method="_on_Area2D_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_Area2D_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_Area2D_mouse_exited"]
+[connection signal="tween_completed" from="FoodAbilityModulateTween" to="." method="_on_FoodAbilityModulateTween_tween_completed"]
 [connection signal="timeout" from="CardReorderTimer" to="." method="_on_CardReorderTimer_timeout"]

@@ -465,6 +465,15 @@ namespace AutoPets
         }
     }
 
+    public class ZombieBeeAbility : NoAbility
+    {
+        public ZombieBeeAbility()
+        {
+            DefaultAttack = 1;
+            DefaultHP = 1;
+        }
+    }
+
     public class ShrimpAbility : Ability
     {
         public ShrimpAbility() : base()
