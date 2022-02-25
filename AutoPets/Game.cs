@@ -165,16 +165,7 @@ namespace AutoPets
                     foreach (var c in player.BuildDeck)
                         if (c != card)
                             c.Ability.FriendSummoned(queue, c, card);
-                    var nextQueue = new CardCommandQueue();
-                    foreach (var command in queue)
-                    {
-                        command.Execute().ExecuteAbility(nextQueue);
-                    }
-					// nextQueue should be empty because there should be no abilities invoked
-					// from buying a card; an exception here would mean we need to continue
-                    // processing abilities similar to Game.CreateFightResult()
-					if (nextQueue.Count > 0)
-						throw new Exception("Unprocessed abilities were found.");
+                    queue.Execute();
                 }
                 else
                 {

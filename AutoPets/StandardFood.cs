@@ -5,9 +5,9 @@ namespace AutoPets
 {
     public class AppleFood : Food
     {
-        public override void Execute(Card card)
+        public override void Execute(CardCommandQueue queue, Card card)
         {
-            base.Execute(card);
+            base.Execute(queue, card);
             card.HitPoints += 1;
             card.AttackPoints += 1;
         }
@@ -15,18 +15,18 @@ namespace AutoPets
 
     public class HoneyFood : Food
     {
-        public override void Execute(Card card)
+        public override void Execute(CardCommandQueue queue, Card card)
         {
-            base.Execute(card);
+            base.Execute(queue, card);
             card.FoodAbility = new HoneyBeeAbility();
         }
     }
 
     public class CupcakeFood : Food
     {
-        public override void Execute(Card card)
+        public override void Execute(CardCommandQueue queue, Card card)
         {
-            base.Execute(card);
+            base.Execute(queue, card);
             card.BuildHitPoints += 3;
             card.BuildAttackPoints += 3;
         }
@@ -34,18 +34,19 @@ namespace AutoPets
 
     public class MeatBoneFood : Food
     {
-        public override void Execute(Card card)
+        public override void Execute(CardCommandQueue queue, Card card)
         {
-            base.Execute(card);
+            base.Execute(queue, card);
             card.FoodAbility = new BoneAttackAbility();
         }
     }
 
     public class SleepingPillFood : Food
     {
-        public override void Execute(Card card)
+        public override void Execute(CardCommandQueue queue, Card card)
         {
-            base.Execute(card);
+            base.Execute(queue, card);
+            queue.Add(new FaintCardCommand(card));
         }
     }
 

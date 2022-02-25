@@ -15,6 +15,20 @@ namespace AutoPets
             _list.Add(cardCommand);
         }
 
+        public void Execute()
+        {
+            var queue = this;
+            while (queue.Count > 0)
+            {
+                var nextQueue = new CardCommandQueue(); 
+                foreach (var command in queue)
+                {
+                    command.Execute().ExecuteAbility(nextQueue);
+                }
+                queue = nextQueue;
+            }
+        }        
+
         public IEnumerator<CardCommand> GetEnumerator()
         {
             return _list.GetEnumerator();

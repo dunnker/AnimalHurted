@@ -5,7 +5,7 @@ namespace AutoPets
 {
     public class Food
     {
-        public virtual void Execute(Card card)
+        public virtual void Execute(CardCommandQueue queue, Card card)
         {
 
         }

@@ -125,19 +125,24 @@ namespace AutoPets
 
         public void BuyFood(Card card, int index)
         {
-            if (Gold < Game.FoodCost)
-                throw new Exception("Not enough gold to buy food.");
+            Food food;
             if (index == 1)
-            {
-                _shopFood1.Execute(card);
-                _shopFood1 = null;
-            }
+                food = _shopFood1;
             else
-            {
-                _shopFood2.Execute(card);
+                food = _shopFood2;
+            int foodCost = Game.FoodCost;
+            if (food is SleepingPillFood)
+                foodCost = 1;
+            if (Gold < foodCost)
+                throw new Exception("Not enough gold to buy food.");
+            var queue = new CardCommandQueue();
+            food.Execute(queue, card);
+            if (index == 1)
+                _shopFood1 = null;
+            else
                 _shopFood2 = null;
-            }
-            Gold -= Game.FoodCost;
+            queue.Execute();
+            Gold -= foodCost;
         }
 
         void NewShopFood()
