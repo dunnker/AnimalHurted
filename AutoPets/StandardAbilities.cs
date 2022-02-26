@@ -791,6 +791,20 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 2;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Buy => If you lost last battle, give all friends +{card.Level}/+{card.Level}.";
+        }
+
+        public override void Bought(Card card)
+        {
+            base.Bought(card);
+            if (card.Deck.Player.LostLastBattle)
+                foreach (var c in card.Deck)
+                    if (c != card)
+                        c.Buff(card.Index, card.Level, card.Level);
+        }
     }
 
     public class TurtleAbility : Ability

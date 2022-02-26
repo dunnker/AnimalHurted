@@ -22,6 +22,7 @@ namespace AutoPets
         Food _shopFood2;
         Deck _battleDeck;
         int _updateCount;
+        bool _lostLastBattle;
 
         public Game Game { get { return _game; } }
 
@@ -33,6 +34,8 @@ namespace AutoPets
 
         public Food ShopFood1 { get { return _shopFood1; } }
         public Food ShopFood2 { get { return _shopFood2; } }
+
+        public bool LostLastBattle { get { return _lostLastBattle; } }
 
         public int Gold { 
             get
@@ -159,10 +162,12 @@ namespace AutoPets
 
         public void NewRound(bool won, bool lost, int round)
         {
+            _lostLastBattle = false;
             if (won)
                 _wins += 1;
             else if (lost)
             {
+                _lostLastBattle = true;
                 if (round == 1 || round == 2)
                     _lives -= 1;
                 else if (round == 3 || round == 4)
