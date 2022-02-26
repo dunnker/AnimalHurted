@@ -814,6 +814,24 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Faint => Give {card.Level} friend(s) behind melon armor.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            for (int i = 1; i <= card.Level; i++)
+            {
+                if (index - i < 0)
+                    break;
+                var priorCard = card.Deck[index - i];
+                if (priorCard != null)
+                    queue.Add(new GainFoodAbilityCommand(priorCard, new MelonArmorAbility()));
+            }
+        }
     }
 
 
