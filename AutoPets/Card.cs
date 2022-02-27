@@ -238,14 +238,11 @@ namespace AutoPets
             if (_deck[atIndex] != null)
                 throw new Exception(string.Format("A card already exists at {0}", atIndex));
             _deck.SetCard(this, atIndex);
-            _deck.Player.Game.OnCardSummonedEvent(this, atIndex);
         }
 
         public void Faint()
         {
-            int saveIndex = _index;
             _deck.Remove(_index);
-            _deck.Player.Game.OnCardFaintedEvent(this, saveIndex);
         }
 
         public void Buy(int atIndex)
@@ -276,7 +273,6 @@ namespace AutoPets
                 if (_foodAbility != null)
                     _foodAbility.Hurting(this, ref damage);
                 _hitPoints -= damage;
-                _deck.Player.Game.OnCardHurtEvent(this, sourceDeck, sourceIndex);
             }
         }
 
@@ -285,7 +281,6 @@ namespace AutoPets
             Debug.Assert(hitPoints >= 0 && attackPoints >= 0);
             _hitPoints += hitPoints;
             _attackPoints += attackPoints;
-            _deck.Player.Game.OnCardBuffedEvent(this, sourceIndex);
         }
 
         public void Eat(CardCommandQueue queue, Food food)

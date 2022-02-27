@@ -31,6 +31,10 @@ namespace AutoPets
         {
             return this;
         }
+
+		// UserEvent is for the UI logic to use to notify itself when last command has executed and to know
+		// when animations have stopped playing so the next set of command results can be animated
+        public EventHandler UserEvent;
     }
 
     public class AttackCardCommand : CardCommand
@@ -60,7 +64,7 @@ namespace AutoPets
             Card.HitPoints -= _opponentDamage;
             OpponentCard.HitPoints -= _damage;
 
-            Card.Deck.Player.Game.OnAttackEvent();
+            Card.Deck.Player.Game.OnAttackEvent(this);
 
             return this;
         }
@@ -93,6 +97,9 @@ namespace AutoPets
         public override CardCommand Execute()
         {
             Card.FoodAbility = _foodAbility;
+
+            //TODO need an event
+
             return this;
         }
     }
@@ -110,6 +117,7 @@ namespace AutoPets
         {
             _faintedCard = Card;
             Card.Faint();
+            Deck.Player.Game.OnCardFaintedEvent(this, Deck, Index);
             return this;
         }
 
@@ -146,6 +154,7 @@ namespace AutoPets
         {
             _saveHitPoints = Card.TotalHitPoints;
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
+            Deck.Player.Game.OnCardHurtEvent(this, Card, _sourceDeck, _sourceIndex);
             return this;
         }
 
@@ -187,6 +196,7 @@ namespace AutoPets
         public override CardCommand Execute()
         {
             Card.Buff(_sourceIndex, _hitPoints, _attackPoints);
+            Deck.Player.Game.OnCardBuffedEvent(this, Card, _sourceIndex);
             return this;
         }
     }
@@ -238,16 +248,20 @@ namespace AutoPets
             //if (summonIndex == -1 && _atDeck.MakeRoomAt(_atIndex))
             //    summonIndex = _atIndex;
 
-            if (summonIndex != -1)
+            if (summonIndex == -1)
+                // the UI expects every command to invoke some event so it can know
+                // that the animations are finished for the current attack
+				// we might consider creating a "NoEvent" handler for this specific case
+                throw new Exception("No place to summon pet.");
+
+            _summonedCard = new Card(_atDeck, _ability)
             {
-                _summonedCard = new Card(_atDeck, _ability)
-                {
-                    HitPoints = _hitPoints,
-                    AttackPoints = _attackPoints
-                };
-                _summonedCard.XP = Card.GetXPFromLevel(_level);
-                _summonedCard.Summon(summonIndex);
-            }
+                HitPoints = _hitPoints,
+                AttackPoints = _attackPoints
+            };
+            _summonedCard.XP = Card.GetXPFromLevel(_level);
+            _summonedCard.Summon(summonIndex);
+            _atDeck.Player.Game.OnCardSummonedEvent(this, _summonedCard, summonIndex);
             return this;
         }
 
