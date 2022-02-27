@@ -12,10 +12,14 @@ public class BattleNode : Node
 {
     int _playQueueIndex;
     bool _playingAttack;
-    bool _playingLastCommand;
+    bool _playingBattle;
 
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
+
+    // every card command event (OnHurt, OnFaint etc.) that is handled by BattleNode and DeckNode2D
+    // must be finished before MaxTimePerEvent. See comments in PositionDecks
+    public const float MaxTimePerEvent = 0.7f;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
@@ -24,6 +28,9 @@ public class BattleNode : Node
     public Button SaveButton { get { return GetNode<Button>("SaveButton"); } }
     public TextureButton PlayOneButton { get { return GetNode<TextureButton>("PlayOneButton"); } }
     public FileDialog SaveFileDialog { get { return GetNode<FileDialog>("SaveFileDialog"); } } 
+
+    [Signal]
+    public delegate void OneAttackOverSignal();
 
     protected override void Dispose(bool disposing)
     {
@@ -39,6 +46,12 @@ public class BattleNode : Node
 
     public override void _Ready()
     {
+        Connect("OneAttackOverSignal", this, "_signal_OneAttackOver", null, 
+            // important to be Deferred because it ensures that all tweens will be freed
+            // before the next set of animation events fire off -- so a new "tween_completed"
+            // signal can be invoked
+            (int)ConnectFlags.Deferred);
+
         _player1DeckPosition = Player1DeckNode2D.Position;
         _player2DeckPosition = Player2DeckNode2D.Position;
 
@@ -84,20 +97,43 @@ public class BattleNode : Node
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
 
-        _playingAttack = false;
         _playQueueIndex = -1;
 
-        //TODO
-        // kick off auto-play, or allow user to press Play button to iterate over 
-        // commands
+        //if (_autoPlay)
+        //    PlayBattle();
+    }
+
+    public void _on_PlayOneButton_pressed()
+    {
+        if (!_playingAttack && !_playingBattle)
+        {
+            _playQueueIndex++;
+            PlayOneAttack();
+        }
     }
 
     public void _on_PlayButton_pressed()
     {
-        if (!_playingAttack)
-        {
-            _playQueueIndex++;
+        if (!_playingBattle && !_playingAttack)
+            PlayBattle();
+    }
+
+    void PlayBattle()
+    {
+        _playingBattle = true;
+        _playQueueIndex = -1;
+        EmitSignal("OneAttackOverSignal");
+    }
+
+    public void _signal_OneAttackOver()
+    {
+        _playQueueIndex++;
+        if (_playQueueIndex < GameSingleton.Instance.FightResult.Count)
             PlayOneAttack();
+        else
+        {
+            // battle is now finished
+            _playingBattle = false;
         }
     }
 
@@ -105,29 +141,25 @@ public class BattleNode : Node
     {
         if (_playQueueIndex < GameSingleton.Instance.FightResult.Count)
         {
+            _playingAttack = true;
             ReplayButton.Disabled = true;
             SaveButton.Disabled = true;
 
-            _playingAttack = true;
-            _playingLastCommand = false;
-
-            // each item in a FightResult is a list of commands
-            // each press of the 'Play' button executes one or more commands for just one item in FightResult
+            // Each item in a FightResult is a list of commands
+            // Each press of the 'Play' button executes one or more commands for just one item in FightResult
             var oneAttackResult = GameSingleton.Instance.FightResult[_playQueueIndex];
+
+            // Get notification of when the last command is finished animation
+            // Any event handler associated with the last command invokes UserEvent when finished playing
+            // its animation to notify when done.
+            oneAttackResult.Last().UserEvent += _event_UserEvent;    
+
             foreach (var command in oneAttackResult)
             {
                 // Each command Execute might inflict damage (HurtCommand), faint a pet (FaintCommand)
                 // buff the health of a pet (BuffCommand) etc.
                 // In turn, a corresonding event is fired off, OnHurt, OnFaint etc. and this scene,
                 // or the DeckNode2D scene responds to the event and renders an animation 
-
-                // Since we're in a loop, that means several animations might kick off at once.
-                // Animations do not block the UI; Also we have to know which command/event is the last
-                // one in order to re-enable the play button to allow the user to play the next set of 
-                // commands. Every event handler calls CheckFinishedPlayingAttack() when finished playing
-                // its animation to notify when done.
-
-                _playingLastCommand = command == oneAttackResult.Last();
 
                 command.Execute();
 
@@ -138,14 +170,19 @@ public class BattleNode : Node
         }
     }
 
-    public void CheckFinishedPlayingAttack()
+    public void _event_UserEvent(object sender, EventArgs e)
     {
-        _playingAttack = !_playingLastCommand;   
-        ReplayButton.Disabled = _playingAttack;
-        SaveButton.Disabled = _playingAttack;
+        _playingAttack = false;
+        ReplayButton.Disabled = false;
+        SaveButton.Disabled = false;
+            
+        GameSingleton.Instance.FightResult[_playQueueIndex].Last().UserEvent -= _event_UserEvent;    
+
+        if (_playingBattle)
+            EmitSignal("OneAttackOverSignal");
     }
 
-    public async void _game_AttackEvent(object sender, EventArgs e)
+    public async void _game_AttackEvent(object sender, CardCommand command)
     {
         await PositionDecks();
 
@@ -154,12 +191,14 @@ public class BattleNode : Node
         var tween2 = new Tween();
         AddChild(tween2);
 
+        float rotationTime = 0.5f;
+
         var card1 = GameSingleton.Instance.Game.Player1.BattleDeck.GetLastCard();
         var cardSlot1 = Player1DeckNode2D.GetCardSlotNode2D(card1.Index + 1);
         tween1.InterpolateProperty(cardSlot1.CardArea2D.Sprite, "rotation",
             0, // radians
             0.5, // radians; about 30 degrees 
-            0.5f, Tween.TransitionType.Expo, Tween.EaseType.Out);
+            rotationTime, Tween.TransitionType.Expo, Tween.EaseType.Out);
         tween1.Start();
 
         var card2 = GameSingleton.Instance.Game.Player2.BattleDeck.GetLastCard();
@@ -167,7 +206,7 @@ public class BattleNode : Node
         tween2.InterpolateProperty(cardSlot2.CardArea2D.Sprite, "rotation",
             0, // radians 
             -0.5, // radians; about -30 degrees
-            0.5f, Tween.TransitionType.Expo, Tween.EaseType.Out);
+            rotationTime, Tween.TransitionType.Expo, Tween.EaseType.Out);
         tween2.Start();
 
         await ToSignal(tween1, "tween_all_completed");
@@ -184,10 +223,10 @@ public class BattleNode : Node
         //TODO: if a knockout, play additional knockout sound clip
         FightPlayer.Play();
 
-        CheckFinishedPlayingAttack();
+        command.UserEvent?.Invoke(this, EventArgs.Empty);
     }
 
-    public async void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
+    public async void _game_CardHurtEvent(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex)
     {
         // see also DeckNode2D where its _game_CardHurtEvent handles 
         // the case where source card deck is the same as the card
@@ -220,19 +259,16 @@ public class BattleNode : Node
 
             cardSlot.CardArea2D.RenderCard(deckNode2D.Deck[card.Index], card.Index);
 
-            CheckFinishedPlayingAttack();
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public async Task PositionDecks(bool hideCardSlots = true)
     {
-		//TODO: in order to know the correct amount to delay, we should force every event
-		// to wait a specific amount of time no matter what animation is played 
-		
         // when repositioning, other animations might still be going
         // so add small delay to allow those animations to complete in order
         // for them to be shown associated with the correct card slots
-        await ToSignal(GetTree().CreateTimer(0.5f), "timeout");
+        await ToSignal(GetTree().CreateTimer(MaxTimePerEvent), "timeout");
 
         if (hideCardSlots)
         {

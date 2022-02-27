@@ -21,18 +21,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     public Deck Deck { get { return _deck; } }
 
     [Signal]
-    public delegate void CardFaintedSignal(int index);
-
-    [Signal]
-    public delegate void CardSummonedSignal(int index);
-
-    [Signal]
-    public delegate void CardBuffedSignal(int index, int sourceIndex);
-
-    [Signal]
-    public delegate void CardHurtSignal(int index, int sourceIndex);
-
-    [Signal]
     public delegate void CardGainedXPDragDropSignal();
 
     public CardSlotNode2D GetCardSlotNode2D(int index)
@@ -65,8 +53,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             }
         }
     }
-    // ICardSelectHost
 
+    // ICardSelectHost
     public CardSlotNode2D GetSelectedCardSlotNode2D()
     {
         for (int i = 1; i <= 5; i++)
@@ -101,14 +89,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
 
-        Connect("CardFaintedSignal", this, "_signal_CardFainted", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("CardSummonedSignal", this, "_signal_CardSummoned", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("CardBuffedSignal", this, "_signal_CardBuffed", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("CardHurtSignal", this, "_signal_CardHurt", null, 
-            (int)ConnectFlags.Deferred);
         Connect("CardGainedXPDragDropSignal", this, "_signal_CardGainedXPDragDrop", null,
             (int)ConnectFlags.Deferred);
     }
@@ -170,7 +150,13 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         parent.AddChild(tweenRotate);
 
         float buffSpeed = 0.5f;
-        int arcY = 150;
+
+        // pick a somewhat random height to throw, to minimize other objects from having
+        // the same trajectory
+        int yDelta = GameSingleton.Instance.Game.Random.Next(0, 100);
+        if (GameSingleton.Instance.Game.Random.Next(0, 2) == 1)
+            yDelta *= -1;
+        int arcY = 200 + yDelta;
 
         tweenPosX.InterpolateProperty(area2D, "position:x",
             area2D.GlobalPosition.x, toPosition.x, buffSpeed, 
@@ -281,132 +267,105 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         return GetParent() is BuildNode;
     }
 
-    // Game thread events happening within their own thread.
-    // Other nodes may get the same event, but only one event should
-    // call WaitOne(), and only one spawning signal should reset the thread
-    // with GameSingleton.autoResetEvent.Reset()
-    public void _game_CardFaintedEvent(object sender, Card card, int index)
+    public async void _game_CardFaintedEvent(object sender, CardCommand command, Deck deck, int index)
     {
-        if (card.Deck == this._deck)
+        if (deck == this._deck)
         {
-            EmitSignal("CardFaintedSignal", index);
+            var tween = new Tween();
+            AddChild(tween);
+
+            float faintTime = 0.5f;
+
+            var cardSlot = GetCardSlotNode2D(index + 1);
+            tween.InterpolateProperty(cardSlot.CardArea2D.Sprite, "modulate:a",
+                1.0, 0.0, faintTime, Tween.TransitionType.Linear, Tween.EaseType.In);
+            tween.Start();
+
+            await ToSignal(tween, "tween_all_completed");
+
+            tween.QueueFree();
+
+            // restore modulate, even though we're about to hide the sprite
+            // next time something spawns we want modulate to have its restored value
+            var color = cardSlot.CardArea2D.Sprite.Modulate;
+            cardSlot.CardArea2D.Sprite.Modulate = new Color(color.r, color.g,
+                color.b, 1);
+            cardSlot.CardArea2D.RenderCard(null, index);
+
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public void _game_CardSummonedEvent(object sender, Card card, int index)
+    public async void _game_CardSummonedEvent(object sender, CardCommand command, Card card, int index)
     {
         if (card.Deck == this._deck)
         {
-            EmitSignal("CardSummonedSignal", card.Index);
+            var cardSlot = GetCardSlotNode2D(index + 1);
+            if (!cardSlot.Visible)
+                cardSlot.Show();
+
+            if (GetParent() is BattleNode)
+            {
+                await (GetParent() as BattleNode).PositionDecks(false);
+            }
+
+            // make the summoned card appear, but after we positioned the deck
+            cardSlot.CardArea2D.RenderCard(_deck[index], index);
+        
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public void _game_CardBuffedEvent(object sender, Card card, int sourceIndex)
+    public async void _game_CardBuffedEvent(object sender, CardCommand command, Card card, int sourceIndex)
     {
         if (card.Deck == this._deck)
         {
-            EmitSignal("CardBuffedSignal", card.Index, sourceIndex);
+            var cardSlot = GetCardSlotNode2D(card.Index + 1);
+            var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+
+            var buffArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/BuffArea2D.tscn");
+            Area2D buffArea2D = buffArea2DScene.Instance() as Area2D;
+            GetParent().AddChild(buffArea2D);
+            buffArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
+
+            await DeckNode2D.ThrowArea2D(GetParent(), buffArea2D, cardSlot.GlobalPosition);
+
+            buffArea2D.QueueFree();
+
+            GulpPlayer.Play();
+            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
+    public async void _game_CardHurtEvent(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex)
     {
         // see also BattleNode where its _game_CardHurtEvent handles 
         // the case where source card deck is an opponent
         if (card.Deck == this._deck && sourceDeck == card.Deck)
         {
-            EmitSignal("CardHurtSignal", card.Index, sourceIndex);
+            // see also BattleNode where its _game_CardHurtEvent handles 
+            // the case where source card deck is different than the card
+            // in which case we have to animate from the opponent's DeckNodeScene
+
+            var cardSlot = GetCardSlotNode2D(card.Index + 1);
+            var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+
+            WhooshPlayer.Play();
+
+            var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
+            Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;
+            GetParent().AddChild(damageArea2D);
+            damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
+
+            await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);
+
+            damageArea2D.QueueFree();
+
+            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
-    }
-
-    // main thread signals
-    public async void _signal_CardFainted(int index)
-    {
-        var tween = new Tween();
-        AddChild(tween);
-
-        var cardSlot = GetCardSlotNode2D(index + 1);
-        tween.InterpolateProperty(cardSlot.CardArea2D.Sprite, "modulate:a",
-            1.0, 0.0, 0.5f, Tween.TransitionType.Linear, Tween.EaseType.In);
-        tween.Start();
-
-        await ToSignal(tween, "tween_all_completed");
-
-        tween.QueueFree();
-
-        // restore modulate, even though we're about to hide the sprite
-        // next time something spawns we want modulate to have its restored value
-        var color = cardSlot.CardArea2D.Sprite.Modulate;
-        cardSlot.CardArea2D.Sprite.Modulate = new Color(color.r, color.g,
-            color.b, 1);
-        cardSlot.CardArea2D.RenderCard(null, index);
-
-        if (GetParent() is BattleNode)
-            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
-    }
-
-    public async void _signal_CardSummoned(int index)
-    {
-        var cardSlot = GetCardSlotNode2D(index + 1);
-        if (!cardSlot.Visible)
-            cardSlot.Show();
-
-        if (GetParent() is BattleNode)
-        {
-            await (GetParent() as BattleNode).PositionDecks(false);
-        }
-
-        // make the summoned card appear, but after we positioned the deck
-        cardSlot.CardArea2D.RenderCard(_deck[index], index);
-
-        if (GetParent() is BattleNode)
-            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
-    }
-
-    public async void _signal_CardBuffed(int index, int sourceIndex)
-    {
-        var cardSlot = GetCardSlotNode2D(index + 1);
-        var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
-
-        var buffArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/BuffArea2D.tscn");
-        Area2D buffArea2D = buffArea2DScene.Instance() as Area2D;
-        GetParent().AddChild(buffArea2D);
-        buffArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
-
-        await DeckNode2D.ThrowArea2D(GetParent(), buffArea2D, cardSlot.GlobalPosition);
-
-        buffArea2D.QueueFree();
-
-        GulpPlayer.Play();
-        cardSlot.CardArea2D.RenderCard(_deck[index], index);
-
-        if (GetParent() is BattleNode)
-            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
-    }
-
-    public async void _signal_CardHurt(int index, int sourceIndex)
-    {
-        // see also BattleNode where its _game_CardHurtEvent handles 
-        // the case where source card deck is different than the card
-        // in which case we have to animate from the opponent's DeckNodeScene
-
-        var cardSlot = GetCardSlotNode2D(index + 1);
-        var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
-
-        WhooshPlayer.Play();
-
-        var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
-        Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;
-        GetParent().AddChild(damageArea2D);
-        damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
-
-        await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);
-
-        damageArea2D.QueueFree();
-
-        cardSlot.CardArea2D.RenderCard(_deck[index], index);
-            
-        if (GetParent() is BattleNode)
-            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
     }
 }

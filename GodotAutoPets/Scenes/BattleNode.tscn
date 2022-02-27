@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Assets/background.png" type="Texture" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
@@ -7,6 +7,8 @@
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://Assets/play_button.png" type="Texture" id=6]
 [ext_resource path="res://Assets/play_button_pressed.png" type="Texture" id=7]
+[ext_resource path="res://Assets/play_one_button_pressed.png" type="Texture" id=8]
+[ext_resource path="res://Assets/play_one_button.png" type="Texture" id=9]
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
@@ -79,6 +81,18 @@ margin_left = 600.0
 margin_top = 24.0
 margin_right = 700.0
 margin_bottom = 124.0
+texture_normal = ExtResource( 9 )
+texture_pressed = ExtResource( 8 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayButton" type="TextureButton" parent="."]
+margin_left = 488.0
+margin_top = 24.0
+margin_right = 588.0
+margin_bottom = 124.0
 texture_normal = ExtResource( 6 )
 texture_pressed = ExtResource( 7 )
 expand = true
@@ -101,5 +115,6 @@ current_path = "/github/AutoPets/GodotAutoPets/"
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_SaveButton_pressed"]
-[connection signal="pressed" from="PlayOneButton" to="." method="_on_PlayButton_pressed"]
+[connection signal="pressed" from="PlayOneButton" to="." method="_on_PlayOneButton_pressed"]
+[connection signal="pressed" from="PlayButton" to="." method="_on_PlayButton_pressed"]
 [connection signal="file_selected" from="SaveFileDialog" to="." method="_on_FileDialog_file_selected"]
