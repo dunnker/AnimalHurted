@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
+using System.IO;
 
 namespace AutoPets
 {
     public class Card
     {
         readonly Deck _deck;
-        readonly Ability _ability;
+        Ability _ability;
         FoodAbility _foodAbility;
         int _index;
         int _hitPoints;
@@ -15,7 +17,14 @@ namespace AutoPets
         int _buildHitPoints;
         int _buildAttackPoints;
         
-        public Card(Deck deck, Ability ability) : base()
+        public Card(Deck deck)
+        {
+            _deck = deck;
+            _index = -1;
+            _xp = 1;
+        }
+
+        public Card(Deck deck, Ability ability)
         {
             _deck = deck;
             _index = -1;
@@ -101,6 +110,46 @@ namespace AutoPets
                 else
                     return 0;
             }
+        }
+
+        public void SaveToStream(StreamWriter writer)
+        {
+            // version number of this stream; used to support backward compatibility
+            // if stream format changes later
+            writer.WriteLine(1);
+            writer.WriteLine(_index);
+            writer.WriteLine(_xp);
+            writer.WriteLine(_hitPoints);
+            writer.WriteLine(_attackPoints);
+            writer.WriteLine(_buildHitPoints);
+            writer.WriteLine(_buildAttackPoints);
+            if (_ability == null)
+                writer.WriteLine(string.Empty);
+            else
+                writer.WriteLine(_ability.GetType().Name);
+            if (_foodAbility == null)
+                writer.WriteLine(string.Empty);
+            else
+                writer.WriteLine(_foodAbility.GetType().Name);
+        }
+
+        public void LoadFromStream(StreamReader reader)
+        {
+            int version = Int32.Parse(reader.ReadLine());
+            if (version != 1)
+                throw new Exception("Invalid stream version");
+            _index = Int32.Parse(reader.ReadLine());
+            _xp = Int32.Parse(reader.ReadLine());
+            _hitPoints = Int32.Parse(reader.ReadLine());
+            _attackPoints = Int32.Parse(reader.ReadLine());
+            _buildHitPoints = Int32.Parse(reader.ReadLine());
+            _buildAttackPoints = Int32.Parse(reader.ReadLine());
+            string abilityName = reader.ReadLine();
+            _ability = AbilityList.Instance.AllAbilities.FirstOrDefault((a) => a.GetType().Name == abilityName );
+            string foodAbilityName = reader.ReadLine();
+            if (!string.IsNullOrEmpty(foodAbilityName))
+                _foodAbility = Activator.CreateInstance(
+                    Type.GetType($"AutoPets.{foodAbilityName}, AutoPets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
         }
 
         public void Attack(CardCommandQueue queue, Card card)

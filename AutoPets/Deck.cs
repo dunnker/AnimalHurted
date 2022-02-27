@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
+using System.IO;
 using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace AutoPets
     {
         readonly Player _player;
 
-        readonly Card[] _cards;
+        Card[] _cards;
 
         public Card this[int index] { get { return _cards[index]; } }
 
@@ -23,6 +23,39 @@ namespace AutoPets
         {
             _cards = new Card[size];
             _player = player;
+        }
+
+        public void SaveToStream(StreamWriter writer)
+        {
+            // version number of this stream; used to support backward compatibility
+            // if stream format changes later
+            writer.WriteLine(1);
+            writer.WriteLine(_cards.Length);
+            foreach (var c in _cards)
+            {
+                writer.WriteLine(c != null);
+                if (c != null)
+                    c.SaveToStream(writer);
+            }
+        }
+
+        public void LoadFromStream(StreamReader reader)
+        {
+            int version = Int32.Parse(reader.ReadLine());
+            if (version != 1)
+                throw new Exception("Invalid stream version");
+            int count = Int32.Parse(reader.ReadLine());
+            _cards = new Card[count];
+            for (int i = 0; i < _cards.Length; i++)
+            {
+                var assigned = Boolean.Parse(reader.ReadLine());
+                if (assigned)
+                {
+                    Card card = new Card(this);
+                    card.LoadFromStream(reader);
+                    SetCard(card, i);
+                }
+            }
         }
 
         public void SetCard(Card card, int index)

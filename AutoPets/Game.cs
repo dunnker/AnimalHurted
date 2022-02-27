@@ -234,8 +234,6 @@ namespace AutoPets
         {
             // disable events
             BeginUpdate();
-            _player1.NewBattleDeck();
-            _player2.NewBattleDeck();
             var fightResult = new List<CardCommandQueue>();
             CardCommandQueue lastQueue = null;
             do
@@ -245,9 +243,6 @@ namespace AutoPets
                     fightResult.Add(lastQueue);
             } while (lastQueue.Count > 0 || !IsFightOver());
             FightOver();
-            // restore battle decks
-            _player1.NewBattleDeck();
-            _player2.NewBattleDeck();
             EndUpdate();
             return fightResult;
         }

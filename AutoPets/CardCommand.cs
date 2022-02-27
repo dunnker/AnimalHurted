@@ -69,9 +69,9 @@ namespace AutoPets
         {
             var priorCard = Card.Deck.LastOrDefault(c => c != null && c.Index < Card.Index && c.TotalHitPoints > 0);
             priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
-            if (_opponentDamage > 0)
+            if (_opponentDamage > 0 && Card.TotalHitPoints > 0)
                 Card.Ability.Hurt(queue, Card);
-            if (_damage > 0)
+            if (_damage > 0 && OpponentCard.TotalHitPoints > 0)
                 OpponentCard.Ability.Hurt(queue, OpponentCard);
             if (Card.TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(Card));
@@ -151,7 +151,10 @@ namespace AutoPets
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            Card.Ability.Hurt(queue, Card);
+            // As a rule, abilities should not be invoked if a card is fainting
+            // (unless it's Ability.Fainted)
+            if (Card.TotalHitPoints > 0)
+                Card.Ability.Hurt(queue, Card);
 
             // Prevent queuing up more than one FaintCommand by checking _saveHitPoints.
             // HurtCommand's can queue multiple times for one card.
@@ -253,7 +256,7 @@ namespace AutoPets
             if (_summonedCard != null)
                 foreach (var c in _atDeck)
                 {
-                    if (c != _summonedCard)
+                    if (c != _summonedCard && c.TotalHitPoints > 0)
                         c.Ability.FriendSummoned(queue, c, _summonedCard);
                 }
             return this;

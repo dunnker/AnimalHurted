@@ -169,7 +169,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         var tweenRotate = new Tween();
         parent.AddChild(tweenRotate);
 
-        float buffSpeed = 0.6f;
+        float buffSpeed = 0.5f;
         int arcY = 150;
 
         tweenPosX.InterpolateProperty(area2D, "position:x",
@@ -290,7 +290,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         if (card.Deck == this._deck)
         {
             EmitSignal("CardFaintedSignal", index);
-            GameSingleton.autoResetEvent.WaitOne();
         }
     }
 
@@ -299,7 +298,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         if (card.Deck == this._deck)
         {
             EmitSignal("CardSummonedSignal", card.Index);
-            GameSingleton.autoResetEvent.WaitOne();
         }
     }
 
@@ -308,7 +306,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         if (card.Deck == this._deck)
         {
             EmitSignal("CardBuffedSignal", card.Index, sourceIndex);
-            GameSingleton.autoResetEvent.WaitOne();
         }
     }
 
@@ -319,7 +316,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         if (card.Deck == this._deck && sourceDeck == card.Deck)
         {
             EmitSignal("CardHurtSignal", card.Index, sourceIndex);
-            GameSingleton.autoResetEvent.WaitOne();
         }
     }
 
@@ -345,26 +341,26 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             color.b, 1);
         cardSlot.CardArea2D.RenderCard(null, index);
 
-        GameSingleton.autoResetEvent.Set();
+        if (GetParent() is BattleNode)
+            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
     }
 
-    public void _signal_CardSummoned(int index)
+    public async void _signal_CardSummoned(int index)
     {
         var cardSlot = GetCardSlotNode2D(index + 1);
         if (!cardSlot.Visible)
-        {
             cardSlot.Show();
 
-            //TODO: for Sheep we may need to call this method...
-            //await PositionDecks();
+        if (GetParent() is BattleNode)
+        {
+            await (GetParent() as BattleNode).PositionDecks(false);
         }
 
-        // rendering entire deck because pets may have been moved to make room for summoned card
-        // see SummonCardCommand's call to MakeRoomAt
-        RenderDeck(_deck);
-        //cardSlot.CardArea2D.RenderCard(_deck[index], index);
+        // make the summoned card appear, but after we positioned the deck
+        cardSlot.CardArea2D.RenderCard(_deck[index], index);
 
-        GameSingleton.autoResetEvent.Set();
+        if (GetParent() is BattleNode)
+            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
     }
 
     public async void _signal_CardBuffed(int index, int sourceIndex)
@@ -384,13 +380,15 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         GulpPlayer.Play();
         cardSlot.CardArea2D.RenderCard(_deck[index], index);
 
-        GameSingleton.autoResetEvent.Set();
+        if (GetParent() is BattleNode)
+            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
     }
 
     public async void _signal_CardHurt(int index, int sourceIndex)
     {
         // see also BattleNode where its _game_CardHurtEvent handles 
         // the case where source card deck is different than the card
+        // in which case we have to animate from the opponent's DeckNodeScene
 
         var cardSlot = GetCardSlotNode2D(index + 1);
         var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
@@ -407,7 +405,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         damageArea2D.QueueFree();
 
         cardSlot.CardArea2D.RenderCard(_deck[index], index);
-
-        GameSingleton.autoResetEvent.Set();
+            
+        if (GetParent() is BattleNode)
+            (GetParent() as BattleNode).CheckFinishedPlayingAttack();
     }
 }

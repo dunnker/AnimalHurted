@@ -423,14 +423,16 @@ namespace AutoPets
         public override void Hurt(CardCommandQueue queue, Card card)
         {
             base.Hurt(queue, card);
+
+            // not necessary to check card.TotalHitpoints > 0; see comments in HurtCommand
+
             // if not about to faint, then buff itself
-            if (card.TotalHitPoints > 0)
-            {
-                int attackPoints = (int)Math.Round(((double)card.TotalAttackPoints / 2) * card.Level, 
-                    // if 0.5 then round up
-                    MidpointRounding.AwayFromZero);
-                queue.Add(new BuffCardCommand(card, card.Index, 0, attackPoints));
-            }
+            //if (card.TotalHitPoints > 0)
+
+            int attackPoints = (int)Math.Round(((double)card.TotalAttackPoints / 2) * card.Level, 
+                // if 0.5 then round up
+                MidpointRounding.AwayFromZero);
+            queue.Add(new BuffCardCommand(card, card.Index, 0, attackPoints));
         }
     }
 

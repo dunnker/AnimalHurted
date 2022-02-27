@@ -1,38 +1,33 @@
 using Godot;
 using AutoPets;
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class BattleNode : Node
 {
-    System.Threading.Thread _gameThread;
+    int _playQueueIndex;
+    bool _playingAttack;
+    bool _playingLastCommand;
+
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
-    List<CardCommandQueue> _fightResult;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
     public AudioStreamPlayer FightPlayer { get { return GetNode<AudioStreamPlayer>("FightPlayer"); } }
-    public Godot.Timer BeginBattleTimer { get { return GetNode<Godot.Timer>("BeginBattleTimer"); } }
     public Button ReplayButton { get { return GetNode<Button>("ReplayButton"); } }
-
-    [Signal]
-    public delegate void AttackEventSignal();
-
-    [Signal]
-    public delegate void CardHurtSignal(int index, int sourceIndex);
-
-    [Signal]
-    public delegate void FightOverSignal();
+    public Button SaveButton { get { return GetNode<Button>("SaveButton"); } }
+    public TextureButton PlayOneButton { get { return GetNode<TextureButton>("PlayOneButton"); } }
+    public FileDialog SaveFileDialog { get { return GetNode<FileDialog>("SaveFileDialog"); } } 
 
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        if (_gameThread != null)
-            _gameThread.Abort();
         // Dispose can be called from Godot editor, and our singleton
         // may not have a Game when designing
         if (GameSingleton.Instance.Game != null)
@@ -50,15 +45,7 @@ public class BattleNode : Node
         GameSingleton.Instance.Game.AttackEvent += _game_AttackEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
 
-        // using Deferred to ensure the event fires on the main thread
-        Connect("AttackEventSignal", this, "_signal_AttackEvent", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("CardHurtSignal", this, "_signal_CardHurt", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("FightOverSignal", this, "_signal_FightOver", null, 
-            (int)ConnectFlags.Deferred);
-
-        _fightResult = GameSingleton.Instance.Game.CreateFightResult();
+        _playQueueIndex = -1;
 
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.ReverseCardAreaPositions();
@@ -75,11 +62,6 @@ public class BattleNode : Node
         #endif
     } 
     
-    public void _on_BeginBattleTimer_timeout()
-    {
-        ReplayBattle();
-    }
-
     public void _on_ContinueButton_pressed()
     {
         GameSingleton.Instance.Game.NewRound();
@@ -89,76 +71,81 @@ public class BattleNode : Node
 
     public void _on_ReplayButton_pressed()
     {
-        ReplayButton.Disabled = true;
+        BeginReplay();
+    }
+
+    public void BeginReplay()
+    {
         Player1DeckNode2D.Position = _player1DeckPosition;
         Player2DeckNode2D.Position = _player2DeckPosition;
 
-        GameSingleton.Instance.Game.Player1.NewBattleDeck();
-        GameSingleton.Instance.Game.Player2.NewBattleDeck();
+        GameSingleton.Instance.RestoreBattleDecks();
+
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
 
-        BeginBattleTimer.Start();
+        _playingAttack = false;
+        _playQueueIndex = -1;
+
+        //TODO
+        // kick off auto-play, or allow user to press Play button to iterate over 
+        // commands
     }
 
-    async void ReplayBattle()
+    public void _on_PlayButton_pressed()
     {
-        await PositionDecks();
-
-        _gameThread = new System.Threading.Thread(() => 
+        if (!_playingAttack)
         {
-            // each press of the 'Play' button
-            foreach (var commandQueue in _fightResult)
-            {
-                foreach (var command in commandQueue)
-                {
-                    command.Execute();
-                    // not executing abilities during replay, because abilities
-                    // have already been processed in CreateFightResult()
-                    //command.ExecuteAbility()
-                }
-            }
-
-			// assuming "this" is still valid. See Dispose method where thread is aborted
-            this.EmitSignal("FightOverSignal");
-        });
-        _gameThread.Name = "Battle Game Thread";
-        _gameThread.Start();
-    }
-
-    // Game thread events happening within their own thread.
-    // Other nodes may get the same event, but only one event should
-    // call WaitOne(), and only one spawning signal should reset the thread
-    // with GameSingleton.autoResetEvent.Reset()
-    public void _game_AttackEvent(object sender, EventArgs e)
-    {
-        EmitSignal("AttackEventSignal");
-        GameSingleton.autoResetEvent.WaitOne();
-    }
-
-    public void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
-    {
-        // see also DeckNode2D where its _game_CardHurtEvent handles 
-        // the case where source card deck is the same as the card
-        if (sourceDeck != card.Deck)
-        {
-            DeckNode2D deckNode2D;
-            DeckNode2D sourceDeckNode2D;
-            if (card.Deck.Player == GameSingleton.Instance.Game.Player1)
-                deckNode2D = Player1DeckNode2D;
-            else
-                deckNode2D = Player2DeckNode2D;
-            if (sourceDeck.Player == GameSingleton.Instance.Game.Player1)
-                sourceDeckNode2D = Player1DeckNode2D;
-            else
-                sourceDeckNode2D = Player2DeckNode2D;
-            EmitSignal("CardHurtSignal", deckNode2D, card.Index, sourceDeckNode2D, sourceIndex);
-            GameSingleton.autoResetEvent.WaitOne();
+            _playQueueIndex++;
+            PlayOneAttack();
         }
     }
 
-    // signal events on main thread
-    public async void _signal_AttackEvent()
+    void PlayOneAttack()
+    {
+        if (_playQueueIndex < GameSingleton.Instance.FightResult.Count)
+        {
+            ReplayButton.Disabled = true;
+            SaveButton.Disabled = true;
+
+            _playingAttack = true;
+            _playingLastCommand = false;
+
+            // each item in a FightResult is a list of commands
+            // each press of the 'Play' button executes one or more commands for just one item in FightResult
+            var oneAttackResult = GameSingleton.Instance.FightResult[_playQueueIndex];
+            foreach (var command in oneAttackResult)
+            {
+                // Each command Execute might inflict damage (HurtCommand), faint a pet (FaintCommand)
+                // buff the health of a pet (BuffCommand) etc.
+                // In turn, a corresonding event is fired off, OnHurt, OnFaint etc. and this scene,
+                // or the DeckNode2D scene responds to the event and renders an animation 
+
+                // Since we're in a loop, that means several animations might kick off at once.
+                // Animations do not block the UI; Also we have to know which command/event is the last
+                // one in order to re-enable the play button to allow the user to play the next set of 
+                // commands. Every event handler calls CheckFinishedPlayingAttack() when finished playing
+                // its animation to notify when done.
+
+                _playingLastCommand = command == oneAttackResult.Last();
+
+                command.Execute();
+
+                // not executing abilities during replay, because abilities
+                // have already been processed in Game.CreateFightResult():
+                //command.ExecuteAbility()
+            }
+        }
+    }
+
+    public void CheckFinishedPlayingAttack()
+    {
+        _playingAttack = !_playingLastCommand;   
+        ReplayButton.Disabled = _playingAttack;
+        SaveButton.Disabled = _playingAttack;
+    }
+
+    public async void _game_AttackEvent(object sender, EventArgs e)
     {
         await PositionDecks();
 
@@ -197,45 +184,68 @@ public class BattleNode : Node
         //TODO: if a knockout, play additional knockout sound clip
         FightPlayer.Play();
 
-        GameSingleton.autoResetEvent.Set();
+        CheckFinishedPlayingAttack();
     }
 
-    public async void _signal_CardHurt(DeckNode2D deck, int index, DeckNode2D sourceDeck, int sourceIndex)
+    public async void _game_CardHurtEvent(object sender, Card card, Deck sourceDeck, int sourceIndex)
     {
-        var cardSlot = deck.GetCardSlotNode2D(index + 1);
-        var sourceCardSlot = sourceDeck.GetCardSlotNode2D(sourceIndex + 1);
+        // see also DeckNode2D where its _game_CardHurtEvent handles 
+        // the case where source card deck is the same as the card
+        if (sourceDeck != card.Deck)
+        {
+            DeckNode2D deckNode2D;
+            DeckNode2D sourceDeckNode2D;
+            if (card.Deck.Player == GameSingleton.Instance.Game.Player1)
+                deckNode2D = Player1DeckNode2D;
+            else
+                deckNode2D = Player2DeckNode2D;
+            if (sourceDeck.Player == GameSingleton.Instance.Game.Player1)
+                sourceDeckNode2D = Player1DeckNode2D;
+            else
+                sourceDeckNode2D = Player2DeckNode2D;
 
-        deck.WhooshPlayer.Play();
+            var cardSlot = deckNode2D.GetCardSlotNode2D(card.Index + 1);
+            var sourceCardSlot = sourceDeckNode2D.GetCardSlotNode2D(sourceIndex + 1);
 
-        var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
-        Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;
-        AddChild(damageArea2D);
-        damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
+            deckNode2D.WhooshPlayer.Play();
 
-        await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);
+            var damageArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/DamageArea2D.tscn");
+            Area2D damageArea2D = damageArea2DScene.Instance() as Area2D;
+            AddChild(damageArea2D);
+            damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
 
-        damageArea2D.QueueFree();
+            await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);
 
-        cardSlot.CardArea2D.RenderCard(deck.Deck[index], index);
+            damageArea2D.QueueFree();
 
-        GameSingleton.autoResetEvent.Set();
+            cardSlot.CardArea2D.RenderCard(deckNode2D.Deck[card.Index], card.Index);
+
+            CheckFinishedPlayingAttack();
+        }
     }
 
-    public async void _signal_FightOver()
+    public async Task PositionDecks(bool hideCardSlots = true)
     {
-        await PositionDecks();
-        ReplayButton.Disabled = false;
-    }
+		//TODO: in order to know the correct amount to delay, we should force every event
+		// to wait a specific amount of time no matter what animation is played 
+		
+        // when repositioning, other animations might still be going
+        // so add small delay to allow those animations to complete in order
+        // for them to be shown associated with the correct card slots
+        await ToSignal(GetTree().CreateTimer(0.5f), "timeout");
 
-    public async Task PositionDecks()
-    {
-        Player1DeckNode2D.HideEndingCardSlots();
-        Player2DeckNode2D.HideEndingCardSlots();
+        if (hideCardSlots)
+        {
+            Player1DeckNode2D.HideEndingCardSlots();
+            Player2DeckNode2D.HideEndingCardSlots();
+        }
 
         var tween1 = new Tween();
         AddChild(tween1);
         var tween2 = new Tween();
         AddChild(tween2);
+
+        float moveSpeed = 0.5f;
 
         var lastVisibleCardSlot = Player1DeckNode2D.GetEndingVisibleCardSlot();
         Tween awaitTween = null;
@@ -245,7 +255,7 @@ public class BattleNode : Node
             var lastCardSlot = Player1DeckNode2D.GetCardSlotNode2D(5);
             destination.x += lastCardSlot.GlobalPosition.x - lastVisibleCardSlot.GlobalPosition.x;
             tween1.InterpolateProperty(Player1DeckNode2D, "position",
-                Player1DeckNode2D.Position, destination, 0.5f, Tween.TransitionType.Expo, 
+                Player1DeckNode2D.Position, destination, moveSpeed, Tween.TransitionType.Expo, 
                 Tween.EaseType.Out);
             tween1.Start();
             awaitTween = tween1;
@@ -258,7 +268,7 @@ public class BattleNode : Node
             var lastCardSlot = Player2DeckNode2D.GetCardSlotNode2D(5);
             destination.x -= lastVisibleCardSlot.GlobalPosition.x - lastCardSlot.GlobalPosition.x;
             tween2.InterpolateProperty(Player2DeckNode2D, "position",
-                Player2DeckNode2D.Position, destination, 0.5f, Tween.TransitionType.Expo, 
+                Player2DeckNode2D.Position, destination, moveSpeed, Tween.TransitionType.Expo, 
                 Tween.EaseType.Out);
             tween2.Start();
             if (awaitTween == null)
@@ -270,5 +280,22 @@ public class BattleNode : Node
 
         tween1.QueueFree();
         tween2.QueueFree();
+    }
+
+    public void _on_SaveButton_pressed()
+    {
+        SaveFileDialog.PopupCentered();
+    }
+
+    public void _on_FileDialog_file_selected(Godot.Path @string)
+    {
+        // restore battle decks before serializing them
+        BeginReplay();
+        using (StreamWriter streamWriter = new StreamWriter(
+            ProjectSettings.GlobalizePath(SaveFileDialog.CurrentPath)))
+        {
+            GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(streamWriter);
+            GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(streamWriter);
+        }
     }
 }

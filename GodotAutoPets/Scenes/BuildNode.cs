@@ -74,7 +74,16 @@ public class BuildNode : Node
             GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
         }
         else
+        {
+            GameSingleton.Instance.Game.Player1.NewBattleDeck();
+            GameSingleton.Instance.Game.Player2.NewBattleDeck();
+            GameSingleton.Instance.SaveBattleDecks();
+            GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
+            // restore for rendering in next scene
+            GameSingleton.Instance.RestoreBattleDecks();
+
             GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
+        }
     }
 
     public void _on_SellButton_pressed()
