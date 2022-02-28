@@ -44,9 +44,9 @@ position = Vector2( 104, 0 )
 [node name="ColorRect" type="ColorRect" parent="."]
 modulate = Color( 1, 1, 1, 0.254902 )
 margin_left = 112.0
-margin_top = 104.0
+margin_top = 136.0
 margin_right = 832.0
-margin_bottom = 368.0
+margin_bottom = 400.0
 mouse_filter = 2
 color = Color( 0.796078, 0.917647, 0.529412, 1 )
 __meta__ = {
@@ -54,14 +54,14 @@ __meta__ = {
 }
 
 [node name="DeckNode2D" parent="." instance=ExtResource( 2 )]
-position = Vector2( 128, 128 )
+position = Vector2( 128, 184 )
 
 [node name="ColorRect2" type="ColorRect" parent="."]
 modulate = Color( 1, 1, 1, 0.254902 )
 margin_left = 112.0
-margin_top = 392.0
+margin_top = 416.0
 margin_right = 832.0
-margin_bottom = 656.0
+margin_bottom = 680.0
 mouse_filter = 2
 color = Color( 0.796078, 0.917647, 0.529412, 1 )
 __meta__ = {
@@ -71,9 +71,9 @@ __meta__ = {
 [node name="ColorRect4" type="ColorRect" parent="."]
 modulate = Color( 1, 1, 1, 0.254902 )
 margin_left = 848.0
-margin_top = 392.0
+margin_top = 416.0
 margin_right = 1224.0
-margin_bottom = 656.0
+margin_bottom = 680.0
 mouse_filter = 2
 color = Color( 0.796078, 0.917647, 0.529412, 1 )
 __meta__ = {
@@ -81,13 +81,13 @@ __meta__ = {
 }
 
 [node name="ShopNode2D" parent="." instance=ExtResource( 3 )]
-position = Vector2( 128, 416 )
+position = Vector2( 128, 464 )
 
 [node name="FoodSlotNode2D1" parent="." instance=ExtResource( 7 )]
-position = Vector2( 928, 480 )
+position = Vector2( 928, 528 )
 
 [node name="FoodSlotNode2D2" parent="." instance=ExtResource( 7 )]
-position = Vector2( 1056, 480 )
+position = Vector2( 1056, 528 )
 
 [node name="QuitGameButton" type="Button" parent="."]
 margin_left = 848.0
@@ -113,9 +113,9 @@ __meta__ = {
 
 [node name="RollButton" type="Button" parent="."]
 margin_left = 128.0
-margin_top = 608.0
+margin_top = 632.0
 margin_right = 224.0
-margin_bottom = 644.0
+margin_bottom = 668.0
 custom_fonts/font = SubResource( 4 )
 text = "Roll"
 __meta__ = {
@@ -124,9 +124,9 @@ __meta__ = {
 
 [node name="SellButton" type="Button" parent="."]
 margin_left = 128.0
-margin_top = 320.0
+margin_top = 352.0
 margin_right = 224.0
-margin_bottom = 356.0
+margin_bottom = 388.0
 custom_fonts/font = SubResource( 4 )
 text = "Sell"
 __meta__ = {

@@ -5,6 +5,11 @@ namespace AutoPets
 {
     public class AppleFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a Pet +1/+1.";
+        }
+
         public override void Execute(CardCommandQueue queue, Card card)
         {
             base.Execute(queue, card);
@@ -15,6 +20,11 @@ namespace AutoPets
 
     public class HoneyFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a Pet Honey Bee.";
+        }
+
         public override void Execute(CardCommandQueue queue, Card card)
         {
             base.Execute(queue, card);
@@ -24,6 +34,11 @@ namespace AutoPets
 
     public class CupcakeFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a Pet +3/+3 until end of battle.";
+        }
+
         public override void Execute(CardCommandQueue queue, Card card)
         {
             base.Execute(queue, card);
@@ -34,6 +49,11 @@ namespace AutoPets
 
     public class MeatBoneFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a Pet Bone Attack.";
+        }
+
         public override void Execute(CardCommandQueue queue, Card card)
         {
             base.Execute(queue, card);
@@ -43,6 +63,11 @@ namespace AutoPets
 
     public class SleepingPillFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Make a friendly Pet faint.";
+        }
+
         public override void Execute(CardCommandQueue queue, Card card)
         {
             base.Execute(queue, card);

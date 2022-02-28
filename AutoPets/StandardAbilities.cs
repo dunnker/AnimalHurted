@@ -684,7 +684,7 @@ namespace AutoPets
             base.RoundEnded(queue, card);
             for (int i = 1; i <= card.Level; i++)
             {
-                if (i >= card.Deck.Size)
+                if (i + card.Index >= card.Deck.Size)
                     break;
                 // not checking buffCard.TotalHitPoints > 0 because we aren't in a battle
                 var buffCard = card.Deck[card.Index + i];
@@ -731,7 +731,7 @@ namespace AutoPets
         {
             base.FriendAheadFaints(queue, card, faintedIndex);
             queue.Add(new GainFoodAbilityCommand(card, new MelonArmorAbility()));
-            queue.Add(new BuffCardCommand(card, faintedIndex, 0, card.Level * 2));
+            queue.Add(new BuffCardCommand(card, card.Index, 0, card.Level * 2));
         }
     }
 

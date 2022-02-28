@@ -19,11 +19,26 @@ public class FoodArea2D : Area2D
     public void _on_Area2D_mouse_entered()
     {
         GetParent().GetNode<Sprite>("HoverSprite").Show();
+        if (Sprite.Visible && !GameSingleton.Instance.Dragging)
+        {
+            var node2D = GetParent().GetNode<Node2D>("AbilityHintNode2D");
+            Food food;
+            if (Index == 1)
+                food = BuildNode.Player.ShopFood1;
+            else
+                food = BuildNode.Player.ShopFood2;
+            var nameLabel = node2D.GetNode<Label>("AbilityNameLabel");
+            nameLabel.Text = food.ToString();
+            var messageLabel = node2D.GetNode<Label>("AbilityMessageLabel");
+            messageLabel.Text = food.GetMessage();
+            node2D.Show();
+        }
     }
 
     public void _on_Area2D_mouse_exited()
     {
         GetParent().GetNode<Sprite>("HoverSprite").Hide();
+        GetParent().GetNode<Node2D>("AbilityHintNode2D").Hide();
     }
 
     public void _on_Area2D_input_event(Node viewport, InputEvent @event, int shape_idx)
@@ -71,6 +86,8 @@ public class FoodArea2D : Area2D
         GameSingleton.Instance.Dragging = !GameSingleton.Instance.Dragging;
         if (GameSingleton.Instance.Dragging)
         {
+            GetParent().GetNode<Node2D>("AbilityHintNode2D").Hide();
+
             GameSingleton.Instance.DragSource = this;
             GameSingleton.Instance.DragTarget = null;
             _dragLocalMousePos = GetLocalMousePosition();

@@ -13,6 +13,7 @@ public class CardSlotNode2D : Node2D
 
     public CardArea2D CardArea2D { get { return GetNode<CardArea2D>("CardArea2D"); } }
     public Sprite HoverSprite { get { return GetNode<Sprite>("HoverSprite"); } }
+    public Node2D AbilityHintNode2D { get { return GetNode<Node2D>("AbilityHintNode2D"); } }
     public Sprite SelectedSprite { get { return GetNode<Sprite>("SelectedSprite"); } }
     public ICardSlotDeck CardSlotDeck { get { return GetParent() as ICardSlotDeck; } }
 

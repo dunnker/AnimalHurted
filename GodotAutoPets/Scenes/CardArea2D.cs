@@ -102,6 +102,18 @@ public class CardArea2D : Area2D
     public void _on_Area2D_mouse_entered()
     {
         CardSlotNode2D.HoverSprite.Show();
+        if (Sprite.Visible && !GameSingleton.Instance.Dragging)
+        {
+            var card = CardSlotNode2D.CardSlotDeck.Deck[CardIndex];
+            if (card != null)
+            {
+                var nameLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityNameLabel");
+                nameLabel.Text = card.Ability.ToString();
+                var messageLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityMessageLabel");
+                messageLabel.Text = card.Ability.GetAbilityMessage(card);
+                CardSlotNode2D.AbilityHintNode2D.Show();
+            }
+        }
 
         // if dragging from one card to another adjacent card
         // sometimes the mouse_entered event will fire for the adjacent card
@@ -150,6 +162,7 @@ public class CardArea2D : Area2D
     public void _on_Area2D_mouse_exited()
     {
         CardSlotNode2D.HoverSprite.Hide();
+        CardSlotNode2D.AbilityHintNode2D.Hide();
 
         if (GameSingleton.Instance.Dragging)
         {
@@ -209,6 +222,8 @@ public class CardArea2D : Area2D
         GameSingleton.Instance.Dragging = !GameSingleton.Instance.Dragging;
         if (GameSingleton.Instance.Dragging)
         {
+            CardSlotNode2D.AbilityHintNode2D.Hide();
+
             GameSingleton.Instance.DragSource = this;
             GameSingleton.Instance.DragTarget = null;
             _dragLocalMousePos = GetLocalMousePosition();
