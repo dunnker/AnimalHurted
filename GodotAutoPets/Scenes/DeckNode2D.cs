@@ -11,7 +11,6 @@ public interface ICardSelectHost
 
 public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 {
-    System.Threading.Thread _gameThread;
     Deck _deck;
 
     public AudioStreamPlayer ThumpPlayer { get { return GetNode<AudioStreamPlayer>("ThumpPlayer"); } }
@@ -19,9 +18,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     public AudioStreamPlayer WhooshPlayer { get { return GetNode<AudioStreamPlayer>("WhooshPlayer"); } }
 
     public Deck Deck { get { return _deck; } }
-
-    [Signal]
-    public delegate void CardGainedXPDragDropSignal();
 
     public CardSlotNode2D GetCardSlotNode2D(int index)
     {
@@ -69,8 +65,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        if (_gameThread != null)
-            _gameThread.Abort();
         // Dispose can be called from Godot editor, and our singleton
         // may not have a Game when designing
         if (GameSingleton.Instance.Game != null)
@@ -88,9 +82,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         GameSingleton.Instance.Game.CardSummonedEvent += _game_CardSummonedEvent;
         GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
-
-        Connect("CardGainedXPDragDropSignal", this, "_signal_CardGainedXPDragDrop", null,
-            (int)ConnectFlags.Deferred);
     }
 
     public void PlayThump()
@@ -201,7 +192,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                 if (_deck[targetCardArea2D.CardIndex] == null)
                 {
                     // moving a card does not invoke any game events otherwise this
-                    // would need to be done in a thread
+                    // would need to be done with a queue
                     _deck.MoveCard(_deck[sourceCardArea2D.CardIndex], targetCardArea2D.CardIndex);
                 }
                 else
@@ -209,16 +200,12 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                     if ((targetCardArea2D.CardIndex != sourceCardArea2D.CardIndex) && 
                         _deck[targetCardArea2D.CardIndex].Ability == sourceDeck.Deck[sourceCardArea2D.CardIndex].Ability)
                     {
-                        _gameThread = new System.Threading.Thread(() =>
-                        {
-                            // leveling up can trigger abilities, so doing this in a thread
-                            // events will update UI
-                            _deck[targetCardArea2D.CardIndex].GainXP(sourceDeck.Deck[sourceCardArea2D.CardIndex]);
-
-                            this.EmitSignal("CardGainedXPDragDropSignal");
-                        });
-                        _gameThread.Name = "DragDropped Game Thread";
-                        _gameThread.Start();
+                        var queue = new CardCommandQueue();
+                        var card = _deck[targetCardArea2D.CardIndex];
+                        card.GainXP(queue, sourceDeck.Deck[sourceCardArea2D.CardIndex]);
+                        targetCardArea2D.RenderCard(card, card.Index);
+                        // show animations from abilities, like Fish
+                        (GetParent() as BuildNode).ExecuteQueue(queue);
                     }
                 }
 
@@ -226,11 +213,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                 PlayThump();   
             }
         }
-        RenderDeck(_deck);
-    }
-
-    public void _signal_CardGainedXPDragDrop()
-    {
         RenderDeck(_deck);
     }
 
@@ -310,6 +292,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             }
 
             // make the summoned card appear, but after we positioned the deck
+            // otherwise the summoned card might appear behind some other pet on the opponent deck
             cardSlot.CardArea2D.RenderCard(_deck[index], index);
         
             command.UserEvent?.Invoke(this, EventArgs.Empty);

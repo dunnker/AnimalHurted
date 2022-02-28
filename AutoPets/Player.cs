@@ -126,7 +126,7 @@ namespace AutoPets
             NewShopFood();
         }
 
-        public void BuyFood(Card card, int index)
+        public void BuyFood(CardCommandQueue queue, Card card, int index)
         {
             Food food;
             if (index == 1)
@@ -138,9 +138,7 @@ namespace AutoPets
                 foodCost = 1;
             if (Gold < foodCost)
                 throw new Exception("Not enough gold to buy food.");
-            var queue = new CardCommandQueue();
             card.Eat(queue, food);
-            queue.Execute();
             if (index == 1)
                 _shopFood1 = null;
             else
@@ -157,7 +155,7 @@ namespace AutoPets
         public void BuildEnded(CardCommandQueue queue)
         {
             foreach (var c in _buildDeck)
-                c.BuildEnded(queue);
+                c.Ability.RoundEnded(queue, c);
         }
 
         public void NewRound(bool won, bool lost, int round)

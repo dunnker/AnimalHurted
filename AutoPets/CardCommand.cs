@@ -211,6 +211,8 @@ namespace AutoPets
         Deck _atDeck;
         Card _summonedCard;
 
+        public int AtIndex { get { return _atIndex; } }
+
         public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints,
             int level = 1) : base(card)
         {

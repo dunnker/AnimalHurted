@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AutoPets
 {
@@ -15,18 +16,23 @@ namespace AutoPets
             _list.Add(cardCommand);
         }
 
-        public void Execute()
+        public List<CardCommandQueue> CreateExecuteResult(Game game)
         {
-            var queue = this;
+            game.BeginUpdate();
+            var result = new List<CardCommandQueue>();
+            CardCommandQueue queue = this;
             while (queue.Count > 0)
             {
-                var nextQueue = new CardCommandQueue(); 
+                result.Add(queue);
+                var nextQueue = new CardCommandQueue();
                 foreach (var command in queue)
                 {
                     command.Execute().ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;
             }
+            game.EndUpdate();
+            return result;
         }        
 
         public IEnumerator<CardCommand> GetEnumerator()

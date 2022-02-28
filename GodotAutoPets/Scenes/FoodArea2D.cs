@@ -1,12 +1,9 @@
-using Godot;
 using System;
-using System.Threading;
+using Godot;
 using AutoPets;
 
 public class FoodArea2D : Area2D
 {
-    System.Threading.Thread _gameThread;
-
     Vector2 _defaultPosition;
     Vector2 _dragLocalMousePos;
     int _defaultZIndex;
@@ -18,17 +15,6 @@ public class FoodArea2D : Area2D
 
     [Signal]
     public delegate void StartStopDragSignal();
-
-    [Signal]
-    public delegate void BuyFoodOverSignal();
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        // Dispose can be called from Godot editor so check if thread exists
-        if (_gameThread != null)
-            _gameThread.Abort();
-    }
 
     public void _on_Area2D_mouse_entered()
     {
@@ -104,14 +90,15 @@ public class FoodArea2D : Area2D
                     var card = BuildNode.DeckNode2D.Deck[cardArea2D.CardIndex];
                     if (card != null)
                     {
-                        _gameThread = new System.Threading.Thread(() =>
-                        {
-                            BuildNode.Player.BuyFood(card, Index);
+                        var queue = new CardCommandQueue();
+                        BuildNode.Player.BuyFood(queue, card, Index);
 
-                            this.EmitSignal("BuyFoodOverSignal");
-                        });
-                        _gameThread.Name = "Buy Food Thread";
-                        _gameThread.Start();
+                        BuildNode.RenderFood(1, BuildNode.Player.ShopFood1);
+                        BuildNode.RenderFood(2, BuildNode.Player.ShopFood2);
+                        BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
+                        BuildNode.DeckNode2D.GulpPlayer.Play();
+
+                        BuildNode.ExecuteQueue(queue);
                     }
                 }
             }
@@ -120,18 +107,9 @@ public class FoodArea2D : Area2D
         }
     }
 
-    public void _signal_BuyFoodOver()
-    {
-        BuildNode.RenderFood(1, BuildNode.Player.ShopFood1);
-        BuildNode.RenderFood(2, BuildNode.Player.ShopFood2);
-        BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
-        BuildNode.DeckNode2D.GulpPlayer.Play();
-    }
-
     public override void _Ready()
     {
         Connect("StartStopDragSignal", this, "_signal_StartStopDrag");
-        Connect("BuyFoodOverSignal", this, "_signal_BuyFoodOver", null, (int)ConnectFlags.Deferred);
         _defaultPosition = Position;
         _defaultZIndex = ZIndex;
     }

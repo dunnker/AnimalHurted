@@ -77,13 +77,13 @@ namespace AutoPets
             return string.Format("Buy => Give a random friend +{0} attack and +{1} health.", card.Level, card.Level);
         }
 
-        public override void Bought(Card card)
+        public override void Bought(CardCommandQueue queue, Card card)
         {
-            base.Bought(card);
+            base.Bought(queue, card);
             // find and buff a random card that is not the otter
             var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { card.Index });
             if (buffCard != null)
-                buffCard.Buff(card.Index, card.Level, card.Level);
+                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, card.Level));
         }
     }
 
@@ -100,21 +100,17 @@ namespace AutoPets
             return string.Format("Sell => Give two random friends +{0} health.", card.Level);
         }
 
-        public override void Sold(Card card, int index)
+        public override void Sold(CardCommandQueue queue, Card card, int index)
         {
-            //TODO the second card found might be the same as the first one we found
-            // but SAP doesn't work that way, it finds two unique cards to buff
-            // we could keep our game the way it is, or change it to be more like SAP
-            // e.g. we could change GetRandomCard to allow more than one index to exclude in its search
-            // probably best way to implement that would be to dynamically create a 
-            // new array of pets that are exclusive to the otter and the first pet we found
-            // and then get a random pet from that array
+            base.Sold(queue, card, index);
             var buffCard1 = card.Deck.GetRandomCard(new HashSet<int>() { index });
-            var buffCard2 = card.Deck.GetRandomCard(new HashSet<int>() { index });
-            if (buffCard1 != null && buffCard2 != null)
+            if (buffCard1 != null)
             {
-                buffCard1.Buff(index, card.Level, 0);
-                buffCard2.Buff(index, card.Level, 0);
+                queue.Add(new BuffCardCommand(buffCard1, index, card.Level, 0));
+                // second card can't be the first card we found
+                var buffCard2 = card.Deck.GetRandomCard(new HashSet<int>() { index, buffCard1.Index });
+                if (buffCard2 != null)
+                    queue.Add(new BuffCardCommand(buffCard2, index, card.Level, 0));
             }
         }
     }
@@ -163,9 +159,9 @@ namespace AutoPets
             return string.Format("Sell => Gain an extra {0} gold.", card.Level);
         }
 
-        public override void Sold(Card card, int index)
+        public override void Sold(CardCommandQueue queue, Card card, int index)
         {
-            base.Sold(card, index);
+            base.Sold(queue, card, index);
             card.Deck.Player.Gold += card.Level;
         }
     }
@@ -183,9 +179,9 @@ namespace AutoPets
             return string.Format("Sell => Give shop pets {0} health.", card.Level);
         }
 
-        public override void Sold(Card card, int index)
+        public override void Sold(CardCommandQueue queue, Card card, int index)
         {
-            base.Sold(card, index);
+            base.Sold(queue, card, index);
             foreach (var shopCard in card.Deck.Player.ShopDeck)
                 shopCard.Buff(-1, card.Level, 0);
         }
@@ -204,13 +200,13 @@ namespace AutoPets
             return string.Format("Level-up => Give all friends {0} health.", card.Level);
         }
 
-        public override void LeveledUp(Card card)
+        public override void LeveledUp(CardCommandQueue queue, Card card)
         {
-            base.LeveledUp(card);
-            foreach (var tempCard in card.Deck)
+            base.LeveledUp(queue, card);
+            foreach (var friendCard in card.Deck)
             {
-                if (tempCard != card)
-                    tempCard.Buff(card.Index, card.Level - 1, card.Level - 1);
+                if (friendCard != card)
+                    queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level - 1, card.Level - 1));
             }
         }
     }
@@ -251,9 +247,9 @@ namespace AutoPets
             return "Buy => Copy health from the most healthy friend.";
         }
 
-        public override void Bought(Card card)
+        public override void Bought(CardCommandQueue queue, Card card)
         {
-            base.Bought(card);
+            base.Bought(queue, card);
             var maxCard = card.Deck.OrderByDescending(c => c.TotalHitPoints).First();
             // if maxCard was buffed by a cupcake, then we're taking on those hit points
             // as well. not sure what SAP does in this case
@@ -467,8 +463,13 @@ namespace AutoPets
                 {
                     var opponent = card.Deck.Player.GetOpponentPlayer();
                     if (opponent.BattleDeck[opponent.BattleDeck.Size - i] == null)
-                        queue.Add(new SummonCardCommand(card, opponent.BattleDeck, opponent.BattleDeck.Size - i, 
-                            AbilityList.Instance.DirtyRatAbility, 1, 1));
+                    {
+                        int summonIndex = Ability.GetSummonIndex(queue, opponent.BattleDeck, 
+                            opponent.BattleDeck.Size - i);
+                        if (summonIndex != -1)
+                            queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
+                                AbilityList.Instance.DirtyRatAbility, 1, 1));
+                    }
                 }
             }
         }
@@ -496,12 +497,12 @@ namespace AutoPets
             return $"Friend sold => Give a random friend +{card.Level} health.";
         }
 
-        public override void FriendSold(Card card, Card soldCard)
+        public override void FriendSold(CardCommandQueue queue, Card card, Card soldCard)
         {
-            base.FriendSold(card, soldCard);
+            base.FriendSold(queue, card, soldCard);
             var buffCard = card.Deck.GetRandomCard(new HashSet<int> { card.Index });
             if (buffCard != null)
-                buffCard.Buff(card.Index, card.Level, 0);
+                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, 0));
         }
     }   
 
@@ -523,6 +524,8 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             int randIndex = card.Deck.Player.Game.Random.Next(0, AbilityList.Instance.TierThreeAbilities.Count);
             var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
+            // spider has fainted so we have the empty slot for the new card
+            // otherwise would need to use Ability.GetSummonIndex()
             queue.Add(new SummonCardCommand(card, card.Deck, index, ability, 2, 2, card.Level));
         }
     }
@@ -745,10 +748,10 @@ namespace AutoPets
             return $"Friend eats shop food => Give it +{card.Level} health.";
         }
 
-        public override void FriendAteFood(Card card, Card friendCard)
+        public override void FriendAteFood(CardCommandQueue queue, Card card, Card friendCard)
         {
-            base.FriendAteFood(card, friendCard);
-            friendCard.Buff(card.Index, card.Level, 0);
+            base.FriendAteFood(queue, card, friendCard);
+            queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, 0));
         }
     }
 
@@ -768,12 +771,14 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
+            // for the first ram we have the empty slot because the sheep has fainted
             queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
                 card.Level * 2, card.Level * 2));
-            // see comments in SummonCardCommand, it will only summon the card if it can find room for it
-            // either at index, or past index
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
-                card.Level * 2, card.Level * 2));
+            //...but second ram we use GetSummonIndex to attempt to find a spot for it
+            int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
+            if (summonIndex != -1)
+                queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
+                    card.Level * 2, card.Level * 2));
         }
     }
 
@@ -799,13 +804,13 @@ namespace AutoPets
             return $"Buy => If you lost last battle, give all friends +{card.Level}/+{card.Level}.";
         }
 
-        public override void Bought(Card card)
+        public override void Bought(CardCommandQueue queue, Card card)
         {
-            base.Bought(card);
+            base.Bought(queue, card);
             if (card.Deck.Player.LostLastBattle)
                 foreach (var c in card.Deck)
                     if (c != card)
-                        c.Buff(card.Index, card.Level, card.Level);
+                        queue.Add(new BuffCardCommand(c, card.Index, card.Level, card.Level));
         }
     }
 

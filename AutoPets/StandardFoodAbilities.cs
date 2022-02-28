@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace AutoPets
 {
@@ -8,7 +9,9 @@ namespace AutoPets
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBeeAbility, 1, 1));
+            int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
+            if (summonIndex != -1)
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieBeeAbility, 1, 1));
         }
     }
 

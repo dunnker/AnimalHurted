@@ -8,8 +8,8 @@ using System.Diagnostics;
 
 namespace AutoPets
 {
-    public delegate void CardCommandAttackEventHandler(object sender, CardCommand command);
-    public delegate void CardCommandEventHandler(object sender, CardCommand command, Card card, int index);
+    public delegate void CardCommandEventHandler(object sender, CardCommand command);
+    public delegate void CardCommandSummonedEventHandler(object sender, CardCommand command, Card card, int index);
     public delegate void CardCommandFaintedEventHandler(object sender, CardCommand command, Deck deck, int index);
     public delegate void CardCommandBuffedEventHandler(object sender, CardCommand command, Card card, int sourceIndex);
     public delegate void CardCommandHurtEventHandler(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex);
@@ -46,9 +46,9 @@ namespace AutoPets
         public List<Ability> TierAbilities { get { return _tierAbilities; } }
         public List<Food> TierFood { get { return _tierFood; } }
 
-        public event CardCommandAttackEventHandler AttackEvent;
+        public event CardCommandEventHandler AttackEvent;
         public event CardCommandFaintedEventHandler CardFaintedEvent;
-        public event CardCommandEventHandler CardSummonedEvent;
+        public event CardCommandSummonedEventHandler CardSummonedEvent;
         public event CardCommandBuffedEventHandler CardBuffedEvent;
         public event CardCommandHurtEventHandler CardHurtEvent;
 
@@ -151,7 +151,7 @@ namespace AutoPets
             _player2.Roll(deductGold: false);
         }
 
-        public void BuyFromShop(int shopIndex, int buildIndex, Player player)
+        public void BuyFromShop(CardCommandQueue queue, int shopIndex, int buildIndex, Player player)
         {
             if (player.Gold < Game.PetCost)
                 throw new Exception("Not enough gold to buy pet");
@@ -160,19 +160,20 @@ namespace AutoPets
                 if (player.BuildDeck[buildIndex] == null)
                 {
                     var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
-                    card.Buy(buildIndex);
+                    card.Summon(buildIndex);
                     player.ShopDeck.Remove(shopIndex);
-
-                    var queue = new CardCommandQueue();
-                    foreach (var c in player.BuildDeck)
+                    card.Ability.Bought(queue, card);
+                    foreach (var c in card.Deck)
                         if (c != card)
+                        {
+                            c.Ability.FriendBought(queue, c, card);
                             c.Ability.FriendSummoned(queue, c, card);
-                    queue.Execute();
+                        }
                 }
                 else
                 {
                     if (player.ShopDeck[shopIndex].Ability == player.BuildDeck[buildIndex].Ability)
-                        player.BuildDeck[buildIndex].GainXP(player.ShopDeck[shopIndex]);
+                        player.BuildDeck[buildIndex].GainXP(queue, player.ShopDeck[shopIndex]);
                 }
                 player.Gold -= Game.PetCost;
             }

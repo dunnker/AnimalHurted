@@ -10,16 +10,17 @@ using System.Linq;
 
 public class BattleNode : Node
 {
-    int _playQueueIndex;
     bool _playingAttack;
     bool _playingBattle;
 
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
 
+    CardCommandQueueReader _reader;
+
     // every card command event (OnHurt, OnFaint etc.) that is handled by BattleNode and DeckNode2D
     // must be finished before MaxTimePerEvent. See comments in PositionDecks
-    public const float MaxTimePerEvent = 0.7f;
+    public const float MaxTimePerEvent = 0.5f;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
@@ -30,7 +31,7 @@ public class BattleNode : Node
     public FileDialog SaveFileDialog { get { return GetNode<FileDialog>("SaveFileDialog"); } } 
 
     [Signal]
-    public delegate void OneAttackOverSignal();
+    public delegate void ExecuteQueueOverSignal();
 
     protected override void Dispose(bool disposing)
     {
@@ -46,7 +47,7 @@ public class BattleNode : Node
 
     public override void _Ready()
     {
-        Connect("OneAttackOverSignal", this, "_signal_OneAttackOver", null, 
+        Connect("ExecuteQueueOverSignal", this, "_signal_ExecuteQueueOver", null, 
             // important to be Deferred because it ensures that all tweens will be freed
             // before the next set of animation events fire off -- so a new "tween_completed"
             // signal can be invoked
@@ -58,11 +59,11 @@ public class BattleNode : Node
         GameSingleton.Instance.Game.AttackEvent += _game_AttackEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
 
-        _playQueueIndex = -1;
-
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.ReverseCardAreaPositions();
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
+
+        _reader = new CardCommandQueueReader(this, GameSingleton.Instance.FightResult, "ExecuteQueueOverSignal");
     }
 
     public override void _Input(InputEvent @event)
@@ -97,89 +98,56 @@ public class BattleNode : Node
         Player1DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player1.BattleDeck);
         Player2DeckNode2D.RenderDeck(GameSingleton.Instance.Game.Player2.BattleDeck);
 
-        _playQueueIndex = -1;
-
-        //if (_autoPlay)
-        //    PlayBattle();
+        _reader.Reset();
     }
 
     public void _on_PlayOneButton_pressed()
     {
         if (!_playingAttack && !_playingBattle)
         {
-            _playQueueIndex++;
-            PlayOneAttack();
+            if (!_reader.Finished)
+            {
+                _playingAttack = true;
+                ReplayButton.Disabled = true;
+                SaveButton.Disabled = true;
+                _reader.Execute();
+            }
         }
     }
 
     public void _on_PlayButton_pressed()
     {
         if (!_playingBattle && !_playingAttack)
-            PlayBattle();
-    }
-
-    void PlayBattle()
-    {
-        _playingBattle = true;
-        _playQueueIndex = -1;
-        EmitSignal("OneAttackOverSignal");
-    }
-
-    public void _signal_OneAttackOver()
-    {
-        _playQueueIndex++;
-        if (_playQueueIndex < GameSingleton.Instance.FightResult.Count)
-            PlayOneAttack();
-        else
         {
-            // battle is now finished
-            _playingBattle = false;
-        }
-    }
-
-    void PlayOneAttack()
-    {
-        if (_playQueueIndex < GameSingleton.Instance.FightResult.Count)
-        {
-            _playingAttack = true;
-            ReplayButton.Disabled = true;
-            SaveButton.Disabled = true;
-
-            // Each item in a FightResult is a list of commands
-            // Each press of the 'Play' button executes one or more commands for just one item in FightResult
-            var oneAttackResult = GameSingleton.Instance.FightResult[_playQueueIndex];
-
-            // Get notification of when the last command is finished animation
-            // Any event handler associated with the last command invokes UserEvent when finished playing
-            // its animation to notify when done.
-            oneAttackResult.Last().UserEvent += _event_UserEvent;    
-
-            foreach (var command in oneAttackResult)
+            if (!_reader.Finished)
             {
-                // Each command Execute might inflict damage (HurtCommand), faint a pet (FaintCommand)
-                // buff the health of a pet (BuffCommand) etc.
-                // In turn, a corresonding event is fired off, OnHurt, OnFaint etc. and this scene,
-                // or the DeckNode2D scene responds to the event and renders an animation 
-
-                command.Execute();
-
-                // not executing abilities during replay, because abilities
-                // have already been processed in Game.CreateFightResult():
-                //command.ExecuteAbility()
+                _playingBattle = true;
+                ReplayButton.Disabled = true;
+                SaveButton.Disabled = true;
+                _reader.Execute();
             }
         }
     }
 
-    public void _event_UserEvent(object sender, EventArgs e)
+    public void _signal_ExecuteQueueOver()
     {
         _playingAttack = false;
-        ReplayButton.Disabled = false;
-        SaveButton.Disabled = false;
-            
-        GameSingleton.Instance.FightResult[_playQueueIndex].Last().UserEvent -= _event_UserEvent;    
-
         if (_playingBattle)
-            EmitSignal("OneAttackOverSignal");
+        {
+            if (_reader.Finished)
+            {
+                _playingBattle = false;
+                ReplayButton.Disabled = false;
+                SaveButton.Disabled = false;
+            }
+            else
+                _reader.Execute();
+        }
+        else
+        {
+            ReplayButton.Disabled = false;
+            SaveButton.Disabled = false;
+        }
     }
 
     public async void _game_AttackEvent(object sender, CardCommand command)

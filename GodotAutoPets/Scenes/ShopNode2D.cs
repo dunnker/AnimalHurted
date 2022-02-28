@@ -1,36 +1,16 @@
 using System;
-using System.Threading;
 using Godot;
 using AutoPets;
 
 public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
 {
-    System.Threading.Thread _gameThread;
-
     public BuildNode BuildNode { get { return GetParent() as BuildNode; } }
 
     public Deck Deck { get { return BuildNode.Player.ShopDeck; } }
 
-    [Signal]
-    public delegate void CardBoughtSignal();
-
     public CardSlotNode2D GetCardSlotNode2D(int index)
     {
         return GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", index));
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        // Dispose can be called from Godot editor so check if thread exists
-        if (_gameThread != null)
-            _gameThread.Abort();
-    }
-
-    public override void _Ready()
-    {
-        Connect("CardBoughtSignal", this, "_signal_CardBought", null, 
-            (int)ConnectFlags.Deferred);
     }
 
     public void RenderShop()
@@ -43,11 +23,6 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
             if (i >= GameSingleton.Instance.Game.ShopSlots)
                 cardSlot.Hide();
         }
-    }
-
-    public override void _Process(float delta)
-    {
-        
     }
 
     // IDragParent
@@ -74,18 +49,13 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
                     // we don't want the card shown in the shop during animations
                     sourceCardArea2D.HideCard();
 
-                    _gameThread = new System.Threading.Thread(() => 
-                    {
-                        // from here events can be invoked in DeckNode2D, which send
-                        // signals on main thread to render changes
-                        GameSingleton.Instance.Game.BuyFromShop(sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
-                            BuildNode.Player);
-                        // notify the scene that the thread is finished
-                        // assuming "this" is still valid. See Dispose method where thread is aborted
-                        this.EmitSignal("CardBoughtSignal");
-                    });
-                    _gameThread.Name = "Shop Game Thread";
-                    _gameThread.Start();
+                    var queue = new CardCommandQueue();
+                    GameSingleton.Instance.Game.BuyFromShop(queue, sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
+                        BuildNode.Player);
+                    RenderShop();
+                    BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
+                    BuildNode.DeckNode2D.PlayThump();
+                    BuildNode.ExecuteQueue(queue);
                 }
             }
         }
@@ -99,12 +69,5 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
     public bool GetCanDrag()
     {
         return BuildNode.Player.Gold >= Game.PetCost;
-    }
-
-    public void _signal_CardBought()
-    {
-        RenderShop();
-        BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
-        BuildNode.DeckNode2D.PlayThump();
     }
 }

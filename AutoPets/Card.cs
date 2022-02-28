@@ -182,12 +182,7 @@ namespace AutoPets
             _ability.RoundStarted(this);
         }
 
-        public void BuildEnded(CardCommandQueue queue)
-        {
-            _ability.RoundEnded(queue, this);
-        }
-
-        public void GainXP(Card fromCard)
+        public void GainXP(CardCommandQueue queue, Card fromCard)
         {
             //TODO: what if already at Level 3?
             //TODO: merge food
@@ -229,7 +224,7 @@ namespace AutoPets
 
             if (Level > oldLevel)
             {
-                _ability.LeveledUp(this);
+                _ability.LeveledUp(queue, this);
             }
         }
 
@@ -245,25 +240,16 @@ namespace AutoPets
             _deck.Remove(_index);
         }
 
-        public void Buy(int atIndex)
-        {
-            Summon(atIndex);
-            _ability.Bought(this);
-            foreach (var card in _deck)
-                if (card != this)
-                    card._ability.FriendBought(card, this);
-        }
-
-        public void Sell()
+        public void Sell(CardCommandQueue queue)
         {
             int saveIndex = _index;
             // remove first in case ability spawns something in place, see also Faint()
             _deck.Remove(_index);
             _deck.Player.Gold += Level;
-            _ability.Sold(this, saveIndex);
+            _ability.Sold(queue, this, saveIndex);
             foreach (var c in _deck)
                 if (c != this)
-                    c._ability.FriendSold(c, this);
+                    c._ability.FriendSold(queue, c, this);
         }
 
         public void Hurt(int damage, Deck sourceDeck, int sourceIndex)
@@ -286,10 +272,10 @@ namespace AutoPets
         public void Eat(CardCommandQueue queue, Food food)
         {
             food.Execute(queue, this);
-            _ability.AteFood(this);
+            _ability.AteFood(queue, this);
             foreach (var card in _deck)
                 if (card != this)
-                    card._ability.FriendAteFood(card, this);
+                    card._ability.FriendAteFood(queue, card, this);
         }
     }
 }

@@ -1,13 +1,11 @@
 using System;
-using System.Threading;
 using Godot;
 using AutoPets;
 
 public class BuildNode : Node
 {
     Player _player;
-    System.Threading.Thread _gameThread;
-    bool _pauseBeforeContinue;
+    CardCommandQueueReader _reader;
 
     public ShopNode2D ShopNode2D { get { return GetNode<ShopNode2D>("ShopNode2D"); } }
 
@@ -22,10 +20,7 @@ public class BuildNode : Node
     public Label PlayerNameLabel { get { return GetNode<Label>("PlayerAttrsNode2D/PlayerNameLabel"); } } 
 
     [Signal]
-    public delegate void SellOverSignal();
-
-    [Signal]
-    public delegate void RoundOverSignal();
+    public delegate void ExecuteQueueOverSignal();
 
     public void _on_QuitGameButton_pressed()
     {
@@ -41,31 +36,19 @@ public class BuildNode : Node
         RenderFood(2, _player.ShopFood2);
     }
 
-    public void _on_ContinueButton_pressed()
+    public async void _on_ContinueButton_pressed()
     {
         GetNode<Button>("ContinueButton").Disabled = true;
 
-        _gameThread = new System.Threading.Thread(() => 
+        var queue = new CardCommandQueue();
+        _player.BuildEnded(queue);
+        if (queue.Count > 0)
         {
-            // from here events can be invoked in DeckNode2D, which send
-            // signals on main thread to render changes
-            var queue = new CardCommandQueue();
-            _player.BuildEnded(queue);
-            if (queue.Count > 0)
-            {
-                _pauseBeforeContinue = true;
-                queue.Execute();
-            }
-
-            this.EmitSignal("RoundOverSignal");
-        });
-        _gameThread.Start();
-    }
-
-    public async void _signal_RoundOver()
-    {
-        if (_pauseBeforeContinue)
+            ExecuteQueue(queue);
+            // if cards were buffed, give a short pause to let user be aware of animations
             await ToSignal(GetTree().CreateTimer(1f), "timeout");
+        }
+
         _player.GoldChangedEvent -= _GoldChangedEvent;
 
         if (_player == GameSingleton.Instance.Game.Player1)
@@ -94,23 +77,36 @@ public class BuildNode : Node
             var card = _player.BuildDeck[cardSlot.CardArea2D.CardIndex];
             cardSlot.CardArea2D.RenderCard(null, card.Index);
             cardSlot.Selected = false;
-            _gameThread = new System.Threading.Thread(() => 
-            {
-                // from here events can be invoked in DeckNode2D, which send
-                // signals on main thread to render changes
-                card.Sell();
 
-                this.EmitSignal("SellOverSignal");
-            });
-            _gameThread.Name = "Sell Game Thread";
-            _gameThread.Start();
+            var queue = new CardCommandQueue();
+            card.Sell(queue);
+            ExecuteQueue(queue);
+
+            // in case a Duck was sold, refresh the shop
+            ShopNode2D.RenderShop();
         }
     }
 
-    public void _signal_SellOver()
+    public void ExecuteQueue(CardCommandQueue queue)
     {
-		// in case a Duck was sold, refresh the shop
-        ShopNode2D.RenderShop();
+        if (queue.Count > 0)
+        {
+            var saveDeck = new Deck(_player, Game.BuildDeckSlots);
+            _player.BuildDeck.CloneTo(saveDeck);
+            var list = queue.CreateExecuteResult(GameSingleton.Instance.Game);
+            saveDeck.CloneTo(_player.BuildDeck);
+            if (list.Count > 0)
+            {
+                _reader = new CardCommandQueueReader(this, list, "ExecuteQueueOverSignal");
+                _reader.Execute();
+            }
+        }
+    }
+
+    public void _signal_ExecuteQueueOver()
+    {
+        if (!_reader.Finished)
+            _reader.Execute();
     }
 
     public void _on_ShopPetOKButton_pressed()
@@ -166,9 +162,7 @@ public class BuildNode : Node
         RenderFood(1, _player.ShopFood1);
         RenderFood(2, _player.ShopFood2);
 
-        Connect("SellOverSignal", this, "_signal_SellOver", null, 
-            (int)ConnectFlags.Deferred);
-        Connect("RoundOverSignal", this, "_signal_RoundOver", null, 
+        Connect("ExecuteQueueOverSignal", this, "_signal_ExecuteQueueOver", null, 
             (int)ConnectFlags.Deferred);
     }
 
