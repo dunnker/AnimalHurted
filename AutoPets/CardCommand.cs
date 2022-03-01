@@ -214,27 +214,27 @@ namespace AutoPets
 
     public class SummonCardCommand : CardCommand
     {
-        Ability _ability;
+        Type _abilityType;
         int _atIndex;
         int _hitPoints;
         int _attackPoints;
         int _level;
         Deck _atDeck;
         Card _summonedCard;
-        FoodAbility _foodAbility;
+        Type _foodAbilityType;
 
         public int AtIndex { get { return _atIndex; } }
 
-        public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints,
-            int level = 1, FoodAbility foodAbility = null) : base(card)
+        public SummonCardCommand(Card card, Deck atDeck, int atIndex, Type abilityType, int hitPoints, int attackPoints,
+            int level = 1, Type foodAbilityType = null) : base(card)
         {
             _atDeck = atDeck;
-            _ability = ability;
+            _abilityType = abilityType;
             _atIndex = atIndex;
             _hitPoints = hitPoints;
             _attackPoints = attackPoints;
             _level = level;
-            _foodAbility = foodAbility;
+            _foodAbilityType = foodAbilityType;
         }
 
         public override CardCommand Execute()
@@ -269,13 +269,15 @@ namespace AutoPets
 				// we might consider creating a "NoEvent" handler for this specific case
                 throw new Exception("No place to summon pet.");
 
-            _summonedCard = new Card(_atDeck, _ability)
+            var ability = Activator.CreateInstance(_abilityType) as Ability;
+            _summonedCard = new Card(_atDeck, ability)
             {
                 HitPoints = _hitPoints,
                 AttackPoints = _attackPoints
             };
             _summonedCard.XP = Card.GetXPFromLevel(_level);
-            _summonedCard.FoodAbility = _foodAbility;
+            if (_foodAbilityType != null)
+                _summonedCard.FoodAbility = Activator.CreateInstance(_foodAbilityType) as FoodAbility;
             _summonedCard.Summon(summonIndex);
             _atDeck.Player.Game.OnCardSummonedEvent(this, _summonedCard, summonIndex);
             return this;

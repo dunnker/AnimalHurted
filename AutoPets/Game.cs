@@ -206,53 +206,33 @@ namespace AutoPets
             return _player1.BattleDeck.GetCardCount() == 0 || _player2.BattleDeck.GetCardCount() == 0;
         }
 
-        public void FightOver()
-        {
-            _fighting = false;
-        }
-
-        public CardCommandQueue CreateAttackResult(CardCommandQueue lastQueue = null)
-        {
-            var resultQueue = new CardCommandQueue();
-            if (!_fighting)
-            {
-                _fighting = true;
-                foreach (var card in _player1.BattleDeck)
-                    card.Ability.BattleStarted(resultQueue, card);
-                foreach (var card in _player2.BattleDeck)
-                    card.Ability.BattleStarted(resultQueue, card);
-            }
-            else
-            {
-                if (lastQueue != null)
-                {
-                    foreach (var command in lastQueue)
-                    {
-                        command.Execute();
-                        command.ExecuteAbility(resultQueue);
-                    }
-                }
-            }
-            // if there were no ability methods invoked then start a new card attack
-            if (resultQueue.Count == 0)
-                if (_player1.BattleDeck.GetCardCount() > 0 && _player2.BattleDeck.GetCardCount() > 0)
-                    _player1.BattleDeck.GetLastCard().Attack(resultQueue, _player2.BattleDeck.GetLastCard());
-            return resultQueue;
-        }
-
         public List<CardCommandQueue> CreateFightResult()
         {
             // disable events
             BeginUpdate();
+            _fighting = true;
             var fightResult = new List<CardCommandQueue>();
-            CardCommandQueue lastQueue = null;
-            do
+            var queue = new CardCommandQueue();
+            foreach (var card in _player1.BattleDeck)
+                card.Ability.BattleStarted1(queue, card);
+            foreach (var card in _player2.BattleDeck)
+                card.Ability.BattleStarted1(queue, card);
+            if (queue.Count > 0)
+                fightResult.AddRange(queue.CreateExecuteResult(this));
+            queue = new CardCommandQueue();
+            foreach (var card in _player1.BattleDeck)
+                card.Ability.BattleStarted2(queue, card);
+            foreach (var card in _player2.BattleDeck)
+                card.Ability.BattleStarted2(queue, card);
+            if (queue.Count > 0)
+                fightResult.AddRange(queue.CreateExecuteResult(this));
+            while (!IsFightOver())
             {
-                lastQueue = CreateAttackResult(lastQueue);
-                if (lastQueue.Count > 0)
-                    fightResult.Add(lastQueue);
-            } while (lastQueue.Count > 0 || !IsFightOver());
-            FightOver();
+                queue = new CardCommandQueue();
+                _player1.BattleDeck.GetLastCard().Attack(queue, _player2.BattleDeck.GetLastCard());
+                fightResult.AddRange(queue.CreateExecuteResult(this));
+            }
+            _fighting = false;
             EndUpdate();
             return fightResult;
         }

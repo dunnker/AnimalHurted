@@ -75,7 +75,13 @@ namespace AutoPets
 
         }
 
-        public virtual void BattleStarted(CardCommandQueue queue, Card card)
+        // BattleStarted has two phases; phase 1 is for Whale, to faint the card ahead
+        public virtual void BattleStarted1(CardCommandQueue queue, Card card)
+        {
+
+        }
+
+        public virtual void BattleStarted2(CardCommandQueue queue, Card card)
         {
 
         }

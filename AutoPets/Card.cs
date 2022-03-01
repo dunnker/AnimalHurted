@@ -43,9 +43,10 @@ namespace AutoPets
         /// <param name="card"></param>
         public Card(Deck deck, Card card)
         {
-            _ability = card._ability;
-            _renderAbility = card._renderAbility;
-            _foodAbility = card._foodAbility;
+            _ability = Activator.CreateInstance(card._ability.GetType()) as Ability;
+            _renderAbility = _ability;
+            if (card._foodAbility != null)
+                _foodAbility = Activator.CreateInstance(card._foodAbility.GetType()) as FoodAbility;
             _deck = deck;
             _index = -1;
             _hitPoints = card._hitPoints;

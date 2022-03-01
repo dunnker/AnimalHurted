@@ -56,7 +56,7 @@ namespace AutoPets
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility, card.Level, card.Level));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility.GetType(), card.Level, card.Level));
         }
     }
 
@@ -128,8 +128,9 @@ namespace AutoPets
             return string.Format("Start of battle => Deal 1 damage to {0} random enemies.", card.Level);
         }
 
-        public override void BattleStarted(CardCommandQueue queue, Card card)
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
         {
+            base.BattleStarted2(queue, card);
             var opponent = card.Deck.Player.GetOpponentPlayer();
             var excludingIndexes = new HashSet<int>();
             for (int i = 1; i <= card.Level; i++)
@@ -299,9 +300,9 @@ namespace AutoPets
             return string.Format("Start of battle => Give {0}% of Dodo's attack to friend ahead.", attackPercent);
         }
 
-        public override void BattleStarted(CardCommandQueue queue, Card card)
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
         {
-            base.BattleStarted(queue, card);
+            base.BattleStarted2(queue, card);
             // Note that this card might have been attacked by a mosquito and about to be fainted (see Game.FightOne, after calls to BattleStarted, there is a sweep to faint cards)
             // Same is true with the card ahead. It may have taken damage and about to be fainted
             // if a Dodo's ability were to buff the hitpoints of the card ahead, then that could bring the hitpoints of that card from negative to positive again --
@@ -468,7 +469,7 @@ namespace AutoPets
                             opponent.BattleDeck.Size - i);
                         if (summonIndex != -1)
                             queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
-                                AbilityList.Instance.DirtyRatAbility, 1, 1));
+                                AbilityList.Instance.DirtyRatAbility.GetType(), 1, 1));
                     }
                 }
             }
@@ -526,7 +527,7 @@ namespace AutoPets
             var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
             // spider has fainted so we have the empty slot for the new card
             // otherwise would need to use Ability.GetSummonIndex()
-            queue.Add(new SummonCardCommand(card, card.Deck, index, ability, 2, 2, card.Level));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, ability.GetType(), 2, 2, card.Level));
         }
     }
 
@@ -772,12 +773,12 @@ namespace AutoPets
         {
             base.Fainted(queue, card, index);
             // for the first ram we have the empty slot because the sheep has fainted
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility.GetType(), 
                 card.Level * 2, card.Level * 2));
             //...but second ram we use GetSummonIndex to attempt to find a spot for it
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieRamAbility, 
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieRamAbility.GetType(), 
                     card.Level * 2, card.Level * 2));
         }
     }
@@ -847,7 +848,7 @@ namespace AutoPets
     {
         public override string GetAbilityMessage(Card card)
         {
-            return $"End turn: If there's at least one level 3 friend, gain +{card.Level * 2}/+{card.Level * 2})";
+            return $"End turn => If there's at least one level 3 friend, gain +{card.Level * 2}/+{card.Level * 2})";
         }
 
         public BisonAbility() : base()
@@ -883,14 +884,14 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Fainted: Summon a {card.Level * 5}/{card.Level * 5} bus with splash attack.)";
+            return $"Fainted => Summon a {card.Level * 5}/{card.Level * 5} bus with splash attack.)";
         }
 
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBusAbility, 
-                card.Level * 5, card.Level * 5, 1, new SplashAttackAbility()));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBusAbility.GetType(), 
+                card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)));
         }
     }
 
@@ -904,12 +905,12 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Start of battle: Deal {card.Level * 5} damage to the lowest health enemy.)";
+            return $"Start of battle => Deal {card.Level * 5} damage to the lowest health enemy.)";
         }
 
-        public override void BattleStarted(CardCommandQueue queue, Card card)
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
         {
-            base.BattleStarted(queue, card);
+            base.BattleStarted2(queue, card);
             var opponent = card.Deck.Player.GetOpponentPlayer();
             if (opponent.BattleDeck.GetCardCount() > 0)
             {
@@ -930,7 +931,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Knockout: Gain +{card.Level * 2}/+{card.Level * 2}.";
+            return $"Knockout => Gain +{card.Level * 2}/+{card.Level * 2}.";
         }
 
         public override void Knockout(CardCommandQueue queue, Card card)
@@ -950,7 +951,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"End of turn: Copy ability from friend ahead as level {card.Level} until the end of battle.";
+            return $"End of turn => Copy ability from friend ahead as level {card.Level} until the end of battle.";
         }
 
         public override void NewBattleDeck(Card card)
@@ -961,7 +962,7 @@ namespace AutoPets
                 var friendCard = card.Deck[card.Index + 1];
                 if (friendCard != null)
                     // card.RenderAbility will still be Parrot
-                    card.Ability = friendCard.Ability;
+                    card.Ability = Activator.CreateInstance(friendCard.Ability.GetType()) as Ability;
             }
         }
     }
@@ -976,7 +977,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"End of turn: Give other level 2 and 3 friends +{card.Level}/+{card.Level}.";
+            return $"End of turn => Give other level 2 and 3 friends +{card.Level}/+{card.Level}.";
         }    
 
         public override void RoundEnded(CardCommandQueue queue, Card card)
@@ -1009,7 +1010,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Faint: Summon {card.Level} chick(s) with 1 health and half of the attack.";
+            return $"Faint => Summon {card.Level} chick(s) with 1 health and half of the attack.";
         }    
 
         public override void Fainted(CardCommandQueue queue, Card card, int index)
@@ -1020,7 +1021,7 @@ namespace AutoPets
                 int summonIndex = GetSummonIndex(queue, card.Deck, index);
                 // doing integer division, so adding +1 to card.TotalAttackPoints to round up
                 int attackPoints = (card.TotalAttackPoints + 1) / 2;
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieChickAbility, 
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieChickAbility.GetType(), 
                     1, attackPoints));
             }
         }
@@ -1036,12 +1037,12 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Start of battle: Reduce health of the highest health enemy by {card.Level * 33}%.";
+            return $"Start of battle => Reduce health of the highest health enemy by {card.Level * 33}%.";
         }
 
-        public override void BattleStarted(CardCommandQueue queue, Card card)
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
         {
-            base.BattleStarted(queue, card);
+            base.BattleStarted2(queue, card);
             var opponent = card.Deck.Player.GetOpponentPlayer();
             if (opponent.BattleDeck.GetCardCount() > 0)
             {
@@ -1065,7 +1066,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return $"Start of turn: Discount shop food by {card.Level} gold.";
+            return $"Start of turn => Discount shop food by {card.Level} gold.";
         }
 
         public override void RoundStarted(Card card)
@@ -1080,10 +1081,41 @@ namespace AutoPets
 
     public class WhaleAbility : Ability
     {
+        Card _friendAhead;
+
         public WhaleAbility() : base()
         {
             DefaultHP = 6;
             DefaultAttack = 2;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of battle => Swallow friend ahead and release it as level {card.Level} after fainting.";
+        }
+
+        public override void BattleStarted1(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted1(queue, card);
+            if (card.Index + 1 < card.Deck.Size)
+            {
+                _friendAhead = card.Deck[card.Index + 1];
+                // we faint the card in BattleStarted1 because we don't want other ability methods
+                // to target this card within the same queue.
+                if (_friendAhead != null && _friendAhead.TotalHitPoints > 0)
+                    queue.Add(new FaintCardCommand(_friendAhead));
+            }
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            if (_friendAhead != null)
+            {
+                //TODO: restore food ability on the summoned card?
+                queue.Add(new SummonCardCommand(card, card.Deck, index, _friendAhead.Ability.GetType(), 
+                    _friendAhead.TotalHitPoints, _friendAhead.TotalAttackPoints, card.Level));
+            }
         }
     }
 
