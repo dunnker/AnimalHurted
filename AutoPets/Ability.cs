@@ -109,6 +109,11 @@ namespace AutoPets
 
         }
 
+        public virtual void Knockout(CardCommandQueue queue, Card card)
+        {
+
+        }
+
         public virtual void Hurt(CardCommandQueue queue, Card card)
         {
 

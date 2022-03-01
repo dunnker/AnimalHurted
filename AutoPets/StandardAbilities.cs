@@ -901,6 +901,23 @@ namespace AutoPets
             DefaultHP = 6;
             DefaultAttack = 4;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of battle: Deal {card.Level * 5} damage to the lowest health enemy.)";
+        }
+
+        public override void BattleStarted(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            if (opponent.BattleDeck.GetCardCount() > 0)
+            {
+                var targetCard = opponent.BattleDeck.Aggregate((minCard, nextCard) => 
+                    minCard.TotalHitPoints < nextCard.TotalHitPoints ? minCard : nextCard);
+                queue.Add(new HurtCardCommand(targetCard, card.Level * 5, card.Deck, card.Index));
+            }
+        }
     }
 
     public class HippoAbility : Ability
@@ -909,6 +926,17 @@ namespace AutoPets
         {
             DefaultHP = 7;
             DefaultAttack = 4;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Knockout: Gain +{card.Level * 2}/+{card.Level * 2}.";
+        }
+
+        public override void Knockout(CardCommandQueue queue, Card card)
+        {
+            base.Knockout(queue, card);
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
         }
     }
 
