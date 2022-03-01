@@ -73,6 +73,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             GameSingleton.Instance.Game.CardSummonedEvent -= _game_CardSummonedEvent;
             GameSingleton.Instance.Game.CardBuffedEvent -= _game_CardBuffedEvent;
             GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
+            GameSingleton.Instance.Game.CardGainedFoodAbilityEvent -= _game_CardGainedFoodAbilityEvent;
         }
     }
 
@@ -82,6 +83,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         GameSingleton.Instance.Game.CardSummonedEvent += _game_CardSummonedEvent;
         GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
+        GameSingleton.Instance.Game.CardGainedFoodAbilityEvent += _game_CardGainedFoodAbilityEvent;
     }
 
     public void PlayThump()
@@ -346,6 +348,31 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
             damageArea2D.QueueFree();
 
+            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+
+            command.UserEvent?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public async void _game_CardGainedFoodAbilityEvent(object sender, CardCommand command, Card card, int index)
+    {
+        if (card.Deck == this._deck)
+        {
+            var cardSlot = GetCardSlotNode2D(card.Index + 1);
+            /*var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+
+            var buffArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/BuffArea2D.tscn");
+            Area2D buffArea2D = buffArea2DScene.Instance() as Area2D;
+            GetParent().AddChild(buffArea2D);
+            buffArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
+
+            await DeckNode2D.ThrowArea2D(GetParent(), buffArea2D, cardSlot.GlobalPosition);
+
+            buffArea2D.QueueFree();*/
+
+            await ToSignal(GetTree().CreateTimer(0.5f), "timeout"); //TODO remove
+
+            GulpPlayer.Play();
             cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);

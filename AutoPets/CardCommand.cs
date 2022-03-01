@@ -77,6 +77,8 @@ namespace AutoPets
                 Card.Ability.Hurt(queue, Card);
             if (_damage > 0 && OpponentCard.TotalHitPoints > 0)
                 OpponentCard.Ability.Hurt(queue, OpponentCard);
+            if (Card.FoodAbility != null)
+                Card.FoodAbility.Attacking(queue, Card);
             if (Card.TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(Card));
             if (OpponentCard.TotalHitPoints <= 0)
@@ -98,7 +100,7 @@ namespace AutoPets
         {
             Card.FoodAbility = _foodAbility;
 
-            //TODO need an event
+            Deck.Player.Game.OnCardGainedFoodAbilityEvent(this, Card, Index);
 
             return this;
         }
@@ -210,11 +212,12 @@ namespace AutoPets
         int _level;
         Deck _atDeck;
         Card _summonedCard;
+        FoodAbility _foodAbility;
 
         public int AtIndex { get { return _atIndex; } }
 
         public SummonCardCommand(Card card, Deck atDeck, int atIndex, Ability ability, int hitPoints, int attackPoints,
-            int level = 1) : base(card)
+            int level = 1, FoodAbility foodAbility = null) : base(card)
         {
             _atDeck = atDeck;
             _ability = ability;
@@ -222,6 +225,7 @@ namespace AutoPets
             _hitPoints = hitPoints;
             _attackPoints = attackPoints;
             _level = level;
+            _foodAbility = foodAbility;
         }
 
         public override CardCommand Execute()
@@ -262,6 +266,7 @@ namespace AutoPets
                 AttackPoints = _attackPoints
             };
             _summonedCard.XP = Card.GetXPFromLevel(_level);
+            _summonedCard.FoodAbility = _foodAbility;
             _summonedCard.Summon(summonIndex);
             _atDeck.Player.Game.OnCardSummonedEvent(this, _summonedCard, summonIndex);
             return this;

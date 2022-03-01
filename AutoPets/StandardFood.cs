@@ -49,6 +49,11 @@ namespace AutoPets
 
     public class MeatBoneFood : Food
     {
+        public override string ToString()
+        {
+            return "Meat Bone";
+        }
+
         public override string GetMessage()
         {
             return "Give a Pet Bone Attack.";
@@ -63,6 +68,11 @@ namespace AutoPets
 
     public class SleepingPillFood : Food
     {
+        public override string ToString()
+        {
+            return "Sleeping Pill";
+        }
+
         public override string GetMessage()
         {
             return "Make a friendly Pet faint.";
@@ -82,22 +92,49 @@ namespace AutoPets
 
     public class SaladBowlFood : Food
     {
+        public override string ToString()
+        {
+            return "Salad Bowl";
+        }
         
     }
 
     public class CannedFoodFood : Food
     {
+        public override string ToString()
+        {
+            return "Canned Food";
+        }
         
     }
 
     public class PearFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a Pet +2/+2.";;
+        }
         
+        public override void Execute(CardCommandQueue queue, Card card)
+        {
+            base.Execute(queue, card);
+            card.HitPoints += 2;
+            card.AttackPoints += 2;
+        }
     }
 
     public class ChiliFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give a Pet Splash Attack.";
+        }
+
+        public override void Execute(CardCommandQueue queue, Card card)
+        {
+            base.Execute(queue, card);
+            card.FoodAbility = new SplashAttackAbility();
+        }
     }
 
     public class ChocolateFood : Food

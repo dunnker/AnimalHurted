@@ -17,9 +17,9 @@ namespace AutoPets
 
     public class BoneAttackAbility : FoodAbility
     {
-        public override void Attacking(Card card, ref int damage)
+        public override void CalculatingDamage(Card card, ref int damage)
         {
-            base.Attacking(card, ref damage);
+            base.CalculatingDamage(card, ref damage);
             damage += 5;
         }
     }
@@ -36,6 +36,22 @@ namespace AutoPets
             base.Hurting(card, ref damage);
             damage = Math.Max(0, damage - 20);
             card.FoodAbility = null; // remove the melon armor after first damage
+        }
+    }
+
+    public class SplashAttackAbility : FoodAbility
+    {
+        public override void Attacking(CardCommandQueue queue, Card card)
+        {
+            base.Attacking(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            var lastCard = opponent.BattleDeck.GetLastCard();
+            if (lastCard != null && lastCard.Index > 0)
+            {
+                var targetCard = opponent.BattleDeck[lastCard.Index - 1];
+                if (targetCard != null && targetCard.TotalHitPoints > 0)
+                    queue.Add(new HurtCardCommand(targetCard, 5, card.Deck, card.Index));
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace AutoPets
 {
     public delegate void CardCommandEventHandler(object sender, CardCommand command);
-    public delegate void CardCommandSummonedEventHandler(object sender, CardCommand command, Card card, int index);
+    public delegate void CardCommandCardEventHandler(object sender, CardCommand command, Card card, int index);
     public delegate void CardCommandFaintedEventHandler(object sender, CardCommand command, Deck deck, int index);
     public delegate void CardCommandBuffedEventHandler(object sender, CardCommand command, Card card, int sourceIndex);
     public delegate void CardCommandHurtEventHandler(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex);
@@ -48,9 +48,10 @@ namespace AutoPets
 
         public event CardCommandEventHandler AttackEvent;
         public event CardCommandFaintedEventHandler CardFaintedEvent;
-        public event CardCommandSummonedEventHandler CardSummonedEvent;
+        public event CardCommandCardEventHandler CardSummonedEvent;
         public event CardCommandBuffedEventHandler CardBuffedEvent;
         public event CardCommandHurtEventHandler CardHurtEvent;
+        public event CardCommandCardEventHandler CardGainedFoodAbilityEvent;
 
         public void OnAttackEvent(CardCommand command)
         {
@@ -80,6 +81,12 @@ namespace AutoPets
         {
             if (_updateCount == 0)
                 CardHurtEvent?.Invoke(this, command, card, sourceDeck, sourceIndex);
+        }
+
+        public void OnCardGainedFoodAbilityEvent(CardCommand command, Card card, int index)
+        {
+            if (_updateCount == 0)
+                CardGainedFoodAbilityEvent?.Invoke(this, command, card, index);
         }
 
         public Game()

@@ -845,10 +845,31 @@ namespace AutoPets
     // Tier 4
     public class BisonAbility : Ability
     {
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"End turn: If there's at least one level 3 friend, gain +{card.Level * 2}/+{card.Level * 2})";
+        }
+
         public BisonAbility() : base()
         {
             DefaultHP = 6;
             DefaultAttack = 6;
+        }
+
+        public override void RoundEnded(CardCommandQueue queue, Card card)
+        {
+            base.RoundEnded(queue, card);
+            if (card.Deck.Any((c) => c.Level == 3))
+                queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
+        }
+    }
+
+    public class ZombieBusAbility : NoAbility
+    {
+        public ZombieBusAbility()
+        {
+            DefaultHP = 5;
+            DefaultAttack = 5;
         }
     }
 
@@ -858,6 +879,18 @@ namespace AutoPets
         {
             DefaultHP = 1;
             DefaultAttack = 1;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Fainted: Summon a {card.Level * 5}/{card.Level * 5} bus with splash attack.)";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBusAbility, 
+                card.Level * 5, card.Level * 5, 1, new SplashAttackAbility()));
         }
     }
 

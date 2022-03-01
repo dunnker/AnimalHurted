@@ -10,7 +10,12 @@ namespace AutoPets
 
         }
 
-        public virtual void Attacking(Card card, ref int damage)
+        public virtual void Attacking(CardCommandQueue queue, Card card)
+        {
+
+        }
+
+        public virtual void CalculatingDamage(Card card, ref int damage)
         {
 
         }

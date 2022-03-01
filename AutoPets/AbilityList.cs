@@ -104,6 +104,7 @@ namespace AutoPets
         public DirtyRatAbility DirtyRatAbility { get; }
         public ZombieBeeAbility ZombieBeeAbility { get; } 
         public ZombieRamAbility ZombieRamAbility { get; } 
+        public ZombieBusAbility ZombieBusAbility { get; } 
 
         private AbilityList()
         {
@@ -259,6 +260,8 @@ namespace AutoPets
             AllAbilities.Add(ZombieBeeAbility);
             ZombieRamAbility = new ZombieRamAbility();
             AllAbilities.Add(ZombieRamAbility);
+            ZombieBusAbility = new ZombieBusAbility();
+            AllAbilities.Add(ZombieBusAbility);
         }
     }
 }
