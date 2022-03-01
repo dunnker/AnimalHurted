@@ -81,7 +81,11 @@ namespace AutoPets
                 // invoke even if Card.TotalHitPoints is <= 0, because Splash attack should still apply
                 Card.FoodAbility.Attacking(queue, Card);
             if (Card.TotalHitPoints <= 0)
+            {
                 queue.Add(new FaintCardCommand(Card));
+                if (OpponentCard.TotalHitPoints > 0)
+                    OpponentCard.Ability.Knockout(queue, OpponentCard);
+            }
             if (OpponentCard.TotalHitPoints <= 0)
             {
                 queue.Add(new FaintCardCommand(OpponentCard));

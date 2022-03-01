@@ -110,7 +110,7 @@ namespace AutoPets
             // itself remains
             _buildDeck.CloneTo(_battleDeck);
             foreach (var card in _battleDeck)
-                card?.Ability.NewBattleDeck(card);
+                card.Ability.NewBattleDeck(card);
         }
 
         public void Roll(bool deductGold = true)
