@@ -150,12 +150,12 @@ namespace AutoPets
             // can be invoked in Player.NewRound() which can buff Gold
             _player1.Gold = GoldPerTurn;
             _player2.Gold = GoldPerTurn;
+            _player1.Roll(deductGold: false);
+            _player2.Roll(deductGold: false);
             _player1.NewRound(_player1.BattleDeck.GetCardCount() > 0, 
                 _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
             _player2.NewRound(_player2.BattleDeck.GetCardCount() > 0, 
                 _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
-            _player1.Roll(deductGold: false);
-            _player2.Roll(deductGold: false);
         }
 
         public void BuyFromShop(CardCommandQueue queue, int shopIndex, int buildIndex, Player player)

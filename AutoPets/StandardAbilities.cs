@@ -777,7 +777,7 @@ namespace AutoPets
             //...but second ram we use GetSummonIndex to attempt to find a spot for it
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
-                queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility, 
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieRamAbility, 
                     card.Level * 2, card.Level * 2));
         }
     }
@@ -973,6 +973,30 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"End of turn: Give other level 2 and 3 friends +{card.Level}/+{card.Level}.";
+        }    
+
+        public override void RoundEnded(CardCommandQueue queue, Card card)
+        {
+            base.RoundEnded(queue, card);
+            foreach (var buffCard in card.Deck.Where((c) => c.Level == 2 || c.Level == 3))
+            {
+                // not checking buffCard.TotalHitPoints > 0 because we aren't in a battle
+                queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1));
+            }
+        }
+    }
+
+    public class ZombieChickAbility : NoAbility
+    {
+        public ZombieChickAbility()
+        {
+            DefaultAttack = 1;
+            DefaultHP = 1;
+        }
     }
 
     public class RoosterAbility : Ability
@@ -981,6 +1005,24 @@ namespace AutoPets
         {
             DefaultHP = 3;
             DefaultAttack = 5;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Faint: Summon {card.Level} chick(s) with 1 health and half of the attack.";
+        }    
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            for (int i = 1; i <= card.Level; i++)
+            {
+                int summonIndex = GetSummonIndex(queue, card.Deck, index);
+                // doing integer division, so adding +1 to card.TotalAttackPoints to round up
+                int attackPoints = (card.TotalAttackPoints + 1) / 2;
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieChickAbility, 
+                    1, attackPoints));
+            }
         }
     }
 
@@ -991,6 +1033,26 @@ namespace AutoPets
             DefaultHP = 6;
             DefaultAttack = 3;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of battle: Reduce health of the highest health enemy by {card.Level * 33}%.";
+        }
+
+        public override void BattleStarted(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            if (opponent.BattleDeck.GetCardCount() > 0)
+            {
+                var targetCard = opponent.BattleDeck.Aggregate((maxCard, nextCard) => 
+                    maxCard.TotalHitPoints > nextCard.TotalHitPoints ? maxCard : nextCard);
+                int damage = (int)Math.Round(targetCard.TotalHitPoints * (((double)card.Level * 33) / 100));
+                if (damage >= targetCard.TotalHitPoints)
+                    damage = targetCard.TotalHitPoints - 1;
+                queue.Add(new HurtCardCommand(targetCard, damage, card.Deck, card.Index));
+            }
+        }
     }
 
     public class SquirrelAbility : Ability
@@ -999,6 +1061,20 @@ namespace AutoPets
         {
             DefaultHP = 5;
             DefaultAttack = 2;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of turn: Discount shop food by {card.Level} gold.";
+        }
+
+        public override void RoundStarted(Card card)
+        {
+            base.RoundStarted(card);
+            // shop food could have been frozen from earlier round, so we'd be discounting it a second time
+            // but we're ensuring that the cost will never get below zero
+            card.Deck.Player.ShopFood1.Cost -= Math.Min(card.Deck.Player.ShopFood1.Cost, card.Level);
+            card.Deck.Player.ShopFood2.Cost -= Math.Min(card.Deck.Player.ShopFood2.Cost, card.Level);
         }
     }
 

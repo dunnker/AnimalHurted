@@ -31,6 +31,8 @@ public class FoodArea2D : Area2D
             nameLabel.Text = food.ToString();
             var messageLabel = node2D.GetNode<Label>("AbilityMessageLabel");
             messageLabel.Text = food.GetMessage();
+            var costLabel = node2D.GetNode<Label>("CostLabel");
+            costLabel.Text = $"{food.Cost} Gold";
             node2D.Show();
         }
     }
@@ -55,8 +57,7 @@ public class FoodArea2D : Area2D
                     food = BuildNode.Player.ShopFood1;
                 else
                     food = BuildNode.Player.ShopFood2;
-                if (BuildNode.Player.Gold >= Game.FoodCost || 
-                    food is SleepingPillFood && BuildNode.Player.Gold >= 1)
+                if (BuildNode.Player.Gold >= food.Cost)
                     EmitSignal("StartStopDragSignal");
             }
             else

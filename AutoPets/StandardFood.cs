@@ -68,6 +68,11 @@ namespace AutoPets
 
     public class SleepingPillFood : Food
     {
+        public SleepingPillFood()
+        {
+            Cost = 1;
+        }
+
         public override string ToString()
         {
             return "Sleeping Pill";

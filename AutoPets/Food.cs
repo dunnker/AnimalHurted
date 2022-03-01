@@ -5,6 +5,8 @@ namespace AutoPets
 {
     public class Food
     {
+        public int Cost { get; set; } = Game.FoodCost;
+
         public virtual string GetMessage()
         {
             return string.Empty;

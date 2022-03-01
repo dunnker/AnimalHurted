@@ -17,12 +17,24 @@ texture = ExtResource( 2 )
 [node name="AbilityNameLabel" type="Label" parent="."]
 margin_left = -152.0
 margin_top = -64.0
-margin_right = 152.0
+margin_right = -8.0
 margin_bottom = -40.0
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_fonts/font = SubResource( 1 )
 text = "Ant"
-align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CostLabel" type="Label" parent="."]
+margin_left = 8.0
+margin_top = -64.0
+margin_right = 152.0
+margin_bottom = -40.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "3 Gold"
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

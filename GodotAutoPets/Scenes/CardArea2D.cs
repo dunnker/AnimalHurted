@@ -111,6 +111,11 @@ public class CardArea2D : Area2D
                 nameLabel.Text = card.RenderAbility.ToString();
                 var messageLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityMessageLabel");
                 messageLabel.Text = card.Ability.GetAbilityMessage(card);
+                var costLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("CostLabel");
+                if (CardSlotNode2D.CardSlotDeck is ShopNode2D)
+                    costLabel.Text = $"{Game.PetCost} Gold";
+                else
+                    costLabel.Hide();
                 CardSlotNode2D.AbilityHintNode2D.Show();
             }
         }
