@@ -947,6 +947,23 @@ namespace AutoPets
             DefaultHP = 3;
             DefaultAttack = 5;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"End of turn: Copy ability from friend ahead as level {card.Level} until the end of battle.";
+        }
+
+        public override void NewBattleDeck(Card card)
+        {
+            base.NewBattleDeck(card);
+            if (card.Index + 1 < card.Deck.Size)
+            {
+                var friendCard = card.Deck[card.Index + 1];
+                if (friendCard != null)
+                    // card.RenderAbility will still be Parrot
+                    card.Ability = friendCard.Ability;
+            }
+        }
     }
 
     public class PenguinAbility : Ability

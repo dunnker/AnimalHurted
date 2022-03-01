@@ -109,6 +109,8 @@ namespace AutoPets
             // so CloneTo creates new card instances for the deck, but the deck reference
             // itself remains
             _buildDeck.CloneTo(_battleDeck);
+            foreach (var card in _battleDeck)
+                card?.Ability.NewBattleDeck(card);
         }
 
         public void Roll(bool deductGold = true)

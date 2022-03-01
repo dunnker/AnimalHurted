@@ -9,6 +9,7 @@ namespace AutoPets
     {
         readonly Deck _deck;
         Ability _ability;
+        Ability _renderAbility;
         FoodAbility _foodAbility;
         int _index;
         int _hitPoints;
@@ -30,6 +31,7 @@ namespace AutoPets
             _index = -1;
             _xp = 1;
             _ability = ability;
+            _renderAbility = ability;
             _hitPoints = _ability.DefaultHP;
             _attackPoints = _ability.DefaultAttack;
         }
@@ -42,6 +44,7 @@ namespace AutoPets
         public Card(Deck deck, Card card)
         {
             _ability = card._ability;
+            _renderAbility = card._renderAbility;
             _foodAbility = card._foodAbility;
             _deck = deck;
             _index = -1;
@@ -59,7 +62,9 @@ namespace AutoPets
 
         public int Index { get { return _index; } }
 
-        public Ability Ability { get { return _ability; } }
+        public Ability Ability { get { return _ability; } set { _ability = value; } }
+        
+        public Ability RenderAbility { get { return _renderAbility; }  }
 
         public FoodAbility FoodAbility { get { return _foodAbility; } set { _foodAbility = value; } }
 
@@ -127,6 +132,10 @@ namespace AutoPets
                 writer.WriteLine(string.Empty);
             else
                 writer.WriteLine(_ability.GetType().Name);
+            if (_renderAbility == null)
+                writer.WriteLine(string.Empty);
+            else
+                writer.WriteLine(_renderAbility.GetType().Name);
             if (_foodAbility == null)
                 writer.WriteLine(string.Empty);
             else
@@ -146,6 +155,8 @@ namespace AutoPets
             _buildAttackPoints = Int32.Parse(reader.ReadLine());
             string abilityName = reader.ReadLine();
             _ability = AbilityList.Instance.AllAbilities.FirstOrDefault((a) => a.GetType().Name == abilityName );
+            abilityName = reader.ReadLine();
+            _renderAbility = AbilityList.Instance.AllAbilities.FirstOrDefault((a) => a.GetType().Name == abilityName );;
             string foodAbilityName = reader.ReadLine();
             if (!string.IsNullOrEmpty(foodAbilityName))
                 _foodAbility = Activator.CreateInstance(

@@ -63,6 +63,12 @@ namespace AutoPets
 
         }
 
+        // also a "Start of turn" ability specifically for Parrot
+        public virtual void NewBattleDeck(Card card)
+        {
+
+        }
+
         // "End of turn"
         public virtual void RoundEnded(CardCommandQueue queue, Card card)
         {

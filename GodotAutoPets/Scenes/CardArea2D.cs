@@ -71,7 +71,7 @@ public class CardArea2D : Area2D
             HideCard();
         else
         {
-            var res = GD.Load($"res://Assets/Pets/{card.Ability.GetType().Name}.png");
+            var res = GD.Load($"res://Assets/Pets/{card.RenderAbility.GetType().Name}.png");
             Sprite.Texture = res as Godot.Texture;
             AttackPointsLabel.Text = card.TotalAttackPoints.ToString();
             if (card.BuildAttackPoints > 0)
@@ -108,7 +108,7 @@ public class CardArea2D : Area2D
             if (card != null)
             {
                 var nameLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityNameLabel");
-                nameLabel.Text = card.Ability.ToString();
+                nameLabel.Text = card.RenderAbility.ToString();
                 var messageLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityMessageLabel");
                 messageLabel.Text = card.Ability.GetAbilityMessage(card);
                 CardSlotNode2D.AbilityHintNode2D.Show();
