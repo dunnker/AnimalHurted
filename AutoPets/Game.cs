@@ -158,30 +158,45 @@ namespace AutoPets
                 _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
         }
 
-        public void BuyFromShop(CardCommandQueue queue, int shopIndex, int buildIndex, Player player)
+        public void BuyFromShop(int shopIndex, int buildIndex, Player player, 
+            out CardCommandQueue queue, out Deck saveDeck)
         {
             if (player.Gold < Game.PetCost)
+            {
+                queue = null;
+                saveDeck = null;
                 throw new Exception("Not enough gold to buy pet");
+            }
             else
             {
-                if (player.BuildDeck[buildIndex] == null)
+                queue = new CardCommandQueue();
+                saveDeck = new Deck(player, Game.BuildDeckSlots);
+
+                var shopCard = player.ShopDeck[shopIndex]; 
+                var buildCard = player.BuildDeck[buildIndex];
+
+                if (buildCard == null)
                 {
-                    var card = new Card(player.BuildDeck, player.ShopDeck[shopIndex]);
-                    card.Summon(buildIndex);
+                    var card = new Card(player.BuildDeck, shopCard);
+                    card.Buy(buildIndex);
                     player.ShopDeck.Remove(shopIndex);
-                    card.Ability.Bought(queue, card);
-                    foreach (var c in card.Deck)
-                        if (c != card)
-                        {
-                            c.Ability.FriendBought(queue, c, card);
-                            c.Ability.FriendSummoned(queue, c, card);
-                        }
+
+                    player.BuildDeck.CloneTo(saveDeck);
+                    card.Bought(queue);
                 }
                 else
                 {
-                    if (player.ShopDeck[shopIndex].Ability == player.BuildDeck[buildIndex].Ability)
-                        player.BuildDeck[buildIndex].GainXP(queue, player.ShopDeck[shopIndex]);
+                    if (shopCard.Ability.GetType() == buildCard.Ability.GetType())
+                    {
+                        int oldLevel = buildCard.Level; 
+                        buildCard.GainXP(shopCard);
+                        player.BuildDeck.CloneTo(saveDeck);
+                        buildCard.GainedXP(queue, oldLevel);
+                    }
+                    else
+                        throw new Exception("Shop card cannot be bought or leveled up.");
                 }
+
                 player.Gold -= Game.PetCost;
             }
         }
@@ -213,23 +228,27 @@ namespace AutoPets
             _fighting = true;
             var fightResult = new List<CardCommandQueue>();
             var queue = new CardCommandQueue();
-            foreach (var card in _player1.BattleDeck)
-                card.Ability.BattleStarted1(queue, card);
-            foreach (var card in _player2.BattleDeck)
-                card.Ability.BattleStarted1(queue, card);
+            _player1.BattleStarted1(queue);
+            _player2.BattleStarted1(queue);
             if (queue.Count > 0)
                 fightResult.AddRange(queue.CreateExecuteResult(this));
             queue = new CardCommandQueue();
-            foreach (var card in _player1.BattleDeck)
-                card.Ability.BattleStarted2(queue, card);
-            foreach (var card in _player2.BattleDeck)
-                card.Ability.BattleStarted2(queue, card);
+            _player1.BattleStarted2(queue);
+            _player2.BattleStarted2(queue);
             if (queue.Count > 0)
                 fightResult.AddRange(queue.CreateExecuteResult(this));
             while (!IsFightOver())
             {
                 queue = new CardCommandQueue();
-                _player1.BattleDeck.GetLastCard().Attack(queue, _player2.BattleDeck.GetLastCard());
+
+                var card = _player1.BattleDeck.GetLastCard();
+                var opponentCard = _player2.BattleDeck.GetLastCard();
+
+                card.Attacking(queue);
+                opponentCard.Attacking(queue);
+
+                queue.Add(new AttackCardCommand(card, opponentCard).Execute());
+
                 fightResult.AddRange(queue.CreateExecuteResult(this));
             }
             _fighting = false;

@@ -23,6 +23,18 @@ texture = ExtResource( 1 )
 centered = false
 offset = Vector2( -1152, -48 )
 
+[node name="DirtPath1ColorRect" type="ColorRect" parent="."]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = -64.0
+margin_bottom = 80.0
+mouse_filter = 2
+color = Color( 0.952941, 0.807843, 0.427451, 0.176471 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Player1DeckNode2D" parent="." instance=ExtResource( 2 )]
 position = Vector2( 56, 320 )
 scale = Vector2( 0.9, 0.9 )

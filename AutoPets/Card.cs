@@ -74,7 +74,7 @@ namespace AutoPets
         public int AttackPoints { get { return _attackPoints; } set { _attackPoints = value; } }
 
         // additional hit points that have been acquired during the build but are reset
-        // after a battle. For instance, from a cupkake
+        // after a battle. For instance, from a cupcake
         public int BuildHitPoints { get { return _buildHitPoints; } set { _buildHitPoints = value; } }
 
         // see comments on BuildHitPoints
@@ -164,17 +164,6 @@ namespace AutoPets
                     Type.GetType($"AutoPets.{foodAbilityName}, AutoPets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
         }
 
-        public void Attack(CardCommandQueue queue, Card card)
-        {
-            _ability.BeforeAttack(queue, this);
-            card._ability.BeforeAttack(queue, card);
-
-            int opponentDamage = card.GetDamage();
-            int damage = GetDamage();
-
-            queue.Add(new AttackCardCommand(this, damage, card, opponentDamage));
-        }
-
         public int GetDamage()
         {
             int damage = TotalAttackPoints;
@@ -194,7 +183,130 @@ namespace AutoPets
             _ability.RoundStarted(this);
         }
 
-        public void GainXP(CardCommandQueue queue, Card fromCard)
+        public void Attacking(CardCommandQueue queue)
+        {
+            _ability.BeforeAttack(queue, this);
+        }
+
+        public void Attack(int damage)
+        {
+            _foodAbility?.Hurting(this, ref damage);
+            _hitPoints -= damage;
+        }
+
+        public void Attacked(CardCommandQueue queue, Card opponentCard = null)
+        {
+            var priorCard = _deck.LastOrDefault(c => c != null && c.Index < _index && c.TotalHitPoints > 0);
+            priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
+
+            // invoke even if TotalHitPoints is <= 0, because, for example, Splash attack should still apply
+            _foodAbility?.Attacking(queue, this);
+
+            if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints >= 0)
+                opponentCard.Ability.Knockout(queue, opponentCard);
+
+            Hurted(queue);
+        }
+
+        public void Summon(int atIndex)
+        {
+            if (_deck[atIndex] != null)
+                throw new Exception(string.Format("A card already exists at {0}", atIndex));
+            _deck.SetCard(this, atIndex);
+        }
+
+        public void Summoned(CardCommandQueue queue)
+        {
+            foreach (var c in _deck)
+            {
+                if (c != this && c.TotalHitPoints > 0)
+                    c.Ability.FriendSummoned(queue, c, this);
+            }
+        }
+
+        public void Faint()
+        {
+            _deck.Remove(_index);
+        }
+
+        public void Fainted(CardCommandQueue queue, int index)
+        {
+            // note the use of local param "index" and not "_index/Index"
+            var priorCard = _deck.LastOrDefault(c => c != null && c.Index < index && c.TotalHitPoints > 0);
+            priorCard?.Ability.FriendAheadFaints(queue, priorCard, index);
+            _ability.Fainted(queue, this, index);
+            _foodAbility?.Fainted(queue, this, index);
+        }
+
+        public void Buy(int index)
+        {
+            Summon(index);
+        }
+
+        public void Bought(CardCommandQueue queue)
+        {
+            _ability.Bought(queue, this);
+            foreach (var c in _deck)
+                if (c != this)
+                {
+                    c.Ability.FriendBought(queue, c, this);
+                    c.Ability.FriendSummoned(queue, c, this);
+                }
+        }
+
+        public void Sell()
+        {
+            _deck.Remove(_index);
+            _deck.Player.Gold += Level;
+        }
+
+        public void Sold(CardCommandQueue queue, int index)
+        {
+            _ability.Sold(queue, this, index);
+            foreach (var c in _deck)
+                if (c != this)
+                    c._ability.FriendSold(queue, c, this);
+        }
+
+        public void Hurt(int damage, Deck sourceDeck, int sourceIndex)
+        {
+            if (damage > 0)
+            {
+                _foodAbility?.Hurting(this, ref damage);
+                _hitPoints -= damage;
+            }
+        }
+
+        public void Hurted(CardCommandQueue queue)
+        {
+            if (TotalHitPoints > 0)
+                _ability.Hurt(queue, this);
+            if (TotalHitPoints <= 0)
+                queue.Add(new FaintCardCommand(this).Execute());
+        }
+
+        public void Buff(int sourceIndex, int hitPoints, int attackPoints)
+        {
+            Debug.Assert(hitPoints >= 0 && attackPoints >= 0);
+            _hitPoints += hitPoints;
+            _attackPoints += attackPoints;
+        }
+
+        public void Eat(Food food)
+        {
+            food.Execute(this);
+        }
+
+        public void Ate(CardCommandQueue queue, Food food)
+        {
+            food.ExecuteAbility(queue, this);
+            _ability.AteFood(queue, this);
+            foreach (var card in _deck)
+                if (card != this)
+                    card._ability.FriendAteFood(queue, card, this);
+        }
+    
+        public void GainXP(Card fromCard)
         {
             //TODO: what if already at Level 3?
             //TODO: merge food
@@ -233,61 +345,12 @@ namespace AutoPets
             // Also, removing this now before calling ability method because we don't want fromCard to be affected
             // e.g. see Fish ability
             fromCard.Deck.Remove(fromCard.Index);
+        }
 
+        public void GainedXP(CardCommandQueue queue, int oldLevel)
+        {
             if (Level > oldLevel)
-            {
                 _ability.LeveledUp(queue, this);
-            }
-        }
-
-        public void Summon(int atIndex)
-        {
-            if (_deck[atIndex] != null)
-                throw new Exception(string.Format("A card already exists at {0}", atIndex));
-            _deck.SetCard(this, atIndex);
-        }
-
-        public void Faint()
-        {
-            _deck.Remove(_index);
-        }
-
-        public void Sell(CardCommandQueue queue)
-        {
-            int saveIndex = _index;
-            // remove first in case ability spawns something in place, see also Faint()
-            _deck.Remove(_index);
-            _deck.Player.Gold += Level;
-            _ability.Sold(queue, this, saveIndex);
-            foreach (var c in _deck)
-                if (c != this)
-                    c._ability.FriendSold(queue, c, this);
-        }
-
-        public void Hurt(int damage, Deck sourceDeck, int sourceIndex)
-        {
-            if (damage > 0)
-            {
-                if (_foodAbility != null)
-                    _foodAbility.Hurting(this, ref damage);
-                _hitPoints -= damage;
-            }
-        }
-
-        public void Buff(int sourceIndex, int hitPoints, int attackPoints)
-        {
-            Debug.Assert(hitPoints >= 0 && attackPoints >= 0);
-            _hitPoints += hitPoints;
-            _attackPoints += attackPoints;
-        }
-
-        public void Eat(CardCommandQueue queue, Food food)
-        {
-            food.Execute(queue, this);
-            _ability.AteFood(queue, this);
-            foreach (var card in _deck)
-                if (card != this)
-                    card._ability.FriendAteFood(queue, card, this);
         }
     }
 }

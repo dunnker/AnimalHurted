@@ -113,6 +113,18 @@ namespace AutoPets
                 card.Ability.NewBattleDeck(card);
         }
 
+        public void BattleStarted1(CardCommandQueue queue)
+        {
+            foreach (var card in _battleDeck)
+                card.Ability.BattleStarted1(queue, card);
+        }
+
+        public void BattleStarted2(CardCommandQueue queue)
+        {
+            foreach (var card in _battleDeck)
+                card.Ability.BattleStarted2(queue, card);
+        }
+
         public void Roll(bool deductGold = true)
         {
             if (Gold < Game.RollCost)
@@ -128,17 +140,21 @@ namespace AutoPets
             NewShopFood();
         }
 
-        public void BuyFood(CardCommandQueue queue, Card card, int index)
+        public Food GetShopFoodFromIndex(int foodIndex)
         {
-            Food food;
-            if (index == 1)
-                food = _shopFood1;
+            if (foodIndex == 1)
+                return _shopFood1;
             else
-                food = _shopFood2;
+                return _shopFood2;
+        }
+
+        public void BuyFood(Card card, int foodIndex)
+        {
+            Food food = GetShopFoodFromIndex(foodIndex);
             if (Gold < food.Cost)
                 throw new Exception("Not enough gold to buy food.");
-            card.Eat(queue, food);
-            if (index == 1)
+            card.Eat(food);
+            if (foodIndex == 1)
                 _shopFood1 = null;
             else
                 _shopFood2 = null;
@@ -147,8 +163,6 @@ namespace AutoPets
 
         void NewShopFood()
         {
-            // unlike Ability, food has cost property which can be altered by Squirrel
-            // so create new instances instead of assigning to the singleton instance
             int randIndex = _game.Random.Next(0, _game.TierFood.Count);
             _shopFood1 = Activator.CreateInstance(_game.TierFood[randIndex].GetType()) as Food;
             randIndex = _game.Random.Next(0, _game.TierFood.Count);

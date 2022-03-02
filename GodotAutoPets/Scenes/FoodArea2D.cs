@@ -108,15 +108,23 @@ public class FoodArea2D : Area2D
                     var card = BuildNode.DeckNode2D.Deck[cardArea2D.CardIndex];
                     if (card != null)
                     {
-                        var queue = new CardCommandQueue();
-                        BuildNode.Player.BuyFood(queue, card, Index);
+                        // get local food instance before it's removed in BuyFood                        
+                        var food = BuildNode.Player.GetShopFoodFromIndex(Index);
+
+                        BuildNode.Player.BuyFood(card, Index);
 
                         BuildNode.RenderFood(1, BuildNode.Player.ShopFood1);
                         BuildNode.RenderFood(2, BuildNode.Player.ShopFood2);
-                        BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
+                        cardArea2D.RenderCard(card, card.Index);
                         BuildNode.DeckNode2D.GulpPlayer.Play();
 
-                        BuildNode.ExecuteQueue(queue);
+                        var queue = new CardCommandQueue();
+                        // save changes from BuyFood above 
+                        var savedDeck = BuildNode.CreateSaveDeck();
+                        GameSingleton.Instance.Game.BeginUpdate();
+                        card.Ate(queue, food);
+                        GameSingleton.Instance.Game.EndUpdate();
+                        BuildNode.ExecuteQueue(queue, savedDeck);
                     }
                 }
             }

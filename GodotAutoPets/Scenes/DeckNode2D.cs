@@ -142,7 +142,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         var tweenRotate = new Tween();
         parent.AddChild(tweenRotate);
 
-        float buffSpeed = 0.5f;
+        float buffSpeed = BattleNode.MaxTimePerEvent;
 
         // pick a somewhat random height to throw, to minimize other objects from having
         // the same trajectory
@@ -193,21 +193,27 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                 // if dropping on an empty slot
                 if (_deck[targetCardArea2D.CardIndex] == null)
                 {
-                    // moving a card does not invoke any game events otherwise this
+                    // moving a card does not invoke any abilities otherwise this
                     // would need to be done with a queue
                     _deck.MoveCard(_deck[sourceCardArea2D.CardIndex], targetCardArea2D.CardIndex);
                 }
                 else
                 {
+                    var targetCard = _deck[targetCardArea2D.CardIndex];
+                    var sourceCard = sourceDeck.Deck[sourceCardArea2D.CardIndex];
                     if ((targetCardArea2D.CardIndex != sourceCardArea2D.CardIndex) && 
-                        _deck[targetCardArea2D.CardIndex].Ability == sourceDeck.Deck[sourceCardArea2D.CardIndex].Ability)
+                        targetCard.Ability.GetType() == sourceCard.Ability.GetType())
                     {
+                        int oldLevel = targetCard.Level;
+                        targetCard.GainXP(sourceCard);
+                        targetCardArea2D.RenderCard(targetCard, targetCard.Index);
                         var queue = new CardCommandQueue();
-                        var card = _deck[targetCardArea2D.CardIndex];
-                        card.GainXP(queue, sourceDeck.Deck[sourceCardArea2D.CardIndex]);
-                        targetCardArea2D.RenderCard(card, card.Index);
+                        var savedDeck = (GetParent() as BuildNode).CreateSaveDeck();
+                        GameSingleton.Instance.Game.BeginUpdate();
+                        targetCard.GainedXP(queue, oldLevel);
+                        GameSingleton.Instance.Game.EndUpdate();
                         // show animations from abilities, like Fish
-                        (GetParent() as BuildNode).ExecuteQueue(queue);
+                        (GetParent() as BuildNode).ExecuteQueue(queue, savedDeck);
                     }
                 }
 
@@ -258,7 +264,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             var tween = new Tween();
             AddChild(tween);
 
-            float faintTime = 0.5f;
+            float faintTime = BattleNode.MaxTimePerEvent;
 
             var cardSlot = GetCardSlotNode2D(index + 1);
             tween.InterpolateProperty(cardSlot.CardArea2D.Sprite, "modulate:a",
@@ -293,8 +299,6 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                 await (GetParent() as BattleNode).PositionDecks(false);
             }
 
-            // make the summoned card appear, but after we positioned the deck
-            // otherwise the summoned card might appear behind some other pet on the opponent deck
             cardSlot.CardArea2D.RenderCard(_deck[index], index);
         
             command.UserEvent?.Invoke(this, EventArgs.Empty);
@@ -370,7 +374,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
             buffArea2D.QueueFree();*/
 
-            await ToSignal(GetTree().CreateTimer(0.5f), "timeout"); //TODO remove
+            await ToSignal(GetTree().CreateTimer(BattleNode.MaxTimePerEvent), "timeout"); //TODO remove
 
             GulpPlayer.Play();
             cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);

@@ -27,7 +27,7 @@ namespace AutoPets
                 var nextQueue = new CardCommandQueue();
                 foreach (var command in queue)
                 {
-                    command.Execute().ExecuteAbility(nextQueue);
+                    command.ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;
             }

@@ -10,9 +10,9 @@ namespace AutoPets
             return "Give a Pet +1/+1.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.HitPoints += 1;
             card.AttackPoints += 1;
         }
@@ -25,9 +25,9 @@ namespace AutoPets
             return "Give a Pet Honey Bee.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.FoodAbility = new HoneyBeeAbility();
         }
     }
@@ -39,9 +39,9 @@ namespace AutoPets
             return "Give a Pet +3/+3 until end of battle.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.BuildHitPoints += 3;
             card.BuildAttackPoints += 3;
         }
@@ -59,9 +59,9 @@ namespace AutoPets
             return "Give a Pet Bone Attack.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.FoodAbility = new BoneAttackAbility();
         }
     }
@@ -83,10 +83,10 @@ namespace AutoPets
             return "Make a friendly Pet faint.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void ExecuteAbility(CardCommandQueue queue, Card card)
         {
-            base.Execute(queue, card);
-            queue.Add(new FaintCardCommand(card));
+            base.ExecuteAbility(queue, card);
+            queue.Add(new FaintCardCommand(card).Execute());
         }
     }
 
@@ -120,9 +120,9 @@ namespace AutoPets
             return "Give a Pet +2/+2.";;
         }
         
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.HitPoints += 2;
             card.AttackPoints += 2;
         }
@@ -135,9 +135,9 @@ namespace AutoPets
             return "Give a Pet Splash Attack.";
         }
 
-        public override void Execute(CardCommandQueue queue, Card card)
+        public override void Execute(Card card)
         {
-            base.Execute(queue, card);
+            base.Execute(card);
             card.FoodAbility = new SplashAttackAbility();
         }
     }

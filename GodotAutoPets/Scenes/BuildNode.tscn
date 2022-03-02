@@ -41,6 +41,30 @@ __meta__ = {
 [node name="PlayerAttrsNode2D" parent="." instance=ExtResource( 6 )]
 position = Vector2( 104, 0 )
 
+[node name="DirtPath1ColorRect" type="ColorRect" parent="."]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = -176.0
+margin_bottom = -48.0
+mouse_filter = 2
+color = Color( 0.952941, 0.807843, 0.427451, 0.176471 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DirtPath2ColorRect" type="ColorRect" parent="."]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = 104.0
+margin_bottom = 232.0
+mouse_filter = 2
+color = Color( 0.952941, 0.807843, 0.427451, 0.176471 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ColorRect" type="ColorRect" parent="."]
 modulate = Color( 1, 1, 1, 0.254902 )
 margin_left = 112.0

@@ -11,7 +11,8 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieBeeAbility.GetType(), 1, 1));
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, 
+                    AbilityList.Instance.ZombieBeeAbility.GetType(), 1, 1).Execute());
         }
     }
 
@@ -50,7 +51,7 @@ namespace AutoPets
             {
                 var targetCard = opponent.BattleDeck[lastCard.Index - 1];
                 if (targetCard != null && targetCard.TotalHitPoints > 0)
-                    queue.Add(new HurtCardCommand(targetCard, 5, card.Deck, card.Index));
+                    queue.Add(new HurtCardCommand(targetCard, 5, card.Deck, card.Index).Execute());
             }
         }
     }

@@ -17,7 +17,14 @@ namespace AutoPets
             return GetType().Name.Replace("Food", string.Empty);
         }
 
-        public virtual void Execute(CardCommandQueue queue, Card card)
+        public virtual void Execute(Card card)
+        {
+
+        }
+
+		// this is not FoodAbility, but rather, if a Food needs to invoke some ability method
+		// then it can do so with this method and add to the queue
+        public virtual void ExecuteAbility(CardCommandQueue queue, Card card)
         {
 
         }

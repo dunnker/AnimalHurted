@@ -33,7 +33,7 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { index });
             if (buffCard != null)
-                queue.Add(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level));
+                queue.Add(new BuffCardCommand(buffCard, index, card.Level, 2 * card.Level).Execute());
         }
     }
 
@@ -56,7 +56,7 @@ namespace AutoPets
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility.GetType(), card.Level, card.Level));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility.GetType(), card.Level, card.Level).Execute());
         }
     }
 
@@ -83,7 +83,7 @@ namespace AutoPets
             // find and buff a random card that is not the otter
             var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { card.Index });
             if (buffCard != null)
-                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, card.Level));
+                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, card.Level).Execute());
         }
     }
 
@@ -106,11 +106,11 @@ namespace AutoPets
             var buffCard1 = card.Deck.GetRandomCard(new HashSet<int>() { index });
             if (buffCard1 != null)
             {
-                queue.Add(new BuffCardCommand(buffCard1, index, card.Level, 0));
+                queue.Add(new BuffCardCommand(buffCard1, index, card.Level, 0).Execute());
                 // second card can't be the first card we found
                 var buffCard2 = card.Deck.GetRandomCard(new HashSet<int>() { index, buffCard1.Index });
                 if (buffCard2 != null)
-                    queue.Add(new BuffCardCommand(buffCard2, index, card.Level, 0));
+                    queue.Add(new BuffCardCommand(buffCard2, index, card.Level, 0).Execute());
             }
         }
     }
@@ -138,7 +138,7 @@ namespace AutoPets
                 var randomCard = opponent.BattleDeck.GetRandomCard(excludingIndexes);
                 if (randomCard != null)
                 {
-                    queue.Add(new HurtCardCommand(randomCard, 1, card.Deck, card.Index));
+                    queue.Add(new HurtCardCommand(randomCard, 1, card.Deck, card.Index).Execute());
                     // ensures we won't pick the same pet more than once when getting the
                     // next random card
                     excludingIndexes.Add(randomCard.Index);
@@ -198,7 +198,7 @@ namespace AutoPets
 
         public override string GetAbilityMessage(Card card)
         {
-            return string.Format("Level-up => Give all friends {0} health.", card.Level);
+            return card.Level < 3 ? $"Level-up => Give all friends +{card.Level} health and +{card.Level} attack." : string.Empty;
         }
 
         public override void LeveledUp(CardCommandQueue queue, Card card)
@@ -207,7 +207,7 @@ namespace AutoPets
             foreach (var friendCard in card.Deck)
             {
                 if (friendCard != card)
-                    queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level - 1, card.Level - 1));
+                    queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level - 1, card.Level - 1).Execute());
             }
         }
     }
@@ -230,7 +230,7 @@ namespace AutoPets
             base.FriendSummoned(queue, card, summonedCard);
             //TODO: SAP is worded "Give it +? attack until end of battle." and it underscores the attack points during build and battle
             // after battle, if the friend was summoned during build, the friend's attack points will revert for next build
-            queue.Add(new BuffCardCommand(summonedCard, card.Index, 0, card.Level));
+            queue.Add(new BuffCardCommand(summonedCard, card.Index, 0, card.Level).Execute());
         }
     }
 
@@ -314,7 +314,7 @@ namespace AutoPets
             if (nextCard != null)
             {
                 GetAttackPercent(card, out int attackPoints, out int attackPercent);
-                queue.Add(new BuffCardCommand(nextCard, card.Index, 0, attackPoints));
+                queue.Add(new BuffCardCommand(nextCard, card.Index, 0, attackPoints).Execute());
             }
         }
     }
@@ -340,7 +340,7 @@ namespace AutoPets
             if (card.Index > 0)
                 priorCard = card.Deck[card.Index - 1];
             if (priorCard != null)
-                queue.Add(new HurtCardCommand(priorCard, card.Level, card.Deck, card.Index));
+                queue.Add(new HurtCardCommand(priorCard, card.Level, card.Deck, card.Index).Execute());
         }
     }
 
@@ -364,13 +364,13 @@ namespace AutoPets
             {
                 var priorCard = card.Deck[index - 1];
                 if (priorCard != null)
-                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level));
+                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level).Execute());
             }
             if (index > 1)
             {
                 var priorCard = card.Deck[index - 2];
                 if (priorCard != null)
-                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level));
+                    queue.Add(new BuffCardCommand(priorCard, index, card.Level, card.Level).Execute());
             }
         }
     }
@@ -395,12 +395,12 @@ namespace AutoPets
             foreach (var c in card.Deck)
 				// checking TotalHitPoints > 0; see comments in HurtCommand
                 if (c != card && c.TotalHitPoints > 0)
-                    queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
+                    queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index).Execute());
             if (card.Deck.Player.Game.Fighting)
                 foreach (var c in opponent.BattleDeck)
 					// checking TotalHitPoints > 0; see comments in HurtCommand
                     if (c.TotalHitPoints > 0)
-                        queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index));
+                        queue.Add(new HurtCardCommand(c, 2 * card.Level, card.Deck, index).Execute());
         }
     }
 
@@ -429,7 +429,7 @@ namespace AutoPets
             int attackPoints = (int)Math.Round(((double)card.TotalAttackPoints / 2) * card.Level, 
                 // if 0.5 then round up
                 MidpointRounding.AwayFromZero);
-            queue.Add(new BuffCardCommand(card, card.Index, 0, attackPoints));
+            queue.Add(new BuffCardCommand(card, card.Index, 0, attackPoints).Execute());
         }
     }
 
@@ -469,7 +469,7 @@ namespace AutoPets
                             opponent.BattleDeck.Size - i);
                         if (summonIndex != -1)
                             queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
-                                AbilityList.Instance.DirtyRatAbility.GetType(), 1, 1));
+                                AbilityList.Instance.DirtyRatAbility.GetType(), 1, 1).Execute());
                     }
                 }
             }
@@ -503,7 +503,7 @@ namespace AutoPets
             base.FriendSold(queue, card, soldCard);
             var buffCard = card.Deck.GetRandomCard(new HashSet<int> { card.Index });
             if (buffCard != null)
-                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, 0));
+                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level, 0).Execute());
         }
     }   
 
@@ -527,7 +527,7 @@ namespace AutoPets
             var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
             // spider has fainted so we have the empty slot for the new card
             // otherwise would need to use Ability.GetSummonIndex()
-            queue.Add(new SummonCardCommand(card, card.Deck, index, ability.GetType(), 2, 2, card.Level));
+            queue.Add(new SummonCardCommand(card, card.Deck, index, ability.GetType(), 2, 2, card.Level).Execute());
         }
     }
 
@@ -573,11 +573,11 @@ namespace AutoPets
             Card adjacentCard = card.Deck.LastOrDefault(c => c != null && c.Index < index && c.TotalHitPoints > 0);
             int damage = card.TotalAttackPoints * card.Level;
             if (adjacentCard != null)
-                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
             // find card after the badger that is not fainting
             adjacentCard = card.Deck.FirstOrDefault(c => c != null && c.Index > index && c.TotalHitPoints > 0);
             if (adjacentCard != null)
-                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+                queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
             else
             {
                 var opponent = card.Deck.Player.GetOpponentPlayer();
@@ -586,7 +586,7 @@ namespace AutoPets
                     // last card for the opponent that is not fainting
                     adjacentCard = opponent.BattleDeck.LastOrDefault(c => c != null && c.TotalHitPoints > 0);
                     if (adjacentCard != null)
-                        queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index));
+                        queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
                 }
             }
         }
@@ -613,7 +613,7 @@ namespace AutoPets
             {
                 var opponentCard = opponent.BattleDeck.GetRandomCard();
                 if (opponentCard != null)
-                    queue.Add(new HurtCardCommand(opponentCard, card.Level * 2, card.Deck, card.Index));
+                    queue.Add(new HurtCardCommand(opponentCard, card.Level * 2, card.Deck, card.Index).Execute());
             }
         }
     }
@@ -636,7 +636,7 @@ namespace AutoPets
             base.Hurt(queue, card);
             Card priorCard = card.Deck.LastOrDefault(c => c != null && c.Index < card.Index && c.TotalHitPoints > 0);
             if (priorCard != null)
-                queue.Add(new BuffCardCommand(priorCard, card.Index, card.Level * 2, card.Level));
+                queue.Add(new BuffCardCommand(priorCard, card.Index, card.Level * 2, card.Level).Execute());
         }
     }
 
@@ -663,7 +663,7 @@ namespace AutoPets
                 hitPoints = card.Level;
             else
                 attackPoints = card.Level;
-            queue.Add(new BuffCardCommand(card, card.Index, hitPoints, attackPoints));
+            queue.Add(new BuffCardCommand(card, card.Index, hitPoints, attackPoints).Execute());
         }
     }
 
@@ -690,7 +690,7 @@ namespace AutoPets
                 // not checking buffCard.TotalHitPoints > 0 because we aren't in a battle
                 var buffCard = card.Deck[card.Index + i];
                 if (buffCard != null)
-                    queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1));
+                    queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1).Execute());
             }
         }
     }
@@ -711,7 +711,7 @@ namespace AutoPets
         public override void FriendAheadAttacks(CardCommandQueue queue, Card card)
         {
             base.FriendAheadAttacks(queue, card);
-            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2).Execute());
         }
     }
 
@@ -731,8 +731,8 @@ namespace AutoPets
         public override void FriendAheadFaints(CardCommandQueue queue, Card card, int faintedIndex)
         {
             base.FriendAheadFaints(queue, card, faintedIndex);
-            queue.Add(new GainFoodAbilityCommand(card, new MelonArmorAbility()));
-            queue.Add(new BuffCardCommand(card, card.Index, 0, card.Level * 2));
+            queue.Add(new GainFoodAbilityCommand(card, new MelonArmorAbility()).Execute());
+            queue.Add(new BuffCardCommand(card, card.Index, 0, card.Level * 2).Execute());
         }
     }
 
@@ -752,7 +752,7 @@ namespace AutoPets
         public override void FriendAteFood(CardCommandQueue queue, Card card, Card friendCard)
         {
             base.FriendAteFood(queue, card, friendCard);
-            queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, 0));
+            queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, 0).Execute());
         }
     }
 
@@ -774,12 +774,12 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             // for the first ram we have the empty slot because the sheep has fainted
             queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility.GetType(), 
-                card.Level * 2, card.Level * 2));
+                card.Level * 2, card.Level * 2).Execute());
             //...but second ram we use GetSummonIndex to attempt to find a spot for it
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieRamAbility.GetType(), 
-                    card.Level * 2, card.Level * 2));
+                    card.Level * 2, card.Level * 2).Execute());
         }
     }
 
@@ -811,7 +811,7 @@ namespace AutoPets
             if (card.Deck.Player.LostLastBattle)
                 foreach (var c in card.Deck)
                     if (c != card)
-                        queue.Add(new BuffCardCommand(c, card.Index, card.Level, card.Level));
+                        queue.Add(new BuffCardCommand(c, card.Index, card.Level, card.Level).Execute());
         }
     }
 
@@ -837,7 +837,7 @@ namespace AutoPets
                     break;
                 var priorCard = card.Deck[index - i];
                 if (priorCard != null)
-                    queue.Add(new GainFoodAbilityCommand(priorCard, new MelonArmorAbility()));
+                    queue.Add(new GainFoodAbilityCommand(priorCard, new MelonArmorAbility()).Execute());
             }
         }
     }
@@ -861,7 +861,7 @@ namespace AutoPets
         {
             base.RoundEnded(queue, card);
             if (card.Deck.Any((c) => c.Level == 3))
-                queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
+                queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2).Execute());
         }
     }
 
@@ -891,7 +891,7 @@ namespace AutoPets
         {
             base.Fainted(queue, card, index);
             queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBusAbility.GetType(), 
-                card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)));
+                card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)).Execute());
         }
     }
 
@@ -916,7 +916,7 @@ namespace AutoPets
             {
                 var targetCard = opponent.BattleDeck.Aggregate((minCard, nextCard) => 
                     minCard.TotalHitPoints < nextCard.TotalHitPoints ? minCard : nextCard);
-                queue.Add(new HurtCardCommand(targetCard, card.Level * 5, card.Deck, card.Index));
+                queue.Add(new HurtCardCommand(targetCard, card.Level * 5, card.Deck, card.Index).Execute());
             }
         }
     }
@@ -937,7 +937,7 @@ namespace AutoPets
         public override void Knockout(CardCommandQueue queue, Card card)
         {
             base.Knockout(queue, card);
-            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2));
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2).Execute());
         }
     }
 
@@ -986,7 +986,7 @@ namespace AutoPets
             foreach (var buffCard in card.Deck.Where((c) => c.Level == 2 || c.Level == 3))
             {
                 // not checking buffCard.TotalHitPoints > 0 because we aren't in a battle
-                queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1));
+                queue.Add(new BuffCardCommand(buffCard, card.Index, 1, 1).Execute());
             }
         }
     }
@@ -1022,7 +1022,7 @@ namespace AutoPets
                 // doing integer division, so adding +1 to card.TotalAttackPoints to round up
                 int attackPoints = (card.TotalAttackPoints + 1) / 2;
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieChickAbility.GetType(), 
-                    1, attackPoints));
+                    1, attackPoints).Execute());
             }
         }
     }
@@ -1051,7 +1051,7 @@ namespace AutoPets
                 int damage = (int)Math.Round(targetCard.TotalHitPoints * (((double)card.Level * 33) / 100));
                 if (damage >= targetCard.TotalHitPoints)
                     damage = targetCard.TotalHitPoints - 1;
-                queue.Add(new HurtCardCommand(targetCard, damage, card.Deck, card.Index));
+                queue.Add(new HurtCardCommand(targetCard, damage, card.Deck, card.Index).Execute());
             }
         }
     }
@@ -1103,7 +1103,7 @@ namespace AutoPets
                 // we faint the card in BattleStarted1 because we don't want other ability methods
                 // to target this card within the same queue.
                 if (_friendAhead != null && _friendAhead.TotalHitPoints > 0)
-                    queue.Add(new FaintCardCommand(_friendAhead));
+                    queue.Add(new FaintCardCommand(_friendAhead).Execute());
             }
         }
 
@@ -1114,7 +1114,7 @@ namespace AutoPets
             {
                 //TODO: restore food ability on the summoned card?
                 queue.Add(new SummonCardCommand(card, card.Deck, index, _friendAhead.Ability.GetType(), 
-                    _friendAhead.TotalHitPoints, _friendAhead.TotalAttackPoints, card.Level));
+                    _friendAhead.TotalHitPoints, _friendAhead.TotalAttackPoints, card.Level).Execute());
             }
         }
     }

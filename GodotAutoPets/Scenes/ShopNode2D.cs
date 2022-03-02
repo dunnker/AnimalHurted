@@ -37,9 +37,10 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
             // did we drop onto the build deck?
             if (targetDeck.Deck == BuildNode.Player.BuildDeck)
             {
+                var targetCard = targetDeck.Deck[targetCardArea2D.CardIndex];
                 // are we dropping onto an empty slot, or leveling up a card with same ability
-                if (targetDeck.Deck[targetCardArea2D.CardIndex] == null ||
-                    targetDeck.Deck[targetCardArea2D.CardIndex].Ability == sourceDeck.Deck[sourceCardArea2D.CardIndex].Ability)
+                if (targetCard == null ||
+                    targetCard.Ability.GetType() == sourceDeck.Deck[sourceCardArea2D.CardIndex].Ability.GetType())
                 {
                     // select immediately before animations
                     targetCardArea2D.CardSlotNode2D.Selected = true;
@@ -49,13 +50,20 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
                     // we don't want the card shown in the shop during animations
                     sourceCardArea2D.HideCard();
 
-                    var queue = new CardCommandQueue();
-                    GameSingleton.Instance.Game.BuyFromShop(queue, sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
-                        BuildNode.Player);
-                    RenderShop();
-                    BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
+                    GameSingleton.Instance.Game.BeginUpdate();
+                    // BuyFromShop makes direct changes to the deck (stored in saveDeck) and then
+                    // invokes ability methods which make further changes
+                    GameSingleton.Instance.Game.BuyFromShop(sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
+                        BuildNode.Player, out CardCommandQueue queue, out Deck saveDeck);
+                    GameSingleton.Instance.Game.EndUpdate();
                     BuildNode.DeckNode2D.PlayThump();
-                    BuildNode.ExecuteQueue(queue);
+                    // render the bought card as it existed before ability methods were invoked
+                    targetCardArea2D.RenderCard(saveDeck[targetCardArea2D.CardIndex], targetCardArea2D.CardIndex);
+                    // restore the deck to prior state and then execute ability methods which spawn 
+                    // animations and renders changes
+                    BuildNode.ExecuteQueue(queue, saveDeck);
+
+                    RenderShop();
                 }
             }
         }

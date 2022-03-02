@@ -51,6 +51,8 @@ public class CardCommandQueueReader
 
                 command.Execute();
 
+                //GD.Print(command.ToString());
+
                 // not executing abilities during replay, because abilities
                 // have already been processed, for example in Game.CreateFightResult():
                 //command.ExecuteAbility()

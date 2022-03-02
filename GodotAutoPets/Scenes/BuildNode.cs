@@ -41,10 +41,13 @@ public class BuildNode : Node
         GetNode<Button>("ContinueButton").Disabled = true;
 
         var queue = new CardCommandQueue();
+        var savedDeck = CreateSaveDeck();
+        GameSingleton.Instance.Game.BeginUpdate();
         _player.BuildEnded(queue);
+        GameSingleton.Instance.Game.EndUpdate();
         if (queue.Count > 0)
         {
-            ExecuteQueue(queue);
+            ExecuteQueue(queue, savedDeck);
             // if cards were buffed, give a short pause to let user be aware of animations
             await ToSignal(GetTree().CreateTimer(1f), "timeout");
         }
@@ -78,23 +81,32 @@ public class BuildNode : Node
             cardSlot.CardArea2D.RenderCard(null, card.Index);
             cardSlot.Selected = false;
 
+            card.Sell();
+            var savedDeck = CreateSaveDeck();
             var queue = new CardCommandQueue();
-            card.Sell(queue);
-            ExecuteQueue(queue);
+            GameSingleton.Instance.Game.BeginUpdate();
+            card.Sold(queue, cardSlot.CardArea2D.CardIndex);
+            GameSingleton.Instance.Game.EndUpdate();
+            ExecuteQueue(queue, savedDeck);
 
             // in case a Duck was sold, refresh the shop
             ShopNode2D.RenderShop();
         }
     }
 
-    public void ExecuteQueue(CardCommandQueue queue)
+    public Deck CreateSaveDeck()
+    {
+        var saveDeck = new Deck(_player, Game.BuildDeckSlots);
+        _player.BuildDeck.CloneTo(saveDeck); 
+        return saveDeck;       
+    }
+
+    public void ExecuteQueue(CardCommandQueue queue, Deck savedDeck)
     {
         if (queue.Count > 0)
         {
-            var saveDeck = new Deck(_player, Game.BuildDeckSlots);
-            _player.BuildDeck.CloneTo(saveDeck);
             var list = queue.CreateExecuteResult(GameSingleton.Instance.Game);
-            saveDeck.CloneTo(_player.BuildDeck);
+            savedDeck.CloneTo(_player.BuildDeck);
             if (list.Count > 0)
             {
                 _reader = new CardCommandQueueReader(this, list, "ExecuteQueueOverSignal");

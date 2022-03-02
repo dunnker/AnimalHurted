@@ -20,7 +20,8 @@ public class BattleNode : Node
 
     // every card command event (OnHurt, OnFaint etc.) that is handled by BattleNode and DeckNode2D
     // must be finished before MaxTimePerEvent. See comments in PositionDecks
-    public const float MaxTimePerEvent = 0.5f;
+    public const float MaxTimePerEvent = 0.3f;
+    public const float PositionDeckMoveSpeed = 0.3f;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
@@ -129,7 +130,7 @@ public class BattleNode : Node
         }
     }
 
-    public void _signal_ExecuteQueueOver()
+    public async void _signal_ExecuteQueueOver()
     {
         _playingAttack = false;
         if (_playingBattle)
@@ -141,7 +142,14 @@ public class BattleNode : Node
                 SaveButton.Disabled = false;
             }
             else
+            {
+				// while every event stays within MaxTimePerEvent, the summon event must call PositionDecks
+				// which waits for MaxTimePerEvent, and then spends PositionDeckMoveSpeed amount time to move decks
+				// which means the true maximum time spent considering all events is MaxTimePerEvent + PositionDeckMoveSpeed
+				// so we have to wait this additional amount of time before starting the next round of animations
+                await ToSignal(GetTree().CreateTimer(PositionDeckMoveSpeed + 0.1f), "timeout");
                 _reader.Execute();
+            }
         }
         else
         {
@@ -159,7 +167,7 @@ public class BattleNode : Node
         var tween2 = new Tween();
         AddChild(tween2);
 
-        float rotationTime = 0.5f;
+        float rotationTime = MaxTimePerEvent;
 
         var card1 = GameSingleton.Instance.Game.Player1.BattleDeck.GetLastCard();
         var cardSlot1 = Player1DeckNode2D.GetCardSlotNode2D(card1.Index + 1);
@@ -233,9 +241,12 @@ public class BattleNode : Node
 
     public async Task PositionDecks(bool hideCardSlots = true)
     {
+        float moveSpeed = PositionDeckMoveSpeed;
+
         // when repositioning, other animations might still be going
         // so add small delay to allow those animations to complete in order
         // for them to be shown associated with the correct card slots
+
         await ToSignal(GetTree().CreateTimer(MaxTimePerEvent), "timeout");
 
         if (hideCardSlots)
@@ -248,8 +259,6 @@ public class BattleNode : Node
         AddChild(tween1);
         var tween2 = new Tween();
         AddChild(tween2);
-
-        float moveSpeed = 0.5f;
 
         var lastVisibleCardSlot = Player1DeckNode2D.GetEndingVisibleCardSlot();
         Tween awaitTween = null;
