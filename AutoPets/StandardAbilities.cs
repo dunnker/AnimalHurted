@@ -1172,6 +1172,20 @@ namespace AutoPets
             DefaultHP = 4;
             DefaultAttack = 8;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of battle => Deal {card.Level * 8} damage to the last enemy.";
+        }
+
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted2(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            var firstCard = opponent.BattleDeck.FirstOrDefault((c) => c.TotalHitPoints > 0);
+            if (firstCard != null)
+                queue.Add(new HurtCardCommand(firstCard, card.Level * 8, card.Deck, card.Index).Execute());
+        }
     }
 
     public class MonkeyAbility : Ability
@@ -1181,6 +1195,19 @@ namespace AutoPets
             DefaultHP = 2;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"End of turn => Give the right-most friend +{card.Level * 2} attack and +{card.Level * 3} health.";
+        }
+
+        public override void RoundEnded(CardCommandQueue queue, Card card)
+        {
+            base.RoundEnded(queue, card);
+            var buffCard = card.Deck[card.Deck.Size - 1];
+            if (buffCard != null)
+                queue.Add(new BuffCardCommand(buffCard, card.Index, card.Level * 3, card.Level * 2).Execute());
+        }
     }
 
     public class RhinoAbility : Ability
@@ -1189,6 +1216,20 @@ namespace AutoPets
         {
             DefaultHP = 8;
             DefaultAttack = 5;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Knockout => Deal {card.Level * 4} damage to the first enemy.";
+        }
+
+        public override void Knockout(CardCommandQueue queue, Card card)
+        {
+            base.Knockout(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            var lastCard = opponent.BattleDeck.LastOrDefault((c) => c.TotalHitPoints > 0);
+            if (lastCard != null)
+                queue.Add(new HurtCardCommand(lastCard, card.Level * 4, card.Deck, card.Index).Execute());
         }
     }
 

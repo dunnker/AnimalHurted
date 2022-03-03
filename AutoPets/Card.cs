@@ -202,10 +202,7 @@ namespace AutoPets
             // invoke even if TotalHitPoints is <= 0, because, for example, Splash attack should still apply
             _foodAbility?.Attacking(queue, this);
 
-            if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
-                opponentCard.Ability.Knockout(queue, opponentCard);
-
-            Hurted(queue);
+            Hurted(queue, opponentCard);
         }
 
         public void Summon(int atIndex)
@@ -277,8 +274,10 @@ namespace AutoPets
             }
         }
 
-        public void Hurted(CardCommandQueue queue)
+        public void Hurted(CardCommandQueue queue, Card opponentCard = null)
         {
+            if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
+                opponentCard.Ability.Knockout(queue, opponentCard);
             if (TotalHitPoints > 0)
                 _ability.Hurt(queue, this);
             if (TotalHitPoints <= 0)

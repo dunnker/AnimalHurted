@@ -140,7 +140,14 @@ namespace AutoPets
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
             if (Card != null)
-                Card.Hurted(queue);
+            {
+                Card opponentCard = null;
+                if (Card.Deck.Player.Game.Fighting && 
+                    _sourceDeck != Deck)
+                    opponentCard = _sourceDeck[_sourceIndex];
+
+                Card.Hurted(queue, opponentCard);
+            }
             return this;
         }
     }
