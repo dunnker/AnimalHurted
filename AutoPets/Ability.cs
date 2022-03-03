@@ -91,6 +91,11 @@ namespace AutoPets
 
         }
 
+        public virtual void FriendFaints(CardCommandQueue queue, Card card)
+        {
+
+        }
+
         public virtual void AteFood(CardCommandQueue queue, Card card)
         {
 

@@ -235,6 +235,11 @@ namespace AutoPets
             priorCard?.Ability.FriendAheadFaints(queue, priorCard, index);
             _ability.Fainted(queue, this, index);
             _foodAbility?.Fainted(queue, this, index);
+            foreach (var c in _deck)
+            {
+                if (c.TotalHitPoints > 0)
+                    c.Ability.FriendFaints(queue, c);
+            }
         }
 
         public void Buy(int index)

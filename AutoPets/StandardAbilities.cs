@@ -1291,6 +1291,17 @@ namespace AutoPets
             DefaultHP = 4;
             DefaultAttack = 4;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend faints => Gain +{card.Level * 2} attack and +{card.Level} health.";
+        }
+
+        public override void FriendFaints(CardCommandQueue queue, Card card)
+        {
+            base.FriendFaints(queue, card);
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level, card.Level * 2).Execute());
+        }
     }
 
     public class TurkeyAbility : Ability
@@ -1299,6 +1310,18 @@ namespace AutoPets
         {
             DefaultHP = 4;
             DefaultAttack = 3;
+        }
+        
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend summoned => Give it +{card.Level * 3}/+{card.Level * 3}.";
+        }
+
+        public override void FriendSummoned(CardCommandQueue queue, Card card, Card summonedCard)
+        {
+            base.FriendSummoned(queue, card, summonedCard);
+            //TODO: see comments in HorseAbility, same might apply here
+            queue.Add(new BuffCardCommand(summonedCard, card.Index, card.Level * 3, card.Level * 3).Execute());
         }
     }
 
