@@ -1112,9 +1112,12 @@ namespace AutoPets
             base.Fainted(queue, card, index);
             if (_friendAhead != null)
             {
-                //TODO: restore food ability on the summoned card?
                 queue.Add(new SummonCardCommand(card, card.Deck, index, _friendAhead.Ability.GetType(), 
-                    _friendAhead.TotalHitPoints, _friendAhead.TotalAttackPoints, card.Level).Execute());
+                    _friendAhead.TotalHitPoints, _friendAhead.TotalAttackPoints, card.Level, 
+                    //TODO: restore food ability on the summoned card?
+                    null, 
+                    // in case we swallowed a parrot
+                    _friendAhead.RenderAbility.GetType()).Execute());
             }
         }
     }
@@ -1125,6 +1128,17 @@ namespace AutoPets
         {
             DefaultHP = 2;
             DefaultAttack = 2;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Eats shop food => Gain +{card.Level}/+{card.Level}.";
+        }
+
+        public override void AteFood(CardCommandQueue queue, Card card)
+        {
+            base.AteFood(queue, card);
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level, card.Level).Execute());
         }
     }
 

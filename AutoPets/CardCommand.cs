@@ -176,9 +176,10 @@ namespace AutoPets
         Deck _atDeck;
         Card _summonedCard;
         Type _foodAbilityType;
+        Type _renderAbilityType;
 
         public SummonCardCommand(Card card, Deck atDeck, int atIndex, Type abilityType, int hitPoints, int attackPoints,
-            int level = 1, Type foodAbilityType = null) : base(card)
+            int level = 1, Type foodAbilityType = null, Type renderAbilityType = null) : base(card)
         {
             _atDeck = atDeck;
             _abilityType = abilityType;
@@ -187,6 +188,7 @@ namespace AutoPets
             _attackPoints = attackPoints;
             _level = level;
             _foodAbilityType = foodAbilityType;
+            _renderAbilityType = renderAbilityType;
         }
 
         public override CardCommand Execute()
@@ -200,6 +202,8 @@ namespace AutoPets
             _summonedCard.XP = Card.GetXPFromLevel(_level);
             if (_foodAbilityType != null)
                 _summonedCard.FoodAbility = Activator.CreateInstance(_foodAbilityType) as FoodAbility;
+            if (_renderAbilityType != null)
+                _summonedCard.RenderAbility = Activator.CreateInstance(_renderAbilityType) as Ability;
             _summonedCard.Summon(_atIndex);
             _atDeck.Player.Game.OnCardSummonedEvent(this, _summonedCard, _atIndex);
 

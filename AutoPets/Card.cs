@@ -65,7 +65,7 @@ namespace AutoPets
 
         public Ability Ability { get { return _ability; } set { _ability = value; } }
         
-        public Ability RenderAbility { get { return _renderAbility; }  }
+        public Ability RenderAbility { get { return _renderAbility; } set { _renderAbility = value; }  }
 
         public FoodAbility FoodAbility { get { return _foodAbility; } set { _foodAbility = value; } }
 
