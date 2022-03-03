@@ -1,6 +1,6 @@
 using System;
 using Godot;
-using AutoPets;
+using AnimalHurtedLib;
 
 public class FoodArea2D : Area2D
 {

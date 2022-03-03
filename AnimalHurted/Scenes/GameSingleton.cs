@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using AutoPets;
+using AnimalHurtedLib;
 
 public class GameSingleton
 {

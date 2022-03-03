@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using AutoPets;
+using AnimalHurtedLib;
 
 public class CardArea2D : Area2D
 {
@@ -61,7 +61,7 @@ public class CardArea2D : Area2D
         FoodAbilityModulateTween.Start();
     }
 
-    public void RenderCard(AutoPets.Card card, int index, bool showLevelLabel = true)
+    public void RenderCard(Card card, int index, bool showLevelLabel = true)
     {
         _cardIndex = index;
         _showLevelLabel = showLevelLabel;

@@ -1,6 +1,6 @@
 using System;
 using Godot;
-using AutoPets;
+using AnimalHurtedLib;
 
 public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
 {

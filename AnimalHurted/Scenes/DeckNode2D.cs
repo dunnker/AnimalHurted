@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
-using AutoPets;
+using AnimalHurtedLib;
 
 public interface ICardSelectHost
 {
@@ -24,7 +24,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         return GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", index));
     }
 
-    public void RenderDeck(AutoPets.Deck deck)
+    public void RenderDeck(Deck deck)
     {
         _deck = deck;
         for (int i = 0; i < deck.Size; i++)

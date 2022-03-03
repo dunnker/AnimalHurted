@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Godot;
-using AutoPets;
+using AnimalHurtedLib;
 
 public class MainNode : Node
 {

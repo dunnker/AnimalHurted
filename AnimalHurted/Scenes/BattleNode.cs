@@ -1,5 +1,5 @@
 using Godot;
-using AutoPets;
+using AnimalHurtedLib;
 using System;
 using System.IO;
 using System.Collections;
