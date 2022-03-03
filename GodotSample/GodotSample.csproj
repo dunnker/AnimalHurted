@@ -1,8 +1,0 @@
-<Project Sdk="Godot.NET.Sdk/3.3.0">
-  <ItemGroup>
-    <ProjectReference Include="..\AutoPets\AutoPets.csproj" />
-  </ItemGroup>
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-  </PropertyGroup>
-</Project>
