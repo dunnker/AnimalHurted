@@ -188,19 +188,21 @@ namespace AutoPets
             _ability.BeforeAttack(queue, this);
         }
 
-        public void Attack(int damage)
+        public void Attack(ref int damage)
         {
             _foodAbility?.Hurting(this, ref damage);
             _hitPoints -= damage;
         }
 
-        public void Attacked(CardCommandQueue queue, Card opponentCard = null)
+        public void Attacked(CardCommandQueue queue, int damage, Card opponentCard = null)
         {
             var priorCard = _deck.LastOrDefault(c => c != null && c.Index < _index && c.TotalHitPoints > 0);
             priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
 
             // invoke even if TotalHitPoints is <= 0, because, for example, Splash attack should still apply
             _foodAbility?.Attacking(queue, this);
+
+            _ability.Attacked(queue, this, damage, opponentCard);
 
             Hurted(queue, opponentCard);
         }

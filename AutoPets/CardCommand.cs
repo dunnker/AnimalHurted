@@ -46,6 +46,8 @@ namespace AutoPets
     {
         Deck _opponentDeck;
         int _opponentIndex;
+        int _damage;
+        int _opponentDamage;
 
         Card OpponentCard { get { return _opponentDeck[_opponentIndex]; } }
 
@@ -57,16 +59,20 @@ namespace AutoPets
 
         public override CardCommand Execute()
         {
-            Card.Attack(OpponentCard.GetDamage());
-            OpponentCard.Attack(Card.GetDamage());
+            _damage = Card.GetDamage();
+            _opponentDamage = OpponentCard.GetDamage();
+            Card.Attack(ref _opponentDamage);
+            OpponentCard.Attack(ref _damage);
             Card.Deck.Player.Game.OnAttackEvent(this);
             return this;
         }
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            Card.Attacked(queue, OpponentCard);
-            OpponentCard.Attacked(queue, Card);
+            Card.Attacked(queue, _damage, OpponentCard);
+            // OpponentCard might be null if Card dealt scorpion attack
+            if (OpponentCard != null)
+                OpponentCard.Attacked(queue, _opponentDamage, Card); // now Card could be null...
             return this;
         }
     }

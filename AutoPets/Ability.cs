@@ -111,6 +111,11 @@ namespace AutoPets
 
         }
 
+        public virtual void Attacked(CardCommandQueue queue, Card card, int damage, Card opponentCard = null)
+        {
+
+        }
+
         public virtual void Knockout(CardCommandQueue queue, Card card)
         {
 

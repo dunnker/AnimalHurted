@@ -1240,6 +1240,20 @@ namespace AutoPets
             DefaultHP = 1;
             DefaultAttack = 1;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Attacked => Gives a deadly poison attack to the enemy.";
+        }
+
+        public override void Attacked(CardCommandQueue queue, Card card, int damage, Card opponentCard = null)
+        {
+            base.Attacked(queue, card, damage, opponentCard);
+            // if opponent had melon armor then it would have set damage to zero
+            // and we don't deliver the faint
+            if (damage > 0 && opponentCard != null)
+                queue.Add(new FaintCardCommand(opponentCard).Execute());
+        }
     }
 
     public class SealAbility : Ability
@@ -1248,6 +1262,25 @@ namespace AutoPets
         {
             DefaultHP = 8;
             DefaultAttack = 3;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Eats shop food => Give 2 random friends +{card.Level}/+{card.Level}.";
+        }
+
+        public override void AteFood(CardCommandQueue queue, Card card)
+        {
+            base.AteFood(queue, card);
+            var friendCard = card.Deck.GetRandomCard(new HashSet<int>() { card.Index });
+            if (friendCard != null)
+            {
+                queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, card.Level).Execute());
+                // exclude the friend card in the next search
+                friendCard = card.Deck.GetRandomCard(new HashSet<int>() { card.Index, friendCard.Index });
+                if (friendCard != null)
+                    queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, card.Level).Execute());
+            }
         }
     }
 
