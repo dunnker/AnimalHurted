@@ -3,7 +3,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.IO;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class Card
     {
@@ -161,7 +161,7 @@ namespace AutoPets
             string foodAbilityName = reader.ReadLine();
             if (!string.IsNullOrEmpty(foodAbilityName))
                 _foodAbility = Activator.CreateInstance(
-                    Type.GetType($"AutoPets.{foodAbilityName}, AutoPets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
+                    Type.GetType($"AnimalHurtedLib.{foodAbilityName}, AnimalHurtedLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
         }
 
         public int GetDamage()

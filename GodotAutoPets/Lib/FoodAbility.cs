@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class FoodAbility
     {

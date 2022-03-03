@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class CardCommandQueue : IEnumerable<CardCommand>
     {

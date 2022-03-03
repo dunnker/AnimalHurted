@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public delegate void CardCommandEventHandler(object sender, CardCommand command);
     public delegate void CardCommandCardEventHandler(object sender, CardCommand command, Card card, int index);

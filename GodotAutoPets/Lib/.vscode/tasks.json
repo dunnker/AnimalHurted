@@ -11,7 +11,7 @@
 			},
             "args": [
                 "build",
-                "${workspaceFolder}/AutoPets.csproj",
+                "${workspaceFolder}/AnimalHurtedLib.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/AutoPets.csproj",
+                "${workspaceFolder}/AnimalHurtedLib.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -37,7 +37,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/AutoPets.csproj"
+                "${workspaceFolder}/AnimalHurtedLib.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

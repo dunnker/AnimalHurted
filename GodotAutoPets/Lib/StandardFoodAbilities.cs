@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class HoneyBeeAbility : FoodAbility
     {

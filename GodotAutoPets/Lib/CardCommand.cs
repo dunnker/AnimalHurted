@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class CardCommand
     {

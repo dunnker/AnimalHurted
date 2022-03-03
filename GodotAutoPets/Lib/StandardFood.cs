@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AutoPets
+namespace AnimalHurtedLib
 {
     public class AppleFood : Food
     {
