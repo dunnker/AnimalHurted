@@ -1151,6 +1151,18 @@ namespace AutoPets
             DefaultHP = 6;
             DefaultAttack = 4;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Buy => Replace food shop with free milk that gives +{card.Level} attack and +{card.Level * 2} health.";
+        }
+
+        public override void Bought(CardCommandQueue queue, Card card)
+        {
+            base.Bought(queue, card);
+            card.Deck.Player.ShopFood1 = new MilkFood() { Cost = 0, AttackPoints = card.Level, HitPoints = card.Level * 2 };
+            card.Deck.Player.ShopFood2 = new MilkFood() { Cost = 0, AttackPoints = card.Level, HitPoints = card.Level * 2 };
+        }
     }
 
     public class CrocodileAbility : Ability

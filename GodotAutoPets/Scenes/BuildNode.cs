@@ -171,14 +171,19 @@ public class BuildNode : Node
         PlayerNameLabel.Text = _player.Name;
         DeckNode2D.RenderDeck(_player.BuildDeck);
         ShopNode2D.RenderShop();
-        RenderFood(1, _player.ShopFood1);
-        RenderFood(2, _player.ShopFood2);
+        RenderPlayerFood();
 
         Connect("ExecuteQueueOverSignal", this, "_signal_ExecuteQueueOver", null, 
             (int)ConnectFlags.Deferred);
     }
 
-    public void RenderFood(int index, Food playerFood)
+    public void RenderPlayerFood()
+    {
+        RenderFood(1, _player.ShopFood1);
+        RenderFood(2, _player.ShopFood2);
+    }
+
+    void RenderFood(int index, Food playerFood)
     {
         var foodSlot = GetNode($"FoodSlotNode2D{index}");
         var foodArea2D = foodSlot.GetNode<FoodArea2D>("Area2D");

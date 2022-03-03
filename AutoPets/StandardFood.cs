@@ -174,6 +174,19 @@ namespace AutoPets
 
     public class MilkFood : Food
     {
-        
+        public int HitPoints { get; set; }
+        public int AttackPoints { get; set; }
+
+        public override string GetMessage()
+        {
+             return $"Give a Pet +{AttackPoints} attack and +{HitPoints} health.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.HitPoints += HitPoints;
+            card.AttackPoints += AttackPoints;
+       }
     }
 }

@@ -32,8 +32,8 @@ namespace AutoPets
 
         public Deck ShopDeck { get { return _shopDeck; } }
 
-        public Food ShopFood1 { get { return _shopFood1; } }
-        public Food ShopFood2 { get { return _shopFood2; } }
+        public Food ShopFood1 { get { return _shopFood1; } set { _shopFood1 = value; } }
+        public Food ShopFood2 { get { return _shopFood2; } set { _shopFood2 = value; } }
 
         public bool LostLastBattle { get { return _lostLastBattle; } }
 

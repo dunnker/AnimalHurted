@@ -113,8 +113,7 @@ public class FoodArea2D : Area2D
 
                         BuildNode.Player.BuyFood(card, Index);
 
-                        BuildNode.RenderFood(1, BuildNode.Player.ShopFood1);
-                        BuildNode.RenderFood(2, BuildNode.Player.ShopFood2);
+                        BuildNode.RenderPlayerFood();
                         cardArea2D.RenderCard(card, card.Index);
                         BuildNode.DeckNode2D.GulpPlayer.Play();
 

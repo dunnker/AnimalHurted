@@ -50,12 +50,15 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
                     // we don't want the card shown in the shop during animations
                     sourceCardArea2D.HideCard();
 
+                    int saveGold = BuildNode.Player.Gold;
                     GameSingleton.Instance.Game.BeginUpdate();
                     // BuyFromShop makes direct changes to the deck (stored in saveDeck) and then
                     // invokes ability methods which make further changes
                     GameSingleton.Instance.Game.BuyFromShop(sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
                         BuildNode.Player, out CardCommandQueue queue, out Deck saveDeck);
                     GameSingleton.Instance.Game.EndUpdate();
+                    // manually invoke gold changed event since we disabled events
+                    BuildNode.Player.OnGoldChangedEvent(saveGold);
                     BuildNode.DeckNode2D.PlayThump();
                     // render the bought card as it existed before ability methods were invoked
                     targetCardArea2D.RenderCard(saveDeck[targetCardArea2D.CardIndex], targetCardArea2D.CardIndex);
@@ -64,6 +67,7 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
                     BuildNode.ExecuteQueue(queue, saveDeck);
 
                     RenderShop();
+                    BuildNode.RenderPlayerFood(); // in case we bought a Cow
                 }
             }
         }
