@@ -65,8 +65,8 @@ dialog_hide_on_ok = true
 mode = 0
 access = 2
 filters = PoolStringArray( "*.aps" )
-current_dir = "/github/AutoPets/GodotAutoPets"
-current_path = "/github/AutoPets/GodotAutoPets/"
+current_dir = "/github/AnimalHurted/AnimalHurted"
+current_path = "/github/AnimalHurted/AnimalHurted/"
 
 [connection signal="pressed" from="QuitButton" to="." method="_on_QuitButton_pressed"]
 [connection signal="pressed" from="NewGameButton" to="." method="_on_NewGameButton_pressed"]
