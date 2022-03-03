@@ -123,7 +123,7 @@ public class BuildNode : Node
 
     public void _on_ShopPetOKButton_pressed()
     {
-        var typeName = $"AutoPets.{GetNode<LineEdit>("ShopPetLineEdit").Text}Ability, AutoPets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"; 
+        var typeName = $"AnimalHurtedLib.{GetNode<LineEdit>("ShopPetLineEdit").Text}Ability, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"; 
         var type = Type.GetType(typeName);
         if (type != null)
         {

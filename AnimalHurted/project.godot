@@ -11,6 +11,7 @@ config_version=4
 [application]
 
 config/name="AnimalHurted"
+config/description="Animal Hurted. A game where pets fight until they faint."
 run/main_scene="res://Scenes/MainNode.tscn"
 config/icon="res://icon.png"
 

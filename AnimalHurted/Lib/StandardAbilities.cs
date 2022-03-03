@@ -1375,6 +1375,20 @@ namespace AnimalHurtedLib
             DefaultHP = 8;
             DefaultAttack = 6;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Buy tier 1 pet => Give all friends +{card.Level}/+{card.Level}.";
+        }
+
+        public override void FriendBought(CardCommandQueue queue, Card card, Card friendCard)
+        {
+            base.FriendBought(queue, card, friendCard);
+            if (AbilityList.Instance.TierOneAbilities.Any((ability) => ability.GetType() == friendCard.Ability.GetType()))
+                foreach (var c in card.Deck)
+                    if (c != card)
+                        queue.Add(new BuffCardCommand(c, card.Index, card.Level, card.Level).Execute());
+        }
     }
 
     public class FlyAbility : Ability
