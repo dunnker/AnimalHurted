@@ -1,9 +1,3 @@
-/AutoPets/bin/
-/AutoPets/obj/
-/ConsoleAutoPets/bin/
-/ConsoleAutoPets/obj/
-/GodotAutoPets/.mono
-/GodotAutoPets/.import
-/GodotAutoPets/.battles
-/GodotSample/.mono
-/GodotSample/.import
+/AnimalHurted/.mono
+/AnimalHurted/.import
+/AnimalHurted/.battles
