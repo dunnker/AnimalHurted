@@ -91,7 +91,7 @@ namespace AnimalHurtedLib
 
         }
 
-        public virtual void FriendFaints(CardCommandQueue queue, Card card)
+        public virtual void FriendFaints(CardCommandQueue queue, Card card, int index)
         {
 
         }

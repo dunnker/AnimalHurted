@@ -12,7 +12,7 @@ namespace AnimalHurtedLib
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, 
-                    AbilityList.Instance.ZombieBeeAbility.GetType(), 1, 1).Execute());
+                    typeof(ZombieBeeAbility), 1, 1).Execute());
         }
     }
 

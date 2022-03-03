@@ -28,7 +28,6 @@ namespace AnimalHurtedLib
         public List<Ability> TierFourAbilities { get; set; }
         public List<Ability> TierFiveAbilities { get; set; }
         public List<Ability> TierSixAbilities { get; set; }
-        public List<Ability> AllAbilities { get; set; }
 
         // Tier 1
         public AntAbility AntAbility { get; }
@@ -100,17 +99,8 @@ namespace AnimalHurtedLib
         public SnakeAbility SnakeAbility { get; }
         public TigerAbility TigerAbility { get; }
 
-        public ZombieCricketAbility ZombieCricketAbility { get; }
-        public DirtyRatAbility DirtyRatAbility { get; }
-        public ZombieBeeAbility ZombieBeeAbility { get; } 
-        public ZombieRamAbility ZombieRamAbility { get; } 
-        public ZombieBusAbility ZombieBusAbility { get; } 
-        public ZombieChickAbility ZombieChickAbility { get; } 
-
         private AbilityList()
         {
-            AllAbilities = new List<Ability>();
-
             TierOneAbilities = new List<Ability>();
             TierTwoAbilities = new List<Ability>();
             TierThreeAbilities = new List<Ability>();
@@ -245,26 +235,6 @@ namespace AnimalHurtedLib
             TierSixAbilities.Add(MammothAbility);
             TierSixAbilities.Add(SnakeAbility);
             TierSixAbilities.Add(TigerAbility);
-
-            AllAbilities.AddRange(TierOneAbilities);
-            AllAbilities.AddRange(TierTwoAbilities);
-            AllAbilities.AddRange(TierThreeAbilities);
-            AllAbilities.AddRange(TierFourAbilities);
-            AllAbilities.AddRange(TierFiveAbilities);
-            AllAbilities.AddRange(TierSixAbilities);
-
-            ZombieCricketAbility = new ZombieCricketAbility();
-            AllAbilities.Add(ZombieCricketAbility);
-            DirtyRatAbility = new DirtyRatAbility();
-            AllAbilities.Add(DirtyRatAbility);
-            ZombieBeeAbility = new ZombieBeeAbility();
-            AllAbilities.Add(ZombieBeeAbility);
-            ZombieRamAbility = new ZombieRamAbility();
-            AllAbilities.Add(ZombieRamAbility);
-            ZombieBusAbility = new ZombieBusAbility();
-            AllAbilities.Add(ZombieBusAbility);
-            ZombieChickAbility = new ZombieChickAbility();
-            AllAbilities.Add(ZombieChickAbility);
         }
     }
 }

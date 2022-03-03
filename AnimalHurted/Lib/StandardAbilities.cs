@@ -56,7 +56,7 @@ namespace AnimalHurtedLib
             // cricket is no longer in the deck
             Debug.Assert(card.Index == -1);
             // ...so we have the empty slot to place the zombie cricket
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieCricketAbility.GetType(), card.Level, card.Level).Execute());
+            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieCricketAbility), card.Level, card.Level).Execute());
         }
     }
 
@@ -469,7 +469,7 @@ namespace AnimalHurtedLib
                             opponent.BattleDeck.Size - i);
                         if (summonIndex != -1)
                             queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
-                                AbilityList.Instance.DirtyRatAbility.GetType(), 1, 1).Execute());
+                                typeof(DirtyRatAbility), 1, 1).Execute());
                     }
                 }
             }
@@ -773,12 +773,12 @@ namespace AnimalHurtedLib
         {
             base.Fainted(queue, card, index);
             // for the first ram we have the empty slot because the sheep has fainted
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieRamAbility.GetType(), 
+            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieRamAbility), 
                 card.Level * 2, card.Level * 2).Execute());
             //...but second ram we use GetSummonIndex to attempt to find a spot for it
             int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieRamAbility.GetType(), 
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieRamAbility), 
                     card.Level * 2, card.Level * 2).Execute());
         }
     }
@@ -890,7 +890,7 @@ namespace AnimalHurtedLib
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            queue.Add(new SummonCardCommand(card, card.Deck, index, AbilityList.Instance.ZombieBusAbility.GetType(), 
+            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieBusAbility), 
                 card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)).Execute());
         }
     }
@@ -1021,7 +1021,7 @@ namespace AnimalHurtedLib
                 int summonIndex = GetSummonIndex(queue, card.Deck, index);
                 // doing integer division, so adding +1 to card.TotalAttackPoints to round up
                 int attackPoints = (card.TotalAttackPoints + 1) / 2;
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, AbilityList.Instance.ZombieChickAbility.GetType(), 
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieChickAbility), 
                     1, attackPoints).Execute());
             }
         }
@@ -1297,9 +1297,9 @@ namespace AnimalHurtedLib
             return $"Friend faints => Gain +{card.Level * 2} attack and +{card.Level} health.";
         }
 
-        public override void FriendFaints(CardCommandQueue queue, Card card)
+        public override void FriendFaints(CardCommandQueue queue, Card card, int index)
         {
-            base.FriendFaints(queue, card);
+            base.FriendFaints(queue, card, index);
             queue.Add(new BuffCardCommand(card, card.Index, card.Level, card.Level * 2).Execute());
         }
     }
@@ -1391,12 +1391,49 @@ namespace AnimalHurtedLib
         }
     }
 
+    public class ZombieFlyAbility : NoAbility
+    {
+        public ZombieFlyAbility() : base()
+        {
+            DefaultHP = 5;
+            DefaultAttack = 5;
+        }
+    }
+
     public class FlyAbility : Ability
     {
+        int _summonCount;
+
         public FlyAbility() : base()
         {
             DefaultHP = 5;
             DefaultAttack = 5;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend faints => Summon a {card.Level * 5}/{card.Level * 5} fly in its place, three times per battle.";
+        }
+
+        public override void BattleStarted1(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted1(queue, card);
+            _summonCount = 0;
+        }
+
+        public override void FriendFaints(CardCommandQueue queue, Card card, int index)
+        {
+            base.FriendFaints(queue, card, index);
+            if (_summonCount < 3)
+            {
+                var summonIndex = GetSummonIndex(queue, card.Deck, index);
+                if (summonIndex != -1)
+                {
+                    queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieFlyAbility), 
+                        card.Level * 5, card.Level * 5).Execute());
+                    _summonCount++;
+                }
+            }
         }
     }
 

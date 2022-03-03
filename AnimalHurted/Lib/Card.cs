@@ -155,9 +155,9 @@ namespace AnimalHurtedLib
             _buildHitPoints = Int32.Parse(reader.ReadLine());
             _buildAttackPoints = Int32.Parse(reader.ReadLine());
             string abilityName = reader.ReadLine();
-            _ability = AbilityList.Instance.AllAbilities.FirstOrDefault((a) => a.GetType().Name == abilityName );
+            _ability = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null") ) as Ability;
             abilityName = reader.ReadLine();
-            _renderAbility = AbilityList.Instance.AllAbilities.FirstOrDefault((a) => a.GetType().Name == abilityName );;
+            _renderAbility = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null") ) as Ability;
             string foodAbilityName = reader.ReadLine();
             if (!string.IsNullOrEmpty(foodAbilityName))
                 _foodAbility = Activator.CreateInstance(
@@ -238,7 +238,7 @@ namespace AnimalHurtedLib
             foreach (var c in _deck)
             {
                 if (c.TotalHitPoints > 0)
-                    c.Ability.FriendFaints(queue, c);
+                    c.Ability.FriendFaints(queue, c, index);
             }
         }
 

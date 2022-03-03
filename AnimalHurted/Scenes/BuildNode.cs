@@ -127,7 +127,7 @@ public class BuildNode : Node
         var type = Type.GetType(typeName);
         if (type != null)
         {
-            var ability = AbilityList.Instance.AllAbilities.Find((x) => x.GetType() == type);
+            var ability = Activator.CreateInstance(type) as Ability;
             if (ability != null)
             {
                 if (ShopNode2D.Deck[0] != null)
