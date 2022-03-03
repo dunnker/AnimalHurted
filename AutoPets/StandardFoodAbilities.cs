@@ -25,9 +25,13 @@ namespace AutoPets
         }
     }
 
-    public class GarlicAbility : FoodAbility
+    public class GarlicArmorAbility : FoodAbility
     {
-        
+        public override void Hurting(Card card, ref int damage)
+        {
+            base.Hurting(card, ref damage);
+            damage = Math.Max(1, damage - 2);
+        }
     }
 
     public class MelonArmorAbility : FoodAbility

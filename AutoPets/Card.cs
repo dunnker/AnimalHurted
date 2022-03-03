@@ -286,7 +286,7 @@ namespace AutoPets
             if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
                 opponentCard.Ability.Knockout(queue, opponentCard);
             if (TotalHitPoints > 0)
-                _ability.Hurt(queue, this);
+                _ability.Hurted(queue, this);
             if (TotalHitPoints <= 0)
                 queue.Add(new FaintCardCommand(this).Execute());
         }

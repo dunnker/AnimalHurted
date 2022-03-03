@@ -417,9 +417,9 @@ namespace AutoPets
             return $"Hurt => Gain 50% of attack points, {card.Level} time(s).";
         }
 
-        public override void Hurt(CardCommandQueue queue, Card card)
+        public override void Hurted(CardCommandQueue queue, Card card)
         {
-            base.Hurt(queue, card);
+            base.Hurted(queue, card);
 
             // not necessary to check card.TotalHitpoints > 0; see comments in HurtCommand
 
@@ -605,9 +605,9 @@ namespace AutoPets
             return $"Hurt => Deal {card.Level * 2} damage to a random enemy.";
         }
 
-        public override void Hurt(CardCommandQueue queue, Card card)
+        public override void Hurted(CardCommandQueue queue, Card card)
         {
-            base.Hurt(queue, card);
+            base.Hurted(queue, card);
             var opponent = card.Deck.Player.GetOpponentPlayer();
             if (opponent.Game.Fighting)
             {
@@ -631,9 +631,9 @@ namespace AutoPets
             return $"Hurt => Give friend behind +{card.Level} attack and +{card.Level * 2} health.";
         }
 
-        public override void Hurt(CardCommandQueue queue, Card card)
+        public override void Hurted(CardCommandQueue queue, Card card)
         {
-            base.Hurt(queue, card);
+            base.Hurted(queue, card);
             Card priorCard = card.Deck.LastOrDefault(c => c != null && c.Index < card.Index && c.TotalHitPoints > 0);
             if (priorCard != null)
                 queue.Add(new BuffCardCommand(priorCard, card.Index, card.Level * 2, card.Level).Execute());
@@ -1334,6 +1334,17 @@ namespace AutoPets
             DefaultHP = 6;
             DefaultAttack = 8;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Before attack => Gain +{card.Level * 2}/+{card.Level * 2}.";
+        }
+
+        public override void BeforeAttack(CardCommandQueue queue, Card card)
+        {
+            base.BeforeAttack(queue, card);
+            queue.Add(new BuffCardCommand(card, card.Index, card.Level * 2, card.Level * 2).Execute());
+        }
     }
 
     public class CatAbility : Ability
@@ -1342,6 +1353,18 @@ namespace AutoPets
         {
             DefaultHP = 5;
             DefaultAttack = 4;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Multiply the attack and health of effects of food by {card.Level + 1}.";
+        }
+
+        public override void Eating(Card card, Card eatingCard, ref int hitPoints, ref int attackPoints)
+        {
+            base.Eating(card, eatingCard, ref hitPoints, ref attackPoints);
+            hitPoints *= card.Level + 1;
+            attackPoints *= card.Level + 1;
         }
     }
 

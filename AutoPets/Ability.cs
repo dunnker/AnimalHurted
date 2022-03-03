@@ -101,6 +101,12 @@ namespace AutoPets
 
         }
 
+        // specifically for Cat, card is the one eating (which could be the cat itself if it's eating)
+        public virtual void Eating(Card card, Card eatingCard, ref int hitPoints, ref int attackPoints)
+        {
+
+        }
+
         public virtual void FriendAteFood(CardCommandQueue queue, Card card, Card friendCard)
         {
             
@@ -126,7 +132,7 @@ namespace AutoPets
 
         }
 
-        public virtual void Hurt(CardCommandQueue queue, Card card)
+        public virtual void Hurted(CardCommandQueue queue, Card card)
         {
 
         }

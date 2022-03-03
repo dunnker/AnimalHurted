@@ -124,6 +124,9 @@ public class FoodArea2D : Area2D
                         card.Ate(queue, food);
                         GameSingleton.Instance.Game.EndUpdate();
                         BuildNode.ExecuteQueue(queue, savedDeck);
+
+                        // in case user bought salad bowl
+                        BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
                     }
                 }
             }

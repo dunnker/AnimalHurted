@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace AutoPets
 {
@@ -7,14 +9,17 @@ namespace AutoPets
     {
         public override string GetMessage()
         {
-            return "Give a Pet +1/+1.";
+            return "Give a pet +1/+1.";
         }
 
         public override void Execute(Card card)
         {
             base.Execute(card);
-            card.HitPoints += 1;
-            card.AttackPoints += 1;
+            int hitPoints = 1;
+            int attackPoints = 1;
+            Eating(card, ref hitPoints, ref attackPoints);
+            card.HitPoints += hitPoints;
+            card.AttackPoints += attackPoints;
         }
     }
 
@@ -22,7 +27,7 @@ namespace AutoPets
     {
         public override string GetMessage()
         {
-            return "Give a Pet Honey Bee.";
+            return "Give a pet a Honey Bee.";
         }
 
         public override void Execute(Card card)
@@ -36,14 +41,17 @@ namespace AutoPets
     {
         public override string GetMessage()
         {
-            return "Give a Pet +3/+3 until end of battle.";
+            return "Give a pet +3/+3 until end of battle.";
         }
 
         public override void Execute(Card card)
         {
             base.Execute(card);
-            card.BuildHitPoints += 3;
-            card.BuildAttackPoints += 3;
+            int hitPoints = 3;
+            int attackPoints = 3;
+            Eating(card, ref hitPoints, ref attackPoints);
+            card.BuildHitPoints += hitPoints;
+            card.BuildAttackPoints += attackPoints;
         }
     }
 
@@ -56,7 +64,7 @@ namespace AutoPets
 
         public override string GetMessage()
         {
-            return "Give a Pet Bone Attack.";
+            return "Give a pet Bone Attack.";
         }
 
         public override void Execute(Card card)
@@ -80,7 +88,7 @@ namespace AutoPets
 
         public override string GetMessage()
         {
-            return "Make a friendly Pet faint.";
+            return "Make a friendly pet faint.";
         }
 
         public override void ExecuteAbility(CardCommandQueue queue, Card card)
@@ -92,7 +100,16 @@ namespace AutoPets
 
     public class GarlicFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give a pet garlic armor.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.FoodAbility = new GarlicArmorAbility();
+        }
     }
 
     public class SaladBowlFood : Food
@@ -102,6 +119,31 @@ namespace AutoPets
             return "Salad Bowl";
         }
         
+        public override string GetMessage()
+        {
+            return "Give 2 random pets +1/+1.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            var hashSet = new HashSet<int>();
+            for (int i = 1; i <= 2; i++)
+            {
+                var buffCard = card.Deck.GetRandomCard(hashSet);
+                if (buffCard != null)
+                {
+                    int hitPoints = 1;
+                    int attackPoints = 1;
+                    Eating(buffCard, ref hitPoints, ref attackPoints);
+                    buffCard.HitPoints += hitPoints;
+                    buffCard.AttackPoints += attackPoints;
+
+                    // exclude this buffCard for the search for the next random card
+                    hashSet.Add(buffCard.Index);
+                }
+            }
+        }
     }
 
     public class CannedFoodFood : Food
@@ -117,14 +159,17 @@ namespace AutoPets
     {
         public override string GetMessage()
         {
-            return "Give a Pet +2/+2.";;
+            return "Give a pet +2/+2.";;
         }
         
         public override void Execute(Card card)
         {
             base.Execute(card);
-            card.HitPoints += 2;
-            card.AttackPoints += 2;
+            int hitPoints = 2;
+            int attackPoints = 2;
+            Eating(card, ref hitPoints, ref attackPoints);
+            card.HitPoints += hitPoints;
+            card.AttackPoints += attackPoints;
         }
     }
 
@@ -132,7 +177,7 @@ namespace AutoPets
     {
         public override string GetMessage()
         {
-            return "Give a Pet Splash Attack.";
+            return "Give a pet Splash Attack.";
         }
 
         public override void Execute(Card card)
@@ -179,14 +224,17 @@ namespace AutoPets
 
         public override string GetMessage()
         {
-             return $"Give a Pet +{AttackPoints} attack and +{HitPoints} health.";
+             return $"Give a pet +{AttackPoints} attack and +{HitPoints} health.";
         }
 
         public override void Execute(Card card)
         {
             base.Execute(card);
-            card.HitPoints += HitPoints;
-            card.AttackPoints += AttackPoints;
+            int hitPoints = HitPoints;
+            int attackPoints = AttackPoints;
+            Eating(card, ref hitPoints, ref attackPoints);
+            card.HitPoints += hitPoints;
+            card.AttackPoints += attackPoints;
        }
     }
 }

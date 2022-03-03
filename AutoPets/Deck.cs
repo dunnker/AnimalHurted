@@ -97,24 +97,6 @@ namespace AutoPets
             return _cards.LastOrDefault(c => c != null);
         }
 
-        public Card GetPriorCard(int cardIndex)
-        {
-            Debug.Assert(cardIndex < _cards.Length);
-            for (int i = cardIndex - 1; i >= 0; i--)
-                if (_cards[i] != null)
-                    return _cards[i];
-            return null;
-        }
-
-        public Card GetNextCard(int cardIndex)
-        {
-            Debug.Assert(cardIndex >= 0);
-            for (int i = cardIndex + 1; i < _cards.Length; i++)
-                if (_cards[i] != null)
-                    return _cards[i];
-            return null;
-        }
-
         public bool MakeRoomAt(int atIndex)
         {
             Debug.Assert(atIndex >= 0 && atIndex < _cards.Length);
