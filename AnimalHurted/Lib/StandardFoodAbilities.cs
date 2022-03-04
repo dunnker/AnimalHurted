@@ -46,17 +46,18 @@ namespace AnimalHurtedLib
 
     public class SplashAttackAbility : FoodAbility
     {
-        public override void Attacking(CardCommandQueue queue, Card card)
+        public override void Attacking(CardCommandQueue queue, Card card, Card opponentCard = null)
         {
             base.Attacking(queue, card);
             var opponent = card.Deck.Player.GetOpponentPlayer();
-            var lastCard = opponent.BattleDeck.GetLastCard();
-            if (lastCard != null && lastCard.Index > 0)
-            {
-                var targetCard = opponent.BattleDeck[lastCard.Index - 1];
-                if (targetCard != null && targetCard.TotalHitPoints > 0)
-                    queue.Add(new HurtCardCommand(targetCard, 5, card.Deck, card.Index).Execute());
-            }
+            Card targetCard = null;
+            // opponentCard may have fainted from the attack
+            if (opponentCard == null)
+                targetCard = opponent.BattleDeck.GetLastCard();
+            else if (opponentCard.Index > 0)
+                targetCard = opponent.BattleDeck[opponentCard.Index - 1];
+            if (targetCard != null && targetCard.TotalHitPoints > 0)
+                queue.Add(new HurtCardCommand(targetCard, 5, card.Deck, card.Index).Execute());
         }
     }
 

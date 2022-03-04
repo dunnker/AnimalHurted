@@ -10,7 +10,7 @@ namespace AnimalHurtedLib
 
         }
 
-        public virtual void Attacking(CardCommandQueue queue, Card card)
+        public virtual void Attacking(CardCommandQueue queue, Card card, Card opponentCard = null)
         {
 
         }

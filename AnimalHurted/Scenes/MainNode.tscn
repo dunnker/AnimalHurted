@@ -65,8 +65,8 @@ dialog_hide_on_ok = true
 mode = 0
 access = 2
 filters = PoolStringArray( "*.ah" )
-current_dir = "/github/AnimalHurted/AnimalHurted"
-current_path = "/github/AnimalHurted/AnimalHurted/"
+current_dir = "/"
+current_path = "/"
 
 [connection signal="pressed" from="QuitButton" to="." method="_on_QuitButton_pressed"]
 [connection signal="pressed" from="NewGameButton" to="." method="_on_NewGameButton_pressed"]

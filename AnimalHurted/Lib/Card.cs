@@ -193,7 +193,7 @@ namespace AnimalHurtedLib
             priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
 
             // invoke even if TotalHitPoints is <= 0, because, for example, Splash attack should still apply
-            _foodAbility?.Attacking(queue, this);
+            _foodAbility?.Attacking(queue, this, opponentCard);
 
             _ability.Attacked(queue, this, damage, opponentCard);
 
