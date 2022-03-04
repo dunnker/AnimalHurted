@@ -69,10 +69,10 @@ namespace AnimalHurtedLib
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            Card.Attacked(queue, _damage, OpponentCard);
+            Card.Attacked(queue, _damage, _opponentDamage, OpponentCard);
             // OpponentCard might be null if Card dealt scorpion attack
             if (OpponentCard != null)
-                OpponentCard.Attacked(queue, _opponentDamage, Card); // now Card could be null...
+                OpponentCard.Attacked(queue, _opponentDamage, _damage, Card); // now Card could be null...
             return this;
         }
     }

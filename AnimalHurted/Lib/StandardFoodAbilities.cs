@@ -59,4 +59,16 @@ namespace AnimalHurtedLib
             }
         }
     }
+
+    public class CoconutShieldAbility : FoodAbility
+    {
+        public override void Hurting(Card card, ref int damage)
+        {
+            base.Hurting(card, ref damage);
+            damage = 0;
+            // remove the armor after first damage
+            // gorilla will re-attach shield ability up to 3 times
+            card.FoodAbility = null;
+       }       
+    }
 }

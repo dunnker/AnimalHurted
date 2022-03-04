@@ -194,7 +194,7 @@ namespace AnimalHurtedLib
             _hitPoints -= damage;
         }
 
-        public void Attacked(CardCommandQueue queue, int damage, Card opponentCard = null)
+        public void Attacked(CardCommandQueue queue, int damage, int opponentDamage, Card opponentCard = null)
         {
             var priorCard = _deck.LastOrDefault(c => c != null && c.Index < _index && c.TotalHitPoints > 0);
             priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
@@ -204,7 +204,8 @@ namespace AnimalHurtedLib
 
             _ability.Attacked(queue, this, damage, opponentCard);
 
-            Hurted(queue, opponentCard);
+            if (opponentDamage > 0)
+                Hurted(queue, opponentCard);
         }
 
         public void Summon(int atIndex)

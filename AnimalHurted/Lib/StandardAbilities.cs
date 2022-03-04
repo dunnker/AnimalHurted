@@ -1439,10 +1439,33 @@ namespace AnimalHurtedLib
 
     public class GorillaAbility : Ability
     {
+        int _shieldCount;
+
         public GorillaAbility() : base()
         {
             DefaultHP = 9;
             DefaultAttack = 6;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Hurt => Gain a Coconut Shield, {card.Level} time(s) per battle.";
+        }
+
+        public override void BattleStarted1(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted1(queue, card);
+            _shieldCount = 0;
+        }
+
+        public override void Hurted(CardCommandQueue queue, Card card)
+        {
+            base.Hurted(queue, card);
+            if (_shieldCount < card.Level)
+            {
+                queue.Add(new GainFoodAbilityCommand(card, new CoconutShieldAbility()).Execute());
+                _shieldCount++;
+            }
         }
     }
 
