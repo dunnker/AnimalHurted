@@ -1476,6 +1476,29 @@ namespace AnimalHurtedLib
             DefaultHP = 4;
             DefaultAttack = 10;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Start of battle => Deal 50% of its attack damage to {card.Level} random enemy(s).";
+        }
+
+        public override void BattleStarted2(CardCommandQueue queue, Card card)
+        {
+            base.BattleStarted2(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            // integer division rounds up
+            int damage = (card.AttackPoints + 1) / 2;
+            var hashSet = new HashSet<int>();
+            for (int i = 1; i <= card.Level; i++)
+            {
+                var enemyCard = opponent.BattleDeck.GetRandomCard(hashSet);
+                if (enemyCard != null)
+                {
+                    queue.Add(new HurtCardCommand(enemyCard, damage, card.Deck, card.Index).Execute());
+                    hashSet.Add(enemyCard.Index);
+                }
+            }
+        }
     }
 
     public class MammothAbility : Ability
@@ -1485,6 +1508,19 @@ namespace AnimalHurtedLib
             DefaultHP = 10;
             DefaultAttack = 3;
         }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Faint => Give all friends +{card.Level * 2}/+{card.Level * 2}.";
+        }
+
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            foreach (var friendCard in card.Deck)
+                if (friendCard.TotalHitPoints > 0)
+                    queue.Add(new BuffCardCommand(friendCard, index, card.Level * 2, card.Level * 2).Execute());
+        }
     }
 
     public class SnakeAbility : Ability
@@ -1493,6 +1529,20 @@ namespace AnimalHurtedLib
         {
             DefaultHP = 6;
             DefaultAttack = 6;
+        }
+
+        public override string GetAbilityMessage(Card card)
+        {
+            return $"Friend ahead attacks => Deal {card.Level * 3} damage to a random enemy.";
+        }
+
+        public override void FriendAheadAttacks(CardCommandQueue queue, Card card)
+        {
+            base.FriendAheadAttacks(queue, card);
+            var opponent = card.Deck.Player.GetOpponentPlayer();
+            var enemyCard = opponent.BattleDeck.GetRandomCard();
+            if (enemyCard != null)
+                queue.Add(new HurtCardCommand(enemyCard, card.Level * 3, card.Deck, card.Index).Execute());
         }
     }
 

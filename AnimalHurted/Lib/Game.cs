@@ -246,6 +246,11 @@ namespace AnimalHurtedLib
 
                 card.Attacking(queue);
                 opponentCard.Attacking(queue);
+                if (queue.Count > 0)
+                {
+                    fightResult.AddRange(queue.CreateExecuteResult(this));
+                    queue = new CardCommandQueue();
+                }
 
                 queue.Add(new AttackCardCommand(card, opponentCard).Execute());
 
