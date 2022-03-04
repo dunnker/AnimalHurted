@@ -53,10 +53,10 @@ namespace AnimalHurtedLib
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            // cricket is no longer in the deck
-            Debug.Assert(card.Index == -1);
-            // ...so we have the empty slot to place the zombie cricket
-            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieCricketAbility), card.Level, card.Level).Execute());
+            // cricket has fainted but we still have to search for an empty slot because it's possible that
+            // another ability method has moved cards here; see comments for sheep
+            if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieCricketAbility), card.Level, card.Level).Execute());
         }
     }
 
@@ -465,9 +465,7 @@ namespace AnimalHurtedLib
                     var opponent = card.Deck.Player.GetOpponentPlayer();
                     if (opponent.BattleDeck[opponent.BattleDeck.Size - i] == null)
                     {
-                        int summonIndex = GetSummonIndex(queue, opponent.BattleDeck, 
-                            opponent.BattleDeck.Size - i);
-                        if (summonIndex != -1)
+                        if (CanMakeRoomAt(queue, opponent.BattleDeck, opponent.BattleDeck.Size - i, out int summonIndex))
                             queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
                                 typeof(DirtyRatAbility), 1, 1).Execute());
                     }
@@ -525,9 +523,9 @@ namespace AnimalHurtedLib
             base.Fainted(queue, card, index);
             int randIndex = card.Deck.Player.Game.Random.Next(0, AbilityList.Instance.TierThreeAbilities.Count);
             var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
-            // spider has fainted so we have the empty slot for the new card
-            // otherwise would need to use Ability.GetSummonIndex()
-            queue.Add(new SummonCardCommand(card, card.Deck, index, ability.GetType(), 2, 2, card.Level).Execute());
+            // see comments for cricket and sheep
+            if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, ability.GetType(), 2, 2, card.Level).Execute());
         }
     }
 
@@ -772,13 +770,13 @@ namespace AnimalHurtedLib
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            // for the first ram we have the empty slot because the sheep has fainted
-            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieRamAbility), 
-                card.Level * 2, card.Level * 2).Execute());
-            //...but second ram we use GetSummonIndex to attempt to find a spot for it
-            int summonIndex = GetSummonIndex(queue, card.Deck, index);
-            if (summonIndex != -1)
+            // sheep has fainted but we still have to search for an empty slot because it's possible that
+            // another ability method has moved cards into the sheep's spot
+            if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieRamAbility), 
+                    card.Level * 2, card.Level * 2).Execute());
+            if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex2))
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex2, typeof(ZombieRamAbility), 
                     card.Level * 2, card.Level * 2).Execute());
         }
     }
@@ -890,8 +888,9 @@ namespace AnimalHurtedLib
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieBusAbility), 
-                card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)).Execute());
+            if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieBusAbility), 
+                    card.Level * 5, card.Level * 5, 1, typeof(SplashAttackAbility)).Execute());
         }
     }
 
@@ -1018,8 +1017,7 @@ namespace AnimalHurtedLib
             base.Fainted(queue, card, index);
             for (int i = 1; i <= card.Level; i++)
             {
-                int summonIndex = GetSummonIndex(queue, card.Deck, index);
-                if (summonIndex != -1)
+                if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
                 {
                     // doing integer division, so adding +1 to card.TotalAttackPoints to round up
                     int attackPoints = (card.TotalAttackPoints + 1) / 2;
@@ -1429,8 +1427,7 @@ namespace AnimalHurtedLib
             base.FriendFaints(queue, card, index);
             if (_summonCount < 3)
             {
-                var summonIndex = GetSummonIndex(queue, card.Deck, index);
-                if (summonIndex != -1)
+                if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
                 {
                     queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieFlyAbility), 
                         card.Level * 5, card.Level * 5).Execute());

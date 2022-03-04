@@ -121,8 +121,8 @@ resizable = true
 dialog_hide_on_ok = true
 access = 2
 filters = PoolStringArray( "*.ah" )
-current_dir = "/github/AnimalHurted/AnimalHurted"
-current_path = "/github/AnimalHurted/AnimalHurted/"
+current_dir = "/"
+current_path = "/"
 
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]

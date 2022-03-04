@@ -22,28 +22,41 @@ namespace AnimalHurtedLib
             return string.Empty;
         }
 
-        public static int GetSummonIndex(CardCommandQueue queue, Deck deck, int index)
+        public static bool CanMakeRoomAt(CardCommandQueue queue, Deck deck, int atIndex, out int summonIndex)
         {
+            summonIndex = -1;
             // First look towards the end of the deck for an empty space
-            for (int i = index; i < deck.Size; i++)
+            for (int i = atIndex; i < deck.Size; i++)
                 if (deck[i] == null)
-                    return i;
+                {
+                    summonIndex = i;
+                    return true;
+                }
             // Empty space not found so move cards back if possible
-            for (int i = index - 1; i >= 0; i--)
+            for (int i = atIndex - 1; i >= 0; i--)
             {
                 if (deck[i] == null)
                 {
                     var indexes = new List<(int from, int to)>();
-                    for (int j = i; j <= index - 1; j++)
+                    for (int j = i; j <= atIndex - 1; j++)
                     {
                         indexes.Add((j + 1, j));
+
+                        // CanMakeRoomAt is typically called by an ability method, that previously was called by a queue reader
+                        // such as CardCommandQueue.CreateExecuteResult. Since we are about to move cards, that means that prior
+                        // commands that are left to be read/executed will be associated with the wrong index values.
+                        // those commands that are incorrect are the "parent" commands to this queue that are being read in
+                        // CreateExecuteResult. So notify to update indexes:
                         queue.CardMoving(deck, j + 1, j);
                     }
+                    // perform the deck move operations and store in the queue so when the final result is read
+                    // the same move operations can be performed 
                     queue.Add(new MoveCardsCommand(deck, indexes).Execute());
-                    return index;
+                    summonIndex = atIndex;
+                    return true;
                 }
             }
-            return -1;
+            return false;
         }
 
         // "Start of turn"

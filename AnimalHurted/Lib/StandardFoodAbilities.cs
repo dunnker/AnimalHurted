@@ -9,8 +9,7 @@ namespace AnimalHurtedLib
         public override void Fainted(CardCommandQueue queue, Card card, int index)
         {
             base.Fainted(queue, card, index);
-            int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
-            if (summonIndex != -1)
+            if (Ability.CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, 
                     typeof(ZombieBeeAbility), 1, 1).Execute());
         }

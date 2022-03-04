@@ -38,10 +38,16 @@ namespace AnimalHurtedLib
             while (queue.Count > 0)
             {
                 result.Add(queue);
+                // queue is the "parent" to nextQueue
                 var nextQueue = new CardCommandQueue(queue);
                 foreach (var command in queue)
                 {
+                    // store the current location that is being read in _parentCommand
                     nextQueue._parentCommand = command;
+
+                    // if this ability method adds a summon command to nextQueue, and that command moves cards
+                    // then CardMoving will be responsible for updating the new index locations from this
+                    // command (the _parentCommand) forward
                     command.ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;
