@@ -25,15 +25,18 @@ public class MainNode : Node
 
     public void _on_OpenFileDialog_file_selected(Godot.Path @string)
     {
-        using (StreamReader streamReader = new StreamReader(ProjectSettings.GlobalizePath(OpenFileDialog.CurrentPath)))
+        using (FileStream fileStream = new FileStream(ProjectSettings.GlobalizePath(OpenFileDialog.CurrentPath), FileMode.Open))
         {
-            GameSingleton.Instance.Game = new Game();
-            Deck deck = new Deck(GameSingleton.Instance.Game.Player1, Game.BuildDeckSlots);
-            deck.LoadFromStream(streamReader);
-            deck.CloneTo(GameSingleton.Instance.Game.Player1.BattleDeck);
-            deck = new Deck(GameSingleton.Instance.Game.Player2, Game.BuildDeckSlots);
-            deck.LoadFromStream(streamReader);
-            deck.CloneTo(GameSingleton.Instance.Game.Player2.BattleDeck);
+            using (BinaryReader reader = new BinaryReader(fileStream))
+            {
+                GameSingleton.Instance.Game = new Game();
+                Deck deck = new Deck(GameSingleton.Instance.Game.Player1, Game.BuildDeckSlots);
+                deck.LoadFromStream(reader);
+                deck.CloneTo(GameSingleton.Instance.Game.Player1.BattleDeck);
+                deck = new Deck(GameSingleton.Instance.Game.Player2, Game.BuildDeckSlots);
+                deck.LoadFromStream(reader);
+                deck.CloneTo(GameSingleton.Instance.Game.Player2.BattleDeck);
+            }
         }
         GameSingleton.Instance.SaveBattleDecks();
         GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();

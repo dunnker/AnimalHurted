@@ -118,50 +118,43 @@ namespace AnimalHurtedLib
             }
         }
 
-        public void SaveToStream(StreamWriter writer)
+        public void SaveToStream(BinaryWriter writer)
         {
             // version number of this stream; used to support backward compatibility
             // if stream format changes later
-            writer.WriteLine(1);
-            writer.WriteLine(_index);
-            writer.WriteLine(_xp);
-            writer.WriteLine(_hitPoints);
-            writer.WriteLine(_attackPoints);
-            writer.WriteLine(_buildHitPoints);
-            writer.WriteLine(_buildAttackPoints);
-            if (_ability == null)
-                writer.WriteLine(string.Empty);
-            else
-                writer.WriteLine(_ability.GetType().Name);
-            if (_renderAbility == null)
-                writer.WriteLine(string.Empty);
-            else
-                writer.WriteLine(_renderAbility.GetType().Name);
-            if (_foodAbility == null)
-                writer.WriteLine(string.Empty);
-            else
-                writer.WriteLine(_foodAbility.GetType().Name);
+            writer.Write(1);
+            writer.Write(_index);
+            writer.Write(_xp);
+            writer.Write(_hitPoints);
+            writer.Write(_attackPoints);
+            writer.Write(_buildHitPoints);
+            writer.Write(_buildAttackPoints);
+            writer.Write(_ability != null ? _ability.GetType().Name : string.Empty);
+            writer.Write(_renderAbility != null ? _renderAbility.GetType().Name : string.Empty);
+            writer.Write(_foodAbility != null ? _foodAbility.GetType().Name : string.Empty);
         }
 
-        public void LoadFromStream(StreamReader reader)
+        public void LoadFromStream(BinaryReader reader)
         {
-            int version = Int32.Parse(reader.ReadLine());
+            int version = reader.ReadInt32();
             if (version != 1)
                 throw new Exception("Invalid stream version");
-            _index = Int32.Parse(reader.ReadLine());
-            _xp = Int32.Parse(reader.ReadLine());
-            _hitPoints = Int32.Parse(reader.ReadLine());
-            _attackPoints = Int32.Parse(reader.ReadLine());
-            _buildHitPoints = Int32.Parse(reader.ReadLine());
-            _buildAttackPoints = Int32.Parse(reader.ReadLine());
-            string abilityName = reader.ReadLine();
-            _ability = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null") ) as Ability;
-            abilityName = reader.ReadLine();
-            _renderAbility = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null") ) as Ability;
-            string foodAbilityName = reader.ReadLine();
-            if (!string.IsNullOrEmpty(foodAbilityName))
+            _index = reader.ReadInt32();
+            _xp = reader.ReadInt32();
+            _hitPoints = reader.ReadInt32();
+            _attackPoints = reader.ReadInt32();
+            _buildHitPoints = reader.ReadInt32();
+            _buildAttackPoints = reader.ReadInt32();
+            string abilityName = reader.ReadString();
+            if (!string.IsNullOrEmpty(abilityName))
+                _ability = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as Ability;
+            abilityName = reader.ReadString();
+            if (!string.IsNullOrEmpty(abilityName))
+                _renderAbility = Activator.CreateInstance(Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as Ability;
+            abilityName = reader.ReadString();
+            if (!string.IsNullOrEmpty(abilityName))
                 _foodAbility = Activator.CreateInstance(
-                    Type.GetType($"AnimalHurtedLib.{foodAbilityName}, AnimalHurtedLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
+                    Type.GetType($"AnimalHurtedLib.{abilityName}, AnimalHurted, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")) as FoodAbility;
         }
 
         public int GetDamage()

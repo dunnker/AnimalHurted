@@ -64,7 +64,7 @@ resizable = true
 dialog_hide_on_ok = true
 mode = 0
 access = 2
-filters = PoolStringArray( "*.aps" )
+filters = PoolStringArray( "*.ah" )
 current_dir = "/github/AnimalHurted/AnimalHurted"
 current_path = "/github/AnimalHurted/AnimalHurted/"
 

@@ -7,6 +7,14 @@ namespace AnimalHurtedLib
 {
     public class CardCommandQueue : IEnumerable<CardCommand>
     {
+        CardCommandQueue _parentQueue;
+        CardCommand _parentCommand;
+
+        public CardCommandQueue(CardCommandQueue parentQueue = null)
+        {
+            _parentQueue = parentQueue;
+        }
+
         List<CardCommand> _list = new List<CardCommand>();
 
         public int Count { get { return _list.Count; } }
@@ -14,6 +22,12 @@ namespace AnimalHurtedLib
         public void Add(CardCommand cardCommand)
         {
             _list.Add(cardCommand);
+        }
+
+        public void CardMoving(Deck deck, int from, int to)
+        {
+            foreach (var command in _parentQueue.SkipWhile((c) => c != _parentCommand).Skip(1))
+                command.CardMoving(deck, from, to);
         }
 
         public List<CardCommandQueue> CreateExecuteResult(Game game)
@@ -24,9 +38,10 @@ namespace AnimalHurtedLib
             while (queue.Count > 0)
             {
                 result.Add(queue);
-                var nextQueue = new CardCommandQueue();
+                var nextQueue = new CardCommandQueue(queue);
                 foreach (var command in queue)
                 {
+                    nextQueue._parentCommand = command;
                     command.ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;

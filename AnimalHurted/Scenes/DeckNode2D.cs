@@ -74,6 +74,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             GameSingleton.Instance.Game.CardBuffedEvent -= _game_CardBuffedEvent;
             GameSingleton.Instance.Game.CardHurtEvent -= _game_CardHurtEvent;
             GameSingleton.Instance.Game.CardGainedFoodAbilityEvent -= _game_CardGainedFoodAbilityEvent;
+            GameSingleton.Instance.Game.CardsMovedEvent -= _game_CardsMoved;
         }
     }
 
@@ -84,6 +85,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
         GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
         GameSingleton.Instance.Game.CardGainedFoodAbilityEvent += _game_CardGainedFoodAbilityEvent;
+        GameSingleton.Instance.Game.CardsMovedEvent += _game_CardsMoved;
     }
 
     public void PlayThump()
@@ -257,16 +259,16 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         return GetParent() is BuildNode;
     }
 
-    public async void _game_CardFaintedEvent(object sender, CardCommand command, Deck deck, int index)
+    public async void _game_CardFaintedEvent(object sender, CardCommand command)
     {
-        if (deck == this._deck)
+        if (command.Deck == this._deck)
         {
             var tween = new Tween();
             AddChild(tween);
 
             float faintTime = BattleNode.MaxTimePerEvent;
 
-            var cardSlot = GetCardSlotNode2D(index + 1);
+            var cardSlot = GetCardSlotNode2D(command.Index + 1);
             tween.InterpolateProperty(cardSlot.CardArea2D.Sprite, "modulate:a",
                 1.0, 0.0, faintTime, Tween.TransitionType.Linear, Tween.EaseType.In);
             tween.Start();
@@ -280,17 +282,26 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             var color = cardSlot.CardArea2D.Sprite.Modulate;
             cardSlot.CardArea2D.Sprite.Modulate = new Color(color.r, color.g,
                 color.b, 1);
-            cardSlot.CardArea2D.RenderCard(null, index);
+            cardSlot.CardArea2D.RenderCard(null, command.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public async void _game_CardSummonedEvent(object sender, CardCommand command, Card card, int index)
+    public void _game_CardsMoved(object sender, CardCommand command)
     {
-        if (card.Deck == this._deck)
+        if (command.Deck == _deck)
         {
-            var cardSlot = GetCardSlotNode2D(index + 1);
+            RenderDeck(_deck);  
+        }
+    }
+
+    public async void _game_CardSummonedEvent(object sender, CardCommand command)
+    {
+        var summonedCommand = command as SummonCardCommand;
+        if (summonedCommand.SummonedCard.Deck == this._deck)
+        {
+            var cardSlot = GetCardSlotNode2D(summonedCommand.AtIndex + 1);
             if (!cardSlot.Visible)
                 cardSlot.Show();
 
@@ -299,18 +310,18 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                 await (GetParent() as BattleNode).PositionDecks(false);
             }
 
-            cardSlot.CardArea2D.RenderCard(_deck[index], index);
+            cardSlot.CardArea2D.RenderCard(_deck[summonedCommand.AtIndex], summonedCommand.AtIndex);
         
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public async void _game_CardBuffedEvent(object sender, CardCommand command, Card card, int sourceIndex)
+    public async void _game_CardBuffedEvent(object sender, CardCommand command)
     {
-        if (card.Deck == this._deck)
+        if (command.Deck == this._deck)
         {
-            var cardSlot = GetCardSlotNode2D(card.Index + 1);
-            var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+            var cardSlot = GetCardSlotNode2D(command.Index + 1);
+            var sourceCardSlot = GetCardSlotNode2D((command as BuffCardCommand).SourceIndex + 1);
 
             var buffArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/BuffArea2D.tscn");
             Area2D buffArea2D = buffArea2DScene.Instance() as Area2D;
@@ -322,24 +333,22 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             buffArea2D.QueueFree();
 
             GulpPlayer.Play();
-            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+            cardSlot.CardArea2D.RenderCard(_deck[command.Index], command.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public async void _game_CardHurtEvent(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex)
+    public async void _game_CardHurtEvent(object sender, CardCommand command)
     {
+        var hurtCommand = command as HurtCardCommand;
         // see also BattleNode where its _game_CardHurtEvent handles 
         // the case where source card deck is an opponent
-        if (card.Deck == this._deck && sourceDeck == card.Deck)
+        // in which case we have to animate from the opponent's DeckNodeScene
+        if (hurtCommand.Deck == this._deck && hurtCommand.SourceDeck == hurtCommand.Deck)
         {
-            // see also BattleNode where its _game_CardHurtEvent handles 
-            // the case where source card deck is different than the card
-            // in which case we have to animate from the opponent's DeckNodeScene
-
-            var cardSlot = GetCardSlotNode2D(card.Index + 1);
-            var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
+            var cardSlot = GetCardSlotNode2D(hurtCommand.Index + 1);
+            var sourceCardSlot = GetCardSlotNode2D(hurtCommand.SourceIndex + 1);
 
             WhooshPlayer.Play();
 
@@ -352,17 +361,17 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
             damageArea2D.QueueFree();
 
-            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+            cardSlot.CardArea2D.RenderCard(_deck[hurtCommand.Index], hurtCommand.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public async void _game_CardGainedFoodAbilityEvent(object sender, CardCommand command, Card card, int index)
+    public async void _game_CardGainedFoodAbilityEvent(object sender, CardCommand command)
     {
-        if (card.Deck == this._deck)
+        if (command.Deck == this._deck)
         {
-            var cardSlot = GetCardSlotNode2D(card.Index + 1);
+            var cardSlot = GetCardSlotNode2D(command.Index + 1);
             /*var sourceCardSlot = GetCardSlotNode2D(sourceIndex + 1);
 
             var buffArea2DScene = (PackedScene)ResourceLoader.Load("res://Scenes/BuffArea2D.tscn");
@@ -377,7 +386,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             await ToSignal(GetTree().CreateTimer(BattleNode.MaxTimePerEvent), "timeout"); //TODO remove
 
             GulpPlayer.Play();
-            cardSlot.CardArea2D.RenderCard(_deck[card.Index], card.Index);
+            cardSlot.CardArea2D.RenderCard(_deck[command.Index], command.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }

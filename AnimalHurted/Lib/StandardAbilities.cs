@@ -465,7 +465,7 @@ namespace AnimalHurtedLib
                     var opponent = card.Deck.Player.GetOpponentPlayer();
                     if (opponent.BattleDeck[opponent.BattleDeck.Size - i] == null)
                     {
-                        int summonIndex = Ability.GetSummonIndex(queue, opponent.BattleDeck, 
+                        int summonIndex = GetSummonIndex(queue, opponent.BattleDeck, 
                             opponent.BattleDeck.Size - i);
                         if (summonIndex != -1)
                             queue.Add(new SummonCardCommand(card, opponent.BattleDeck, summonIndex, 
@@ -776,7 +776,7 @@ namespace AnimalHurtedLib
             queue.Add(new SummonCardCommand(card, card.Deck, index, typeof(ZombieRamAbility), 
                 card.Level * 2, card.Level * 2).Execute());
             //...but second ram we use GetSummonIndex to attempt to find a spot for it
-            int summonIndex = Ability.GetSummonIndex(queue, card.Deck, index);
+            int summonIndex = GetSummonIndex(queue, card.Deck, index);
             if (summonIndex != -1)
                 queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieRamAbility), 
                     card.Level * 2, card.Level * 2).Execute());
@@ -1019,10 +1019,13 @@ namespace AnimalHurtedLib
             for (int i = 1; i <= card.Level; i++)
             {
                 int summonIndex = GetSummonIndex(queue, card.Deck, index);
-                // doing integer division, so adding +1 to card.TotalAttackPoints to round up
-                int attackPoints = (card.TotalAttackPoints + 1) / 2;
-                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieChickAbility), 
-                    1, attackPoints).Execute());
+                if (summonIndex != -1)
+                {
+                    // doing integer division, so adding +1 to card.TotalAttackPoints to round up
+                    int attackPoints = (card.TotalAttackPoints + 1) / 2;
+                    queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, typeof(ZombieChickAbility), 
+                        1, attackPoints).Execute());
+                }
             }
         }
     }

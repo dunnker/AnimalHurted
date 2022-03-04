@@ -25,31 +25,30 @@ namespace AnimalHurtedLib
             _player = player;
         }
 
-        public void SaveToStream(StreamWriter writer)
+        public void SaveToStream(BinaryWriter writer)
         {
             // version number of this stream; used to support backward compatibility
             // if stream format changes later
-            writer.WriteLine(1);
-            writer.WriteLine(_cards.Length);
+            writer.Write((int)1);
+            writer.Write(_cards.Length);
             foreach (var c in _cards)
             {
-                writer.WriteLine(c != null);
-                if (c != null)
-                    c.SaveToStream(writer);
+                writer.Write(c != null);
+                c?.SaveToStream(writer);
             }
         }
 
-        public void LoadFromStream(StreamReader reader)
+        public void LoadFromStream(BinaryReader reader)
         {
-            int version = Int32.Parse(reader.ReadLine());
+            int version = reader.ReadInt32();
             if (version != 1)
                 throw new Exception("Invalid stream version");
-            int count = Int32.Parse(reader.ReadLine());
+            int count = reader.ReadInt32();
             _cards = new Card[count];
             for (int i = 0; i < _cards.Length; i++)
             {
-                var assigned = Boolean.Parse(reader.ReadLine());
-                if (assigned)
+                // read if card assigned
+                if (reader.ReadBoolean())
                 {
                     Card card = new Card(this);
                     card.LoadFromStream(reader);

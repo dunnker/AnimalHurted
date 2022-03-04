@@ -17,34 +17,33 @@ namespace AnimalHurtedLib
             return GetType().Name.Replace("Ability", string.Empty);
         }
 
-        public static int GetSummonIndex(CardCommandQueue queue, Deck deck, int index)
-        {
-            // First look towards the end of the deck. Look for a empty space
-            for (int i = index; i < deck.Size; i++)
-                if (deck[i] == null)
-                {
-                    return i;
-                }
-            //TODO should be a loop to find prior empty slot
-            if (index > 0 && deck[index - 1] == null)
-                return index - 1;
-            /*
-            else MoveCards?
-                if we see there are prior gaps. and no existing SummonCommands exist there
-                then it seems like we could move pets to make room.
-                
-                one problem with moving cards is that we might be coming from inside CardCommandQueue.CreateExecuteResult
-                and it's in the process of iterating through a "parent" queue to this current one.
-                the commands in the parent queue will have their index's get out of sync if we move
-                cards here
-            */
-            else
-                return -1;
-        }
-
         public virtual string GetAbilityMessage(Card card)
         {
             return string.Empty;
+        }
+
+        public static int GetSummonIndex(CardCommandQueue queue, Deck deck, int index)
+        {
+            // First look towards the end of the deck for an empty space
+            for (int i = index; i < deck.Size; i++)
+                if (deck[i] == null)
+                    return i;
+            // Empty space not found so move cards back if possible
+            for (int i = index - 1; i >= 0; i--)
+            {
+                if (deck[i] == null)
+                {
+                    var indexes = new List<(int from, int to)>();
+                    for (int j = i; j <= index - 1; j++)
+                    {
+                        indexes.Add((j + 1, j));
+                        queue.CardMoving(deck, j + 1, j);
+                    }
+                    queue.Add(new MoveCardsCommand(deck, indexes).Execute());
+                    return index;
+                }
+            }
+            return -1;
         }
 
         // "Start of turn"

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AnimalHurtedLib
@@ -19,12 +21,23 @@ namespace AnimalHurtedLib
             return $"{_index} {GetType().ToString()}";
         }
 
+        public CardCommand(Deck deck)
+        {
+            _deck = deck;
+        }
+
         public CardCommand(Card card)
         {
             // deck might be cleared later, and new card references added to the deck
             // so we don't keep a reference to the card, but only a reference to the deck 
             _index = card.Index;
             _deck = card.Deck;
+        }
+
+        public virtual void CardMoving(Deck deck, int from, int to)
+        {
+            if (_deck == deck && _index == from)
+                _index = to;
         }
 
         public virtual CardCommand Execute()
@@ -42,6 +55,24 @@ namespace AnimalHurtedLib
         public EventHandler UserEvent;
     }
 
+    public class MoveCardsCommand : CardCommand
+    {
+        List<(int from, int to)> _indexes;
+
+        public MoveCardsCommand(Deck deck, List<(int from, int to)> indexes) : base(deck)
+        {
+            _indexes = indexes;
+        }
+
+        public override CardCommand Execute()
+        {
+            foreach (var pair in _indexes)
+                Deck.MoveCard(Deck[pair.from], pair.to);
+            Deck.Player.Game.OnCardsMovedEvent(this);
+            return this;
+        }
+    }
+
     public class AttackCardCommand : CardCommand
     {
         Deck _opponentDeck;
@@ -55,6 +86,13 @@ namespace AnimalHurtedLib
         {
             _opponentDeck = opponentCard.Deck;
             _opponentIndex = opponentCard.Index;
+        }
+
+        public override void CardMoving(Deck deck, int from, int to)
+        {
+            base.CardMoving(deck, from, to);
+            if (_opponentDeck == deck && _opponentIndex == from)
+                _opponentIndex = to;
         }
 
         public override CardCommand Execute()
@@ -90,7 +128,7 @@ namespace AnimalHurtedLib
         {
             Card.FoodAbility = _foodAbility;
 
-            Deck.Player.Game.OnCardGainedFoodAbilityEvent(this, Card, Index);
+            Deck.Player.Game.OnCardGainedFoodAbilityEvent(this);
 
             return this;
         }
@@ -129,6 +167,10 @@ namespace AnimalHurtedLib
         int _damage;
         Deck _sourceDeck;
 
+        public Deck SourceDeck { get { return _sourceDeck; } }
+
+        public int SourceIndex { get { return _sourceIndex; } }
+
         public HurtCardCommand(Card card, int damage, Deck sourceDeck, int sourceIndex) : base(card)
         {
             _damage = damage;
@@ -136,10 +178,17 @@ namespace AnimalHurtedLib
             _sourceDeck = sourceDeck;
         }
 
+        public override void CardMoving(Deck deck, int from, int to)
+        {
+            base.CardMoving(deck, from, to);
+            if (_sourceDeck == deck && _sourceIndex == from)
+                _sourceIndex = to;
+        }
+
         public override CardCommand Execute()
         {
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
-            Deck.Player.Game.OnCardHurtEvent(this, Card, _sourceDeck, _sourceIndex);
+            Deck.Player.Game.OnCardHurtEvent(this, Card);
             return this;
         }
 
@@ -164,17 +213,26 @@ namespace AnimalHurtedLib
         int _hitPoints;
         int _attackPoints;
 
+        public int SourceIndex { get { return _sourceIndex; } }
+
         public BuffCardCommand(Card card, int sourceIndex, int hitPoints, int attackPoints) : base(card)
         {
             _sourceIndex = sourceIndex;
             _hitPoints = hitPoints;
             _attackPoints = attackPoints;
         }
+        
+        public override void CardMoving(Deck deck, int from, int to)
+        {
+            base.CardMoving(deck, from, to);
+            if (Deck == deck && _sourceIndex == from)
+                _sourceIndex = to;
+        }
 
         public override CardCommand Execute()
         {
             Card.Buff(_sourceIndex, _hitPoints, _attackPoints);
-            Deck.Player.Game.OnCardBuffedEvent(this, Card, _sourceIndex);
+            Deck.Player.Game.OnCardBuffedEvent(this);
             return this;
         }
     }
@@ -190,6 +248,10 @@ namespace AnimalHurtedLib
         Card _summonedCard;
         Type _foodAbilityType;
         Type _renderAbilityType;
+
+        public Card SummonedCard { get { return _summonedCard; } }
+
+        public int AtIndex { get { return _atIndex; } }
 
         public SummonCardCommand(Card card, Deck atDeck, int atIndex, Type abilityType, int hitPoints, int attackPoints,
             int level = 1, Type foodAbilityType = null, Type renderAbilityType = null) : base(card)
@@ -218,7 +280,7 @@ namespace AnimalHurtedLib
             if (_renderAbilityType != null)
                 _summonedCard.RenderAbility = Activator.CreateInstance(_renderAbilityType) as Ability;
             _summonedCard.Summon(_atIndex);
-            _atDeck.Player.Game.OnCardSummonedEvent(this, _summonedCard, _atIndex);
+            _atDeck.Player.Game.OnCardSummonedEvent(this);
 
             return this;
         }

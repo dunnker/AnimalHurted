@@ -9,10 +9,6 @@ using System.Diagnostics;
 namespace AnimalHurtedLib
 {
     public delegate void CardCommandEventHandler(object sender, CardCommand command);
-    public delegate void CardCommandCardEventHandler(object sender, CardCommand command, Card card, int index);
-    public delegate void CardCommandFaintedEventHandler(object sender, CardCommand command, Deck deck, int index);
-    public delegate void CardCommandBuffedEventHandler(object sender, CardCommand command, Card card, int sourceIndex);
-    public delegate void CardCommandHurtEventHandler(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex);
 
     public class Game
     {
@@ -47,11 +43,12 @@ namespace AnimalHurtedLib
         public List<Food> TierFood { get { return _tierFood; } }
 
         public event CardCommandEventHandler AttackEvent;
-        public event CardCommandFaintedEventHandler CardFaintedEvent;
-        public event CardCommandCardEventHandler CardSummonedEvent;
-        public event CardCommandBuffedEventHandler CardBuffedEvent;
-        public event CardCommandHurtEventHandler CardHurtEvent;
-        public event CardCommandCardEventHandler CardGainedFoodAbilityEvent;
+        public event CardCommandEventHandler CardFaintedEvent;
+        public event CardCommandEventHandler CardSummonedEvent;
+        public event CardCommandEventHandler CardBuffedEvent;
+        public event CardCommandEventHandler CardHurtEvent;
+        public event CardCommandEventHandler CardGainedFoodAbilityEvent;
+        public event CardCommandEventHandler CardsMovedEvent;
 
         public void OnAttackEvent(CardCommand command)
         {
@@ -59,34 +56,40 @@ namespace AnimalHurtedLib
                 AttackEvent?.Invoke(this, command);
         }
 
+        public void OnCardsMovedEvent(CardCommand command)
+        {
+            if (_updateCount == 0)
+                CardsMovedEvent?.Invoke(this, command);
+        }
+
         public void OnCardFaintedEvent(CardCommand command, Deck deck, int index)
         {
             if (_updateCount == 0)
-                CardFaintedEvent?.Invoke(this, command, deck, index);
+                CardFaintedEvent?.Invoke(this, command);
         }
 
-        public void OnCardSummonedEvent(CardCommand command, Card card, int index)
+        public void OnCardSummonedEvent(CardCommand command)
         {
             if (_updateCount == 0)
-                CardSummonedEvent?.Invoke(this, command, card, index);
+                CardSummonedEvent?.Invoke(this, command);
         }
 
-        public void OnCardBuffedEvent(CardCommand command, Card card, int sourceIndex)
+        public void OnCardBuffedEvent(CardCommand command)
         {
             if (_updateCount == 0)
-                CardBuffedEvent?.Invoke(this, command, card, sourceIndex);
+                CardBuffedEvent?.Invoke(this, command);
         }
 
-        public void OnCardHurtEvent(CardCommand command, Card card, Deck sourceDeck, int sourceIndex)
+        public void OnCardHurtEvent(CardCommand command, Card card)
         {
             if (_updateCount == 0)
-                CardHurtEvent?.Invoke(this, command, card, sourceDeck, sourceIndex);
+                CardHurtEvent?.Invoke(this, command);
         }
 
-        public void OnCardGainedFoodAbilityEvent(CardCommand command, Card card, int index)
+        public void OnCardGainedFoodAbilityEvent(CardCommand command)
         {
             if (_updateCount == 0)
-                CardGainedFoodAbilityEvent?.Invoke(this, command, card, index);
+                CardGainedFoodAbilityEvent?.Invoke(this, command);
         }
 
         public Game()

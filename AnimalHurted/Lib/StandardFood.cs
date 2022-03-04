@@ -199,7 +199,7 @@ namespace AnimalHurtedLib
         public override void Execute(Card card)
         {
             base.Execute(card);
-            int _oldLevel = card.Level;
+            _oldLevel = card.Level;
             card.XP += 1;
         }
 

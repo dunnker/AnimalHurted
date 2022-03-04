@@ -202,25 +202,26 @@ public class BattleNode : Node
         command.UserEvent?.Invoke(this, EventArgs.Empty);
     }
 
-    public async void _game_CardHurtEvent(object sender, CardCommand command, Card card, Deck sourceDeck, int sourceIndex)
+    public async void _game_CardHurtEvent(object sender, CardCommand command)
     {
+        var hurtCommand = command as HurtCardCommand;
         // see also DeckNode2D where its _game_CardHurtEvent handles 
         // the case where source card deck is the same as the card
-        if (sourceDeck != card.Deck)
+        if (hurtCommand.SourceDeck != hurtCommand.Deck)
         {
             DeckNode2D deckNode2D;
             DeckNode2D sourceDeckNode2D;
-            if (card.Deck.Player == GameSingleton.Instance.Game.Player1)
+            if (hurtCommand.Deck.Player == GameSingleton.Instance.Game.Player1)
                 deckNode2D = Player1DeckNode2D;
             else
                 deckNode2D = Player2DeckNode2D;
-            if (sourceDeck.Player == GameSingleton.Instance.Game.Player1)
+            if (hurtCommand.SourceDeck.Player == GameSingleton.Instance.Game.Player1)
                 sourceDeckNode2D = Player1DeckNode2D;
             else
                 sourceDeckNode2D = Player2DeckNode2D;
 
-            var cardSlot = deckNode2D.GetCardSlotNode2D(card.Index + 1);
-            var sourceCardSlot = sourceDeckNode2D.GetCardSlotNode2D(sourceIndex + 1);
+            var cardSlot = deckNode2D.GetCardSlotNode2D(hurtCommand.Index + 1);
+            var sourceCardSlot = sourceDeckNode2D.GetCardSlotNode2D(hurtCommand.SourceIndex + 1);
 
             deckNode2D.WhooshPlayer.Play();
 
@@ -233,7 +234,7 @@ public class BattleNode : Node
 
             damageArea2D.QueueFree();
 
-            cardSlot.CardArea2D.RenderCard(deckNode2D.Deck[card.Index], card.Index);
+            cardSlot.CardArea2D.RenderCard(deckNode2D.Deck[hurtCommand.Index], hurtCommand.Index);
 
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
@@ -304,11 +305,13 @@ public class BattleNode : Node
     {
         // restore battle decks before serializing them
         BeginReplay();
-        using (StreamWriter streamWriter = new StreamWriter(
-            ProjectSettings.GlobalizePath(SaveFileDialog.CurrentPath)))
+        using (var fileStream = new FileStream(ProjectSettings.GlobalizePath(SaveFileDialog.CurrentPath), FileMode.Create))
         {
-            GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(streamWriter);
-            GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(streamWriter);
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(writer);
+                GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(writer);
+            }
         }
     }
 }

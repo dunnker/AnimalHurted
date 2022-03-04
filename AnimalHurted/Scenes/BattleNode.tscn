@@ -120,9 +120,9 @@ margin_bottom = 608.0
 resizable = true
 dialog_hide_on_ok = true
 access = 2
-filters = PoolStringArray( "*.aps" )
-current_dir = "/github/AutoPets/GodotAutoPets"
-current_path = "/github/AutoPets/GodotAutoPets/"
+filters = PoolStringArray( "*.ah" )
+current_dir = "/github/AnimalHurted/AnimalHurted"
+current_path = "/github/AnimalHurted/AnimalHurted/"
 
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
