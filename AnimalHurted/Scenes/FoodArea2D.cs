@@ -127,6 +127,8 @@ public class FoodArea2D : Area2D
 
                         // in case user bought salad bowl
                         BuildNode.DeckNode2D.RenderDeck(BuildNode.DeckNode2D.Deck);
+                        // in case user bought canned food
+                        BuildNode.ShopNode2D.RenderShop();
                     }
                 }
             }

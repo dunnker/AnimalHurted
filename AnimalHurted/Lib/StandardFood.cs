@@ -153,6 +153,17 @@ namespace AnimalHurtedLib
             return "Canned Food";
         }
         
+        public override string GetMessage()
+        {
+            return "Give all current and future shop pets +2 attack and +1 health.";
+        }
+
+        public override void Execute(Card card)
+        {
+            card.Deck.Player.BuffHitPoints += 1;
+            card.Deck.Player.BuffAttackPoints += 2;
+            card.Deck.Player.BuffShopDeck();
+        }
     }
 
     public class PearFood : Food

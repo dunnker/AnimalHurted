@@ -35,6 +35,9 @@ namespace AnimalHurtedLib
         public Food ShopFood1 { get { return _shopFood1; } set { _shopFood1 = value; } }
         public Food ShopFood2 { get { return _shopFood2; } set { _shopFood2 = value; } }
 
+        public int BuffHitPoints { get; set; }
+        public int BuffAttackPoints { get; set; }
+
         public bool LostLastBattle { get { return _lostLastBattle; } }
 
         public int Gold { 
@@ -101,6 +104,8 @@ namespace AnimalHurtedLib
         {
             _wins = 0;
             _lives = 10;
+            BuffAttackPoints = 0;
+            BuffHitPoints = 0;
         }
 
         public void NewBattleDeck()
@@ -125,6 +130,15 @@ namespace AnimalHurtedLib
                 card.Ability.BattleStarted2(queue, card);
         }
 
+        public void BuffShopDeck()
+        {
+            foreach (var card in _shopDeck)
+            {
+                card.HitPoints += BuffHitPoints;
+                card.AttackPoints += BuffAttackPoints;
+            }
+        }
+
         public void Roll(bool deductGold = true)
         {
             if (Gold < Game.RollCost)
@@ -135,7 +149,10 @@ namespace AnimalHurtedLib
             for (int i = 0; i < Game.ShopSlots; i++)
             {
                 int rand = Game.Random.Next(Game.TierAbilities.Count);
-                _shopDeck.SetCard(new Card(_shopDeck, Game.TierAbilities[rand]), i);
+                var card = new Card(_shopDeck, Game.TierAbilities[rand]);
+                card.HitPoints += BuffHitPoints;
+                card.AttackPoints += BuffAttackPoints;
+                _shopDeck.SetCard(card, i);
             }
             NewShopFood();
         }
