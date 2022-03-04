@@ -189,12 +189,53 @@ namespace AnimalHurtedLib
 
     public class ChocolateFood : Food
     {
+        int _oldLevel;
+
+        public override string GetMessage()
+        {
+            return "Give a pet +1 experience.";
+        }
         
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            int _oldLevel = card.Level;
+            card.XP += 1;
+        }
+
+        public override void ExecuteAbility(CardCommandQueue queue, Card card)
+        {
+            base.ExecuteAbility(queue, card);
+            if (card.Level > _oldLevel)
+                card.GainedXP(queue, _oldLevel);
+        }
     }
 
     public class SushiFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give 3 random pets +1/+1.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            var hashSet = new HashSet<int>();
+            for (int i = 1; i <= 3; i++)
+            {
+                var randomCard = card.Deck.GetRandomCard(hashSet);
+                if (randomCard != null)
+                {
+                    int hitPoints = 1;
+                    int attackPoints = 1;
+                    Eating(randomCard, ref hitPoints, ref attackPoints);
+                    randomCard.HitPoints += hitPoints;
+                    randomCard.AttackPoints += attackPoints;
+                    hashSet.Add(randomCard.Index);
+                }
+            }
+        }
     }
 
     public class MelonFood : Food
@@ -209,7 +250,29 @@ namespace AnimalHurtedLib
 
     public class PizzaFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give 2 random pets +2/+2.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            var hashSet = new HashSet<int>();
+            for (int i = 1; i <= 2; i++)
+            {
+                var randomCard = card.Deck.GetRandomCard(hashSet);
+                if (randomCard != null)
+                {
+                    int hitPoints = 2;
+                    int attackPoints = 2;
+                    Eating(randomCard, ref hitPoints, ref attackPoints);
+                    randomCard.HitPoints += hitPoints;
+                    randomCard.AttackPoints += attackPoints;
+                    hashSet.Add(randomCard.Index);
+                }
+            }
+        }
     }
 
     public class SteakFood : Food
