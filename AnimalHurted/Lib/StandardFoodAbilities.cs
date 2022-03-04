@@ -71,4 +71,14 @@ namespace AnimalHurtedLib
             card.FoodAbility = null;
        }       
     }
+
+    public class SteakAttackAbility : FoodAbility
+    {
+        public override void CalculatingDamage(Card card, ref int damage)
+        {
+            base.CalculatingDamage(card, ref damage);
+            damage += 20;
+            card.FoodAbility = null;
+        }
+    }
 }

@@ -240,7 +240,16 @@ namespace AnimalHurtedLib
 
     public class MelonFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give a pet Melon Armor.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.FoodAbility = new MelonArmorAbility();
+        }
     }
 
     public class MushroomFood : Food
@@ -277,7 +286,16 @@ namespace AnimalHurtedLib
 
     public class SteakFood : Food
     {
-        
+        public override string GetMessage()
+        {
+            return "Give a pet Steak Attack.";
+        }
+
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.FoodAbility = new SteakAttackAbility();
+        }
     }
 
     public class MilkFood : Food

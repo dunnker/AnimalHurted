@@ -326,7 +326,8 @@ namespace AnimalHurtedLib
 
             // a test case to consider is leveling up 6 ducks (each are hp 1)
             // if you level them up serially to create one level 3 duck, it will be a hp 6 duck
-            // if you level them up to create two level 2 ducks, then combine those two ducks to make one level 3 duck, you should still end up with a hp 6 duck
+            // if you level them up to create two level 2 ducks, then combine those two ducks to make one level 3 duck, 
+            // you should still end up with a hp 6 duck
 
             // buffCard has hp that has accumulated due to gaining xp
             // so we're preserving that accumulated hp in the new merged card
@@ -339,7 +340,7 @@ namespace AnimalHurtedLib
 
             // Level is now the combined level
 
-            //TODO ability method for gaining xp for reporting to UI
+            //TODO play a sound when xp goes up
 
             // Note fromCard might be a ShopCard, so this will remove it from the shop
             // Also, removing this now before calling ability method because we don't want fromCard to be affected
