@@ -22,6 +22,17 @@ namespace AnimalHurtedLib
             return string.Empty;
         }
 
+        protected void PerformTigerAbility(Card card, int index, Action<int> action)
+        {
+            action(card.Level);
+            if (index > 0 && card.Deck.Player.Game.Fighting)
+            {
+                var priorCard = card.Deck[index - 1];
+                if (priorCard != null && priorCard.Ability is TigerAbility)
+                    action(priorCard.Level);
+            }
+        }
+
         public static bool CanMakeRoomAt(CardCommandQueue queue, Deck deck, int atIndex, out int summonIndex)
         {
             summonIndex = -1;
