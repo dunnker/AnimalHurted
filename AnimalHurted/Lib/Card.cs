@@ -308,7 +308,6 @@ namespace AnimalHurtedLib
     
         public void GainXP(Card fromCard)
         {
-            //TODO: what if already at Level 3?
             //TODO: merge food
 
             // take the higher hitpoints from the two merging cards
@@ -334,9 +333,7 @@ namespace AnimalHurtedLib
             _hitPoints += buffCard._xp;
             _attackPoints += buffCard._xp;
 
-            int oldLevel = Level;
-            int oldXP = _xp;
-            _xp += fromCard.XP; //TODO if we put a cap on the amount of xp accumulated, then we need to use that accumulated value in the hitpoints calculation above
+            _xp = Math.Min(6, _xp + fromCard.XP);
 
             // Level is now the combined level
 

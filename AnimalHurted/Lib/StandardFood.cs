@@ -265,7 +265,16 @@ namespace AnimalHurtedLib
 
     public class MushroomFood : Food
     {
+        public override string GetMessage()
+        {
+            return "Give a pet an Extra Life.";
+        }
         
+        public override void Execute(Card card)
+        {
+            base.Execute(card);
+            card.FoodAbility = new ExtraLifeAbility();
+        }
     }
 
     public class PizzaFood : Food

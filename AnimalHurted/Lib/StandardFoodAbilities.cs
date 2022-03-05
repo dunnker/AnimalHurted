@@ -81,4 +81,14 @@ namespace AnimalHurtedLib
             card.FoodAbility = null;
         }
     }
+
+    public class ExtraLifeAbility : FoodAbility
+    {
+        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        {
+            base.Fainted(queue, card, index);
+            if (Ability.CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
+                queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, card.Ability.GetType(), 1, 1, card.Level).Execute());
+        }
+    }
 }
