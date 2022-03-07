@@ -104,19 +104,23 @@ public class CardArea2D : Area2D
         CardSlotNode2D.HoverSprite.Show();
         if (Sprite.Visible && !GameSingleton.Instance.Dragging)
         {
-            var card = CardSlotNode2D.CardSlotDeck.Deck[CardIndex];
-            if (card != null)
+            // can be null if just previewing the scene in godot
+            if (CardSlotNode2D.CardSlotDeck.Deck != null)
             {
-                var nameLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityNameLabel");
-                nameLabel.Text = card.RenderAbility.ToString();
-                var messageLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityMessageLabel");
-                messageLabel.Text = card.Ability.GetAbilityMessage(card);
-                var costLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("CostLabel");
-                if (CardSlotNode2D.CardSlotDeck is ShopNode2D)
-                    costLabel.Text = $"{Game.PetCost} Gold";
-                else
-                    costLabel.Hide();
-                CardSlotNode2D.AbilityHintNode2D.Show();
+                var card = CardSlotNode2D.CardSlotDeck.Deck[CardIndex];
+                if (card != null)
+                {
+                    var nameLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityNameLabel");
+                    nameLabel.Text = card.RenderAbility.ToString();
+                    var messageLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("AbilityMessageLabel");
+                    messageLabel.Text = card.Ability.GetAbilityMessage(card);
+                    var costLabel = CardSlotNode2D.AbilityHintNode2D.GetNode<Label>("CostLabel");
+                    if (CardSlotNode2D.CardSlotDeck is ShopNode2D)
+                        costLabel.Text = $"{Game.PetCost} Gold";
+                    else
+                        costLabel.Hide();
+                    CardSlotNode2D.AbilityHintNode2D.Show();
+                }
             }
         }
 

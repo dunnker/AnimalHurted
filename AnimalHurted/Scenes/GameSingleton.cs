@@ -22,6 +22,8 @@ public class GameSingleton
 
     public List<CardCommandQueue> FightResult { get; set; }
 
+    public bool Sandboxing { get; set; }
+
     public static GameSingleton Instance
     {
         get

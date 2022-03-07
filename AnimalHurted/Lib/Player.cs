@@ -16,8 +16,8 @@ namespace AnimalHurtedLib
         int _lives;
         int _wins;
         int _gold;
-        readonly Deck _shopDeck;
-        readonly Deck _buildDeck;
+        Deck _shopDeck;
+        Deck _buildDeck;
         Food _shopFood1;
         Food _shopFood2;
         Deck _battleDeck;
@@ -26,7 +26,7 @@ namespace AnimalHurtedLib
 
         public Game Game { get { return _game; } }
 
-        public Deck BuildDeck { get { return _buildDeck; } }
+        public Deck BuildDeck { get { return _buildDeck; } set { _buildDeck = value; } }
 
         public Deck BattleDeck { get { return _battleDeck; } }
 
@@ -149,7 +149,7 @@ namespace AnimalHurtedLib
             for (int i = 0; i < Game.ShopSlots; i++)
             {
                 int rand = Game.Random.Next(Game.TierAbilities.Count);
-                var card = new Card(_shopDeck, Game.TierAbilities[rand]);
+                var card = new Card(_shopDeck, Activator.CreateInstance(Game.TierAbilities[rand]) as Ability);
                 card.HitPoints += BuffHitPoints;
                 card.AttackPoints += BuffAttackPoints;
                 _shopDeck.SetCard(card, i);
@@ -181,9 +181,9 @@ namespace AnimalHurtedLib
         void NewShopFood()
         {
             int randIndex = _game.Random.Next(0, _game.TierFood.Count);
-            _shopFood1 = Activator.CreateInstance(_game.TierFood[randIndex].GetType()) as Food;
+            _shopFood1 = Activator.CreateInstance(_game.TierFood[randIndex]) as Food;
             randIndex = _game.Random.Next(0, _game.TierFood.Count);
-            _shopFood2 = Activator.CreateInstance(_game.TierFood[randIndex].GetType()) as Food;
+            _shopFood2 = Activator.CreateInstance(_game.TierFood[randIndex]) as Food;
         }
 
         public void BuildEnded(CardCommandQueue queue)

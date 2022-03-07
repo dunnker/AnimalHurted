@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Assets/Pets/AntAbility.png" type="Texture" id=1]
+[ext_resource path="res://Scenes/SandboxItemNode.cs" type="Script" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.403922, 0.603922, 0.278431, 1 )
+
+[node name="PanelContainer" type="PanelContainer"]
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="."]
+margin_right = 128.0
+margin_bottom = 128.0
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="gui_input" from="." to="." method="_on_PanelContainer_gui_input"]

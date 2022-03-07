@@ -17,8 +17,8 @@ namespace AnimalHurtedLib
         readonly Player _player2;
         int _round;
         int _shopSlots;
-        List<Ability> _tierAbilities;
-        List<Food> _tierFood;
+        List<Type> _tierAbilities;
+        List<Type> _tierFood;
         int _updateCount;
         bool _fighting;
 
@@ -39,8 +39,8 @@ namespace AnimalHurtedLib
         public Player Player1 { get { return _player1; } }
         public Player Player2 { get { return _player2; } }
         public bool Fighting { get { return _fighting; } }
-        public List<Ability> TierAbilities { get { return _tierAbilities; } }
-        public List<Food> TierFood { get { return _tierFood; } }
+        public List<Type> TierAbilities { get { return _tierAbilities; } }
+        public List<Type> TierFood { get { return _tierFood; } }
 
         public event CardCommandEventHandler AttackEvent;
         public event CardCommandEventHandler CardFaintedEvent;
@@ -102,8 +102,8 @@ namespace AnimalHurtedLib
 
         public void NewGame()
         {
-            _tierAbilities = new List<Ability>();
-            _tierFood = new List<Food>();
+            _tierAbilities = new List<Type>();
+            _tierFood = new List<Type>();
             _player1.NewGame();
             _player2.NewGame();
             NewRound();
@@ -250,14 +250,17 @@ namespace AnimalHurtedLib
                 card.Attacking(queue);
                 opponentCard.Attacking(queue);
                 if (queue.Count > 0)
-                {
                     fightResult.AddRange(queue.CreateExecuteResult(this));
+
+				// after Attacking ability methods, fight could be over, so have to check here
+                if (!IsFightOver())
+                {
                     queue = new CardCommandQueue();
+                    card = _player1.BattleDeck.GetLastCard();
+                    opponentCard = _player2.BattleDeck.GetLastCard();
+                    queue.Add(new AttackCardCommand(card, opponentCard).Execute());
+                    fightResult.AddRange(queue.CreateExecuteResult(this));
                 }
-
-                queue.Add(new AttackCardCommand(card, opponentCard).Execute());
-
-                fightResult.AddRange(queue.CreateExecuteResult(this));
             }
             _fighting = false;
             EndUpdate();

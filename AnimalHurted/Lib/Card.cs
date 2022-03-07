@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Diagnostics;
 using System.IO;
 
@@ -17,7 +18,7 @@ namespace AnimalHurtedLib
         int _xp;
         int _buildHitPoints;
         int _buildAttackPoints;
-        
+
         public Card(Deck deck)
         {
             _deck = deck;
@@ -43,10 +44,12 @@ namespace AnimalHurtedLib
         /// <param name="card"></param>
         public Card(Deck deck, Card card)
         {
-            _ability = Activator.CreateInstance(card._ability.GetType()) as Ability;
-            _renderAbility = Activator.CreateInstance(card._renderAbility.GetType()) as Ability;
-            if (card._foodAbility != null)
-                _foodAbility = Activator.CreateInstance(card._foodAbility.GetType()) as FoodAbility;
+			// not creating new instances of ability classes because of performance of Activator.CreateInstance
+			// ability classes do keep state, but it's minimal, and if becomes an issue we can create an Init
+			// method to invoke here
+            _ability = card._ability;
+            _renderAbility = card._renderAbility;
+            _foodAbility = card._foodAbility;
             _deck = deck;
             _index = -1;
             _hitPoints = card._hitPoints;

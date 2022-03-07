@@ -19,6 +19,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
     public Deck Deck { get { return _deck; } }
 
+    public bool CanDragDropLevelUp { get; set; } = true;
+
     public CardSlotNode2D GetCardSlotNode2D(int index)
     {
         return GetNode<CardSlotNode2D>(string.Format("CardSlotNode2D_{0}", index));
@@ -39,6 +41,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     // ICardSelectHost
     public void SelectionChanged(CardSlotNode2D cardSlot)
     {
+        GetParent().EmitSignal("CardSelectionChangedSignal", cardSlot.CardArea2D.CardIndex);
+
         if (cardSlot.Selected)
         {
             for (int i = 1; i <= 5; i++)
@@ -49,8 +53,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             }
         }
     }
-
     // ICardSelectHost
+
     public CardSlotNode2D GetSelectedCardSlotNode2D()
     {
         for (int i = 1; i <= 5; i++)
@@ -80,12 +84,15 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
     public override void _Ready()
     {
-        GameSingleton.Instance.Game.CardFaintedEvent += _game_CardFaintedEvent;
-        GameSingleton.Instance.Game.CardSummonedEvent += _game_CardSummonedEvent;
-        GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
-        GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
-        GameSingleton.Instance.Game.CardGainedFoodAbilityEvent += _game_CardGainedFoodAbilityEvent;
-        GameSingleton.Instance.Game.CardsMovedEvent += _game_CardsMoved;
+        if (GameSingleton.Instance.Game != null)
+        {
+            GameSingleton.Instance.Game.CardFaintedEvent += _game_CardFaintedEvent;
+            GameSingleton.Instance.Game.CardSummonedEvent += _game_CardSummonedEvent;
+            GameSingleton.Instance.Game.CardBuffedEvent += _game_CardBuffedEvent;
+            GameSingleton.Instance.Game.CardHurtEvent += _game_CardHurtEvent;
+            GameSingleton.Instance.Game.CardGainedFoodAbilityEvent += _game_CardGainedFoodAbilityEvent;
+            GameSingleton.Instance.Game.CardsMovedEvent += _game_CardsMoved;
+        }
     }
 
     public void PlayThump()
@@ -199,7 +206,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                     // would need to be done with a queue
                     _deck.MoveCard(_deck[sourceCardArea2D.CardIndex], targetCardArea2D.CardIndex);
                 }
-                else
+                else if (CanDragDropLevelUp)
                 {
                     var targetCard = _deck[targetCardArea2D.CardIndex];
                     var sourceCard = sourceDeck.Deck[sourceCardArea2D.CardIndex];
@@ -256,7 +263,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 
     public bool GetCanDrag()
     {
-        return GetParent() is BuildNode;
+        return GetParent() is BuildNode || GetParent() is SandboxNode;
     }
 
     public async void _game_CardFaintedEvent(object sender, CardCommand command)

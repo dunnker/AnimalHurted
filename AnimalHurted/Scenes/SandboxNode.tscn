@@ -1,0 +1,267 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/background.png" type="Texture" id=2]
+[ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/SandboxNodeButtonGroup.tres" type="ButtonGroup" id=4]
+[ext_resource path="res://Scenes/SandboxNode.cs" type="Script" id=5]
+[ext_resource path="res://Assets/heart.png" type="Texture" id=6]
+[ext_resource path="res://Assets/rock.png" type="Texture" id=7]
+
+[sub_resource type="DynamicFont" id=3]
+size = 32
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=1]
+size = 24
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 24
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 24
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=5]
+size = 18
+font_data = ExtResource( 1 )
+
+[node name="Node" type="Node"]
+script = ExtResource( 5 )
+
+[node name="BackgroundSprite" type="Sprite" parent="."]
+position = Vector2( 1152, 48 )
+texture = ExtResource( 2 )
+centered = false
+offset = Vector2( -1152, -48 )
+
+[node name="LeftColorRect" type="ColorRect" parent="."]
+anchor_bottom = 1.0
+margin_right = 168.0
+color = Color( 0.403922, 0.603922, 0.278431, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleLabel" type="Label" parent="."]
+margin_left = 200.0
+margin_top = 16.0
+margin_right = 420.0
+margin_bottom = 43.0
+custom_fonts/font = SubResource( 3 )
+text = "Sandbox"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DirtPath1ColorRect" type="ColorRect" parent="."]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = 168.0
+margin_top = -64.0
+margin_bottom = 80.0
+mouse_filter = 2
+color = Color( 0.952941, 0.807843, 0.427451, 0.176471 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DeckNode2D" parent="." instance=ExtResource( 3 )]
+position = Vector2( 384, 304 )
+
+[node name="BackButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = 456.0
+margin_top = 64.0
+margin_right = 598.0
+margin_bottom = 100.0
+custom_fonts/font = SubResource( 1 )
+text = "Back"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BattleButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = 456.0
+margin_top = 112.0
+margin_right = 598.0
+margin_bottom = 148.0
+custom_fonts/font = SubResource( 1 )
+text = "Battle"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RemoveButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -256.0
+margin_top = 512.0
+margin_right = -114.0
+margin_bottom = 548.0
+custom_fonts/font = SubResource( 1 )
+text = "Remove"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player1Button" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -192.0
+margin_top = 64.0
+margin_right = -50.0
+margin_bottom = 120.0
+custom_fonts/font = SubResource( 1 )
+toggle_mode = true
+pressed = true
+group = ExtResource( 4 )
+text = "Player 1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player2Button" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -40.0
+margin_top = 64.0
+margin_right = 102.0
+margin_bottom = 120.0
+custom_fonts/font = SubResource( 1 )
+toggle_mode = true
+group = ExtResource( 4 )
+text = "Player 2"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CardContainer" type="VBoxContainer" parent="."]
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_right = 168.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FindEdit" type="LineEdit" parent="CardContainer"]
+margin_right = 158.0
+margin_bottom = 34.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+custom_fonts/font = SubResource( 2 )
+
+[node name="CardScrollContainer" type="ScrollContainer" parent="CardContainer"]
+margin_top = 38.0
+margin_right = 158.0
+margin_bottom = 720.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CardVBoxContainer" type="VBoxContainer" parent="CardContainer/CardScrollContainer"]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FoodColorRect" type="ColorRect" parent="."]
+margin_left = 448.0
+margin_top = 192.0
+margin_right = 736.0
+margin_bottom = 240.0
+color = Color( 0.403922, 0.603922, 0.278431, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FoodAbilityHBoxContainer" type="HBoxContainer" parent="."]
+margin_left = 448.0
+margin_top = 200.0
+margin_right = 576.0
+margin_bottom = 240.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CardAttrsNode2D" type="Node2D" parent="."]
+visible = false
+position = Vector2( 576, 512 )
+
+[node name="HealthEdit" type="LineEdit" parent="CardAttrsNode2D"]
+margin_right = 82.0
+margin_bottom = 34.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+custom_fonts/font = SubResource( 4 )
+align = 2
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AttackEdit" type="LineEdit" parent="CardAttrsNode2D"]
+margin_top = 48.0
+margin_right = 82.0
+margin_bottom = 82.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+custom_fonts/font = SubResource( 4 )
+align = 2
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LevelEdit" type="LineEdit" parent="CardAttrsNode2D"]
+margin_top = 96.0
+margin_right = 82.0
+margin_bottom = 130.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+custom_fonts/font = SubResource( 4 )
+align = 2
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LevelLabel" type="Label" parent="CardAttrsNode2D"]
+margin_left = 91.0
+margin_top = 104.0
+margin_right = 131.0
+margin_bottom = 119.0
+custom_fonts/font = SubResource( 5 )
+text = "Level"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeartSprite" type="Sprite" parent="CardAttrsNode2D"]
+position = Vector2( 104, 16 )
+texture = ExtResource( 6 )
+
+[node name="RockSprite" type="Sprite" parent="CardAttrsNode2D"]
+position = Vector2( 104, 64 )
+texture = ExtResource( 7 )
+
+[connection signal="pressed" from="BackButton" to="." method="_on_BackButton_pressed"]
+[connection signal="pressed" from="BattleButton" to="." method="_on_BattleButton_pressed"]
+[connection signal="pressed" from="RemoveButton" to="." method="_on_RemoveButton_pressed"]
+[connection signal="toggled" from="Player1Button" to="." method="_on_Player1Button_toggled"]
+[connection signal="toggled" from="Player2Button" to="." method="_on_Player2Button_toggled"]
+[connection signal="text_changed" from="CardContainer/FindEdit" to="." method="_on_FindEdit_text_changed"]
+[connection signal="text_changed" from="CardAttrsNode2D/HealthEdit" to="." method="_on_HealthEdit_text_changed"]
+[connection signal="text_changed" from="CardAttrsNode2D/AttackEdit" to="." method="_on_AttackEdit_text_changed"]
+[connection signal="text_changed" from="CardAttrsNode2D/LevelEdit" to="." method="_on_LevelEdit_text_changed"]

@@ -65,14 +65,15 @@ public class BuildNode : Node
             GameSingleton.Instance.Game.Player1.NewBattleDeck();
             GameSingleton.Instance.Game.Player2.NewBattleDeck();
 
-            using (var fileStream = new FileStream(@".battles\animalhurted.ah", FileMode.Create))
+
+            /*using (var fileStream = new FileStream(@".battles\animalhurted.ah", FileMode.Create))
             {
                 using (var writer = new BinaryWriter(fileStream))
                 {
                     GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(writer);
                     GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(writer);
                 }
-            }
+            }*/
 
             GameSingleton.Instance.SaveBattleDecks();
             GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();

@@ -23,6 +23,12 @@ public class MainNode : Node
         OpenFileDialog.PopupCentered();
     }
 
+    public void _on_SandboxButton_pressed()
+    {
+        GameSingleton.Instance.Game = new Game();
+        GetTree().ChangeScene("res://Scenes/SandboxNode.tscn");
+    }
+
     public void _on_OpenFileDialog_file_selected(Godot.Path @string)
     {
         using (FileStream fileStream = new FileStream(ProjectSettings.GlobalizePath(OpenFileDialog.CurrentPath), FileMode.Open))

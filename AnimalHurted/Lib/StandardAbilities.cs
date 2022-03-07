@@ -553,7 +553,7 @@ namespace AnimalHurtedLib
                 var ability = AbilityList.Instance.TierThreeAbilities[randIndex];
                 // see comments for cricket and sheep
                 if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
-                    queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, ability.GetType(), 2, 2, level).Execute());
+                    queue.Add(new SummonCardCommand(card, card.Deck, summonIndex, ability, 2, 2, level).Execute());
             });
         }
     }
@@ -1473,7 +1473,7 @@ namespace AnimalHurtedLib
         public override void FriendBought(CardCommandQueue queue, Card card, Card friendCard)
         {
             base.FriendBought(queue, card, friendCard);
-            if (AbilityList.Instance.TierOneAbilities.Any((ability) => ability.GetType() == friendCard.Ability.GetType()))
+            if (AbilityList.Instance.TierOneAbilities.Any((ability) => ability == friendCard.Ability.GetType()))
                 foreach (var c in card.Deck)
                     if (c != card)
                         queue.Add(new BuffCardCommand(c, card.Index, card.Level, card.Level).Execute());

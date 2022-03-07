@@ -79,9 +79,14 @@ public class BattleNode : Node
     
     public void _on_ContinueButton_pressed()
     {
-        GameSingleton.Instance.Game.NewRound();
-        GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
-        GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+        if (GameSingleton.Instance.Sandboxing)
+            GetTree().ChangeScene("res://Scenes/SandboxNode.tscn");
+        else
+        {
+            GameSingleton.Instance.Game.NewRound();
+            GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
+            GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+        }
     }
 
     public void _on_ReplayButton_pressed()
