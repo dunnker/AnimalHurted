@@ -201,7 +201,7 @@ namespace AnimalHurtedLib
             _ability.Attacked(queue, this, damage, opponentCard);
 
             if (opponentDamage > 0)
-                Hurted(queue, opponentCard);
+                Hurted(queue, true, opponentCard);
         }
 
         public void Summon(int atIndex)
@@ -225,12 +225,12 @@ namespace AnimalHurtedLib
             _deck.Remove(_index);
         }
 
-        public void Fainted(CardCommandQueue queue, int index)
+        public void Fainted(CardCommandQueue queue, int index, bool attacking, Card opponentCard = null)
         {
             // note the use of local param "index" and not "_index/Index"
-            var priorCard = _deck.LastOrDefault(c => c != null && c.Index < index && c.TotalHitPoints > 0);
+            var priorCard = _deck.LastOrDefault(c => c.Index < index && c.TotalHitPoints > 0);
             priorCard?.Ability.FriendAheadFaints(queue, priorCard, index);
-            _ability.Fainted(queue, this, index);
+            _ability.Fainted(queue, this, index, attacking, opponentCard);
             _foodAbility?.Fainted(queue, this, index);
             foreach (var c in _deck)
             {
@@ -278,14 +278,14 @@ namespace AnimalHurtedLib
             }
         }
 
-        public void Hurted(CardCommandQueue queue, Card opponentCard = null)
+        public void Hurted(CardCommandQueue queue, bool attacking, Card opponentCard = null)
         {
             if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
                 opponentCard.Ability.Knockout(queue, opponentCard);
             if (TotalHitPoints > 0)
                 _ability.Hurted(queue, this);
             if (TotalHitPoints <= 0)
-                queue.Add(new FaintCardCommand(this).Execute());
+                queue.Add(new FaintCardCommand(this, attacking, opponentCard).Execute());
         }
 
         public void Buff(int sourceIndex, int hitPoints, int attackPoints)

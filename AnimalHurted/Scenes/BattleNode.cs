@@ -72,6 +72,11 @@ public class BattleNode : Node
         #if CHEATS_ENABLED
         if (Input.IsActionPressed("retry_battle"))
         {
+            GameSingleton.Instance.RestoreBattleDecks();
+            GameSingleton.Instance.SaveBattleDecks();
+            GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
+            // restore for rendering in next scene
+            GameSingleton.Instance.RestoreBattleDecks();
             GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
         }
         #endif

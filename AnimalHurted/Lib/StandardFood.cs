@@ -94,7 +94,7 @@ namespace AnimalHurtedLib
         public override void ExecuteAbility(CardCommandQueue queue, Card card)
         {
             base.ExecuteAbility(queue, card);
-            queue.Add(new FaintCardCommand(card).Execute());
+            queue.Add(new FaintCardCommand(card, false).Execute());
         }
     }
 

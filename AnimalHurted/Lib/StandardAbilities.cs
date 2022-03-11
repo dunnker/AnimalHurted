@@ -28,9 +28,9 @@ namespace AnimalHurtedLib
             return string.Format("Faint => Give a random friend +{0} attack and +{1} health.", 2 * card.Level, card.Level);
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 var buffCard = card.Deck.GetRandomCard(new HashSet<int>() { index });
@@ -53,9 +53,9 @@ namespace AnimalHurtedLib
             return string.Format("Faint => Summon a {0}/{1} cricket.", card.Level, card.Level);
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 // cricket has fainted but we still have to search for an empty slot because it's possible that
@@ -374,23 +374,18 @@ namespace AnimalHurtedLib
             return string.Format("Faint => Give the two friends behind +{0} attack and +{1} health.", card.Level, card.Level);
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
-                if (index > 0)
-                {
-                    var priorCard = card.Deck[index - 1];
-                    if (priorCard != null)
-                        queue.Add(new BuffCardCommand(priorCard, index, level, level).Execute());
-                }
-                if (index > 1)
-                {
-                    var priorCard = card.Deck[index - 2];
-                    if (priorCard != null)
-                        queue.Add(new BuffCardCommand(priorCard, index, level, level).Execute());
-                }
+                for (int i = 1; i <= 2; i++)
+                    if (index - i >= 0)
+                    {
+                        var priorCard = card.Deck[index - i];
+                        if (priorCard != null && priorCard.TotalHitPoints > 0)
+                            queue.Add(new BuffCardCommand(priorCard, index, level, level).Execute());
+					}
             });
         }
     }
@@ -408,9 +403,9 @@ namespace AnimalHurtedLib
             return string.Format("Faint => Deal {0} damage to all.", 2 * card.Level);
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 var opponent = card.Deck.Player.GetOpponentPlayer();
@@ -481,9 +476,9 @@ namespace AnimalHurtedLib
             return $"Faint => Summon {card.Level} dirty rat(s) for the opponent.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             if (card.Deck.Player.Game.Fighting)
             {
                 PerformTigerAbility(card, index, (level) =>
@@ -544,9 +539,9 @@ namespace AnimalHurtedLib
             return $"Fainted => Summon a level {card.Level} tier 3 pet as 2/2.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 int randIndex = card.Deck.Player.Game.Random.Next(0, AbilityList.Instance.TierThreeAbilities.Count);
@@ -592,30 +587,33 @@ namespace AnimalHurtedLib
             return $"Fainted => Deal damage - {card.Level} times attack - to adjacent pets.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
-                // checking TotalHitPoints > 0; see comments in HurtCommand
-                // find card prior to the badger that is not fainting
-                Card adjacentCard = card.Deck.LastOrDefault(c => c != null && c.Index < index && c.TotalHitPoints > 0);
                 int damage = card.TotalAttackPoints * level;
-                if (adjacentCard != null)
-                    queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
-                // find card after the badger that is not fainting
-                adjacentCard = card.Deck.FirstOrDefault(c => c != null && c.Index > index && c.TotalHitPoints > 0);
-                if (adjacentCard != null)
-                    queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
+                if (index > 0)
+                {
+                    var priorCard = card.Deck[index - 1];
+                    if (priorCard != null && priorCard.TotalHitPoints > 0)
+                        queue.Add(new HurtCardCommand(priorCard, damage, card.Deck, index).Execute());
+                }
+
+                if (attacking)
+                {
+                    // using opponentCard param because if we used card.Deck.LastOrDefault, we might get
+                    // a summoned bee instead of the actual opponent we just attacked
+                    if (opponentCard != null && opponentCard.TotalHitPoints > 0)
+                        queue.Add(new HurtCardCommand(opponentCard, damage, card.Deck, index).Execute());
+                }
                 else
                 {
-                    var opponent = card.Deck.Player.GetOpponentPlayer();
-                    if (opponent.Game.Fighting)
+                    if (index + 1 < card.Deck.Size)
                     {
-                        // last card for the opponent that is not fainting
-                        adjacentCard = opponent.BattleDeck.LastOrDefault(c => c != null && c.TotalHitPoints > 0);
-                        if (adjacentCard != null)
-                            queue.Add(new HurtCardCommand(adjacentCard, damage, card.Deck, index).Execute());
+                        var nextCard = card.Deck[index + 1];
+                        if (nextCard != null && nextCard.TotalHitPoints > 0)
+                            queue.Add(new HurtCardCommand(nextCard, damage, card.Deck, index).Execute());
                     }
                 }
             });
@@ -669,7 +667,7 @@ namespace AnimalHurtedLib
             base.Hurted(queue, card);
             PerformTigerAbility(card, card.Index, (level) =>
             {
-                Card priorCard = card.Deck.LastOrDefault(c => c != null && c.Index < card.Index && c.TotalHitPoints > 0);
+                Card priorCard = card.Deck.LastOrDefault(c => c.Index < card.Index && c.TotalHitPoints > 0);
                 if (priorCard != null)
                     queue.Add(new BuffCardCommand(priorCard, card.Index, level * 2, level).Execute());
             });
@@ -814,9 +812,9 @@ namespace AnimalHurtedLib
             return $"Faint => Summon two {card.Level * 2}/{card.Level * 2} rams.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 // sheep has fainted but we still have to search for an empty slot because it's possible that
@@ -876,9 +874,9 @@ namespace AnimalHurtedLib
             return $"Faint => Give {card.Level} friend(s) behind melon armor.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             for (int i = 1; i <= card.Level; i++)
             {
                 if (index - i < 0)
@@ -935,9 +933,9 @@ namespace AnimalHurtedLib
             return $"Fainted => Summon a {card.Level * 5}/{card.Level * 5} bus with splash attack.)";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 if (CanMakeRoomAt(queue, card.Deck, index, out int summonIndex))
@@ -1075,9 +1073,9 @@ namespace AnimalHurtedLib
             return $"Faint => Summon {card.Level} chick(s) with 1 health and half of the attack.";
         }    
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 for (int i = 1; i <= level; i++)
@@ -1173,13 +1171,13 @@ namespace AnimalHurtedLib
                 // we faint the card in BattleStarted1 because we don't want other ability methods
                 // to target this card within the same queue.
                 if (_friendAhead != null && _friendAhead.TotalHitPoints > 0)
-                    queue.Add(new FaintCardCommand(_friendAhead).Execute());
+                    queue.Add(new FaintCardCommand(_friendAhead, false).Execute());
             }
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             if (_friendAhead != null)
             {
                 PerformTigerAbility(card, index, (level) =>
@@ -1332,7 +1330,7 @@ namespace AnimalHurtedLib
             // if opponent had melon armor then it would have set damage to zero
             // and we don't deliver the faint
             if (damage > 0 && opponentCard != null)
-                queue.Add(new FaintCardCommand(opponentCard).Execute());
+                queue.Add(new FaintCardCommand(opponentCard, false).Execute());
         }
     }
 
@@ -1610,9 +1608,9 @@ namespace AnimalHurtedLib
             return $"Faint => Give all friends +{card.Level * 2}/+{card.Level * 2}.";
         }
 
-        public override void Fainted(CardCommandQueue queue, Card card, int index)
+        public override void Fainted(CardCommandQueue queue, Card card, int index, bool attacking, Card opponentCard = null)
         {
-            base.Fainted(queue, card, index);
+            base.Fainted(queue, card, index, attacking, opponentCard);
             PerformTigerAbility(card, index, (level) =>
             {
                 foreach (var friendCard in card.Deck)

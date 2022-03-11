@@ -50,19 +50,18 @@ namespace AnimalHurtedLib
                 {
                     var indexes = new List<(int from, int to)>();
                     for (int j = i; j <= atIndex - 1; j++)
-                    {
                         indexes.Add((j + 1, j));
-
-                        // CanMakeRoomAt is typically called by an ability method, that previously was called by a queue reader
-                        // such as CardCommandQueue.CreateExecuteResult. Since we are about to move cards, that means that prior
-                        // commands that are left to be read/executed will be associated with the wrong index values.
-                        // those commands that are incorrect are the "parent" commands to this queue that are being read in
-                        // CreateExecuteResult. So notify to update indexes:
-                        queue.CardMoving(deck, j + 1, j);
-                    }
-                    // perform the deck move operations and store in the queue so when the final result is read
-                    // the same move operations can be performed 
+                        
+                    // Perform the deck move operations and store in the queue so when the final result is read
+                    // the same move operations can be performed -- just before the summon command is executed.
+                    // queue._parentQueue typically contains one or more faint commands (because a card is only summoned
+                    // from Ability.Fainted, or Ability.FriendFainted methods)
+                    // When the final results are executed, ability methods are not executed, and that means that the
+                    // faint commands in queue._parentQueue are simply executed and their associated cards are fainted
+                    // So we don't need to worry about the commands in queue._parentQueue being associated with the wrong index
+                    // values
                     queue.Add(new MoveCardsCommand(deck, indexes).Execute());
+
                     summonIndex = atIndex;
                     return true;
                 }
@@ -135,7 +134,8 @@ namespace AnimalHurtedLib
             
         }
 
-        public virtual void Fainted(CardCommandQueue queue, Card card, int index)
+        public virtual void Fainted(CardCommandQueue queue, Card card, int index, bool attacking,
+            Card opponentCard = null)
         {
 
         }

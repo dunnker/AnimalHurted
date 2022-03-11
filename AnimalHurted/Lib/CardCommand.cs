@@ -34,12 +34,6 @@ namespace AnimalHurtedLib
             _deck = card.Deck;
         }
 
-        public virtual void CardMoving(Deck deck, int from, int to)
-        {
-            if (_deck == deck && _index == from)
-                _index = to;
-        }
-
         public virtual CardCommand Execute()
         {
             return this;
@@ -67,7 +61,8 @@ namespace AnimalHurtedLib
         public override CardCommand Execute()
         {
             foreach (var pair in _indexes)
-                Deck.MoveCard(Deck[pair.from], pair.to);
+                if (Deck[pair.from] != null)
+                    Deck.MoveCard(Deck[pair.from], pair.to);
             Deck.Player.Game.OnCardsMovedEvent(this);
             return this;
         }
@@ -86,13 +81,6 @@ namespace AnimalHurtedLib
         {
             _opponentDeck = opponentCard.Deck;
             _opponentIndex = opponentCard.Index;
-        }
-
-        public override void CardMoving(Deck deck, int from, int to)
-        {
-            base.CardMoving(deck, from, to);
-            if (_opponentDeck == deck && _opponentIndex == from)
-                _opponentIndex = to;
         }
 
         public override CardCommand Execute()
@@ -137,10 +125,13 @@ namespace AnimalHurtedLib
     public class FaintCardCommand : CardCommand
     {
         Card _faintedCard;
+        bool _attacking;
+        Card _opponentCard;
 
-        public FaintCardCommand(Card card) : base(card)
+        public FaintCardCommand(Card card, bool attacking, Card opponentCard = null) : base(card)
         {
-
+            _attacking = attacking;
+            _opponentCard = opponentCard;
         }
 
         public override CardCommand Execute()
@@ -156,7 +147,7 @@ namespace AnimalHurtedLib
             // Execute() is always called before ExecuteAbility() and the Card property is not a direct
             // reference, but a lookup based on Index. Once Card.Faint() is called, the Card instance
             // can no longer be looked up. So we stored Card in _faintedCard in Execute()
-            _faintedCard.Fainted(queue, Index);
+            _faintedCard.Fainted(queue, Index, _attacking, _opponentCard);
             return this;
         }
     }
@@ -178,13 +169,6 @@ namespace AnimalHurtedLib
             _sourceDeck = sourceDeck;
         }
 
-        public override void CardMoving(Deck deck, int from, int to)
-        {
-            base.CardMoving(deck, from, to);
-            if (_sourceDeck == deck && _sourceIndex == from)
-                _sourceIndex = to;
-        }
-
         public override CardCommand Execute()
         {
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
@@ -201,7 +185,7 @@ namespace AnimalHurtedLib
                     _sourceDeck != Deck)
                     opponentCard = _sourceDeck[_sourceIndex];
 
-                Card.Hurted(queue, opponentCard);
+                Card.Hurted(queue, false, opponentCard);
             }
             return this;
         }
@@ -222,13 +206,6 @@ namespace AnimalHurtedLib
             _attackPoints = attackPoints;
         }
         
-        public override void CardMoving(Deck deck, int from, int to)
-        {
-            base.CardMoving(deck, from, to);
-            if (Deck == deck && _sourceIndex == from)
-                _sourceIndex = to;
-        }
-
         public override CardCommand Execute()
         {
             Card.Buff(_sourceIndex, _hitPoints, _attackPoints);

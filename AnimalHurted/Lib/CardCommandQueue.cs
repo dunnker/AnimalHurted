@@ -7,14 +7,6 @@ namespace AnimalHurtedLib
 {
     public class CardCommandQueue : IEnumerable<CardCommand>
     {
-        CardCommandQueue _parentQueue;
-        CardCommand _parentCommand;
-
-        public CardCommandQueue(CardCommandQueue parentQueue = null)
-        {
-            _parentQueue = parentQueue;
-        }
-
         List<CardCommand> _list = new List<CardCommand>();
 
         public int Count { get { return _list.Count; } }
@@ -22,12 +14,6 @@ namespace AnimalHurtedLib
         public void Add(CardCommand cardCommand)
         {
             _list.Add(cardCommand);
-        }
-
-        public void CardMoving(Deck deck, int from, int to)
-        {
-            foreach (var command in _parentQueue.SkipWhile((c) => c != _parentCommand).Skip(1))
-                command.CardMoving(deck, from, to);
         }
 
         public List<CardCommandQueue> CreateExecuteResult(Game game)
@@ -38,16 +24,9 @@ namespace AnimalHurtedLib
             while (queue.Count > 0)
             {
                 result.Add(queue);
-                // queue is the "parent" to nextQueue
-                var nextQueue = new CardCommandQueue(queue);
+                var nextQueue = new CardCommandQueue();
                 foreach (var command in queue)
                 {
-                    // store the current location that is being read in _parentCommand
-                    nextQueue._parentCommand = command;
-
-                    // if this ability method adds a summon command to nextQueue, and that command moves cards
-                    // then CardMoving will be responsible for updating the new index locations from this
-                    // command (the _parentCommand) forward
                     command.ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;

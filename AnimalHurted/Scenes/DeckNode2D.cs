@@ -300,6 +300,10 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         if (command.Deck == _deck)
         {
             RenderDeck(_deck);  
+
+            // don't invoke because we're expecting a summon event, which is likely the last command
+            // in the current queue
+            //command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -318,7 +322,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             }
 
             cardSlot.CardArea2D.RenderCard(_deck[summonedCommand.AtIndex], summonedCommand.AtIndex);
-        
+            
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
     }
