@@ -192,7 +192,7 @@ namespace AnimalHurtedLib
 
         public void Attacked(CardCommandQueue queue, int damage, int opponentDamage, Card opponentCard = null)
         {
-            var priorCard = _deck.LastOrDefault(c => c != null && c.Index < _index && c.TotalHitPoints > 0);
+            var priorCard = _deck.LastOrDefault(c => c.Index < _index && c.TotalHitPoints > 0);
             priorCard?.Ability.FriendAheadAttacks(queue, priorCard);
 
             // invoke even if TotalHitPoints is <= 0, because, for example, Splash attack should still apply

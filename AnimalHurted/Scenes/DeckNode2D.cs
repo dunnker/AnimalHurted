@@ -314,11 +314,20 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         {
             var cardSlot = GetCardSlotNode2D(summonedCommand.AtIndex + 1);
             if (!cardSlot.Visible)
-                cardSlot.Show();
-
-            if (GetParent() is BattleNode)
             {
-                await (GetParent() as BattleNode).PositionDecks(false);
+                // multiple slots prior to cardSlot might be hidden, so restore
+                for (int i = summonedCommand.AtIndex + 1; i >= 0; i--)
+                {
+                    var hiddenSlot = GetCardSlotNode2D(i);
+                    if (!hiddenSlot.Visible)
+                        hiddenSlot.Show();
+                    else
+                        break;
+                }
+                if (GetParent() is BattleNode)
+                {
+                    await (GetParent() as BattleNode).PositionDecks(false);
+                }
             }
 
             cardSlot.CardArea2D.RenderCard(_deck[summonedCommand.AtIndex], summonedCommand.AtIndex);

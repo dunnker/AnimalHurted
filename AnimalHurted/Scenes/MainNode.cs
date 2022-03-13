@@ -14,6 +14,7 @@ public class MainNode : Node
     public void _on_NewGameButton_pressed()
     {
         GameSingleton.Instance.Game = new Game();
+        GameSingleton.Instance.Game.NewGame();
         GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
         GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
     }
@@ -26,6 +27,7 @@ public class MainNode : Node
     public void _on_SandboxButton_pressed()
     {
         GameSingleton.Instance.Game = new Game();
+        GameSingleton.Instance.Game.NewGame();
         GetTree().ChangeScene("res://Scenes/SandboxNode.tscn");
     }
 
@@ -36,6 +38,7 @@ public class MainNode : Node
             using (BinaryReader reader = new BinaryReader(fileStream))
             {
                 GameSingleton.Instance.Game = new Game();
+                GameSingleton.Instance.Game.NewGame();
                 Deck deck = new Deck(GameSingleton.Instance.Game.Player1, Game.BuildDeckSlots);
                 deck.LoadFromStream(reader);
                 deck.CloneTo(GameSingleton.Instance.Game.Player1.BattleDeck);

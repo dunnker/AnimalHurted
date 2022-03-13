@@ -595,6 +595,8 @@ namespace AnimalHurtedLib
                 int damage = card.TotalAttackPoints * level;
                 if (index > 0)
                 {
+                    //TODO: SAP will ignore a newly summoned bee as a target for attack
+                    // same I think below for the nextCard damage
                     var priorCard = card.Deck[index - 1];
                     if (priorCard != null && priorCard.TotalHitPoints > 0)
                         queue.Add(new HurtCardCommand(priorCard, damage, card.Deck, index).Execute());

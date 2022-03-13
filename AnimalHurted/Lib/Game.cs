@@ -97,7 +97,6 @@ namespace AnimalHurtedLib
             _random = new Random();
             _player1 = new Player(this, "Player 1");
             _player2 = new Player(this, "Player 2");
-            NewGame();
         }
 
         public void NewGame()
@@ -222,6 +221,11 @@ namespace AnimalHurtedLib
         {
             // fight is over if either player has run out of cards
             return _player1.BattleDeck.GetCardCount() == 0 || _player2.BattleDeck.GetCardCount() == 0;
+        }
+
+        public bool IsGameOver()
+        {
+            return _player1.Lives == 0 || _player2.Lives == 0;
         }
 
         public List<CardCommandQueue> CreateFightResult()
