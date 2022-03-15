@@ -29,7 +29,34 @@ namespace AnimalHurtedLib
         public List<Type> TierFiveAbilities { get; }
         public List<Type> TierSixAbilities { get; }
 
+        public List<Type> TierTwoAbilitiesPlus { get; }
+        public List<Type> TierThreeAbilitiesPlus { get; }
+        public List<Type> TierFourAbilitiesPlus { get; }
+        public List<Type> TierFiveAbilitiesPlus { get; }
+        public List<Type> TierSixAbilitiesPlus { get; }
+
         public List<Type> AllAbilities { get; }
+
+        public List<Type> GetAbilityListForRound(int round)
+        {
+            switch (round)
+            {
+                case int i when i >= 1 && i <= 2:
+                    return TierOneAbilities;
+                case int i when i >= 3 && i <= 4:
+                    return TierTwoAbilitiesPlus;
+                case int i when i >= 5 && i <= 6:
+                    return TierThreeAbilitiesPlus;
+                case int i when i >= 7 && i <= 8:
+                    return TierFourAbilitiesPlus;
+                case int i when i >= 9 && i <= 10:
+                    return TierFiveAbilitiesPlus;
+                case int i when i >= 11:
+                    return TierSixAbilitiesPlus;
+                default:
+                    throw new Exception("Invalid round");
+            }
+        }
 
         private AbilityList()
         {
@@ -105,12 +132,27 @@ namespace AnimalHurtedLib
             TierSixAbilities.Add(typeof(SnakeAbility));
             TierSixAbilities.Add(typeof(TigerAbility));
 
-            AllAbilities.AddRange(TierOneAbilities);
-            AllAbilities.AddRange(TierTwoAbilities);
-            AllAbilities.AddRange(TierThreeAbilities);
-            AllAbilities.AddRange(TierFourAbilities);
-            AllAbilities.AddRange(TierFiveAbilities);
-            AllAbilities.AddRange(TierSixAbilities);
+            TierTwoAbilitiesPlus = new List<Type>();
+            TierTwoAbilitiesPlus.AddRange(TierOneAbilities);
+            TierTwoAbilitiesPlus.AddRange(TierTwoAbilities);
+
+            TierThreeAbilitiesPlus = new List<Type>();
+            TierThreeAbilitiesPlus.AddRange(TierTwoAbilitiesPlus);
+            TierThreeAbilitiesPlus.AddRange(TierThreeAbilities);
+
+            TierFourAbilitiesPlus = new List<Type>();
+            TierFourAbilitiesPlus.AddRange(TierThreeAbilitiesPlus);
+            TierFourAbilitiesPlus.AddRange(TierFourAbilities);
+
+            TierFiveAbilitiesPlus = new List<Type>();
+            TierFiveAbilitiesPlus.AddRange(TierFourAbilitiesPlus);
+            TierFiveAbilitiesPlus.AddRange(TierFiveAbilities);
+
+            TierSixAbilitiesPlus = new List<Type>();
+            TierSixAbilitiesPlus.AddRange(TierFiveAbilitiesPlus);
+            TierSixAbilitiesPlus.AddRange(TierSixAbilities);
+
+            AllAbilities.AddRange(TierSixAbilitiesPlus);
             AllAbilities.Add(typeof(ZombieBeeAbility));
             AllAbilities.Add(typeof(ZombieBusAbility));
             AllAbilities.Add(typeof(ZombieChickAbility));

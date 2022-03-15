@@ -16,9 +16,6 @@ namespace AnimalHurtedLib
         readonly Player _player1;
         readonly Player _player2;
         int _round;
-        int _shopSlots;
-        List<Type> _tierAbilities;
-        List<Type> _tierFood;
         int _updateCount;
         bool _fighting;
 
@@ -29,18 +26,12 @@ namespace AnimalHurtedLib
         public const int BuildDeckSlots = 5;
         public const int ShopMaxPetSlots = 5;
         public const int ShopFoodSlots = 2;
-
-        public int ShopSlots { get { return _shopSlots; } }
-
         public Random Random { get { return _random; } }
-
         public int Round { get { return _round; } }
 
         public Player Player1 { get { return _player1; } }
         public Player Player2 { get { return _player2; } }
         public bool Fighting { get { return _fighting; } }
-        public List<Type> TierAbilities { get { return _tierAbilities; } }
-        public List<Type> TierFood { get { return _tierFood; } }
 
         public event CardCommandEventHandler AttackEvent;
         public event CardCommandEventHandler CardFaintedEvent;
@@ -101,53 +92,36 @@ namespace AnimalHurtedLib
 
         public void NewGame()
         {
-            _tierAbilities = new List<Type>();
-            _tierFood = new List<Type>();
             _player1.NewGame();
             _player2.NewGame();
             NewRound();
         }
 
-        public void CheckNewTier()
+        public void CloneTo(Game game)
+        {
+            game._round = _round;
+            _player1.CloneTo(game._player1);
+            _player2.CloneTo(game._player2);
+        }
+
+        public int GetShopSlotCount()
         {
             switch (_round)
             {
-                case int i when i >= 1 && i <= 2:
-                    _shopSlots = 3;
-                    _tierAbilities.AddRange(AbilityList.Instance.TierOneAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierOneFood);
-                    break;
-                case int i when i >= 3 && i <= 4:
-                    _tierAbilities.AddRange(AbilityList.Instance.TierTwoAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierTwoFood);
-                    break;
-                case int i when i >= 5 && i <= 6:
-                    _shopSlots = 4;
-                    _tierAbilities.AddRange(AbilityList.Instance.TierThreeAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierThreeFood);
-                    break;
-                case int i when i >= 7 && i <= 8:
-                    _tierAbilities.AddRange(AbilityList.Instance.TierFourAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierFourFood);
-                    break;
-                case int i when i >= 9 && i <= 10:
-                    _shopSlots = 5;
-                    _tierAbilities.AddRange(AbilityList.Instance.TierFiveAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierFiveFood);
-                    break;
-                case int i when i >= 11:
-                    _tierAbilities.AddRange(AbilityList.Instance.TierSixAbilities);
-                    _tierFood.AddRange(FoodList.Instance.TierSixFood);
-                    break;
+                case int i when i >= 1 && i <= 4:
+                    return 3;
+                case int i when i >= 5 && i <= 8:
+                    return 4;
+                case int i when i >= 9:
+                    return 5;
                 default:
-                    break;
+                    throw new Exception("Invalid round");
             }
         }
 
         public void NewRound()
         {
             _round++;
-            CheckNewTier();
             // assign Gold before calling Player.NewRound() because card abilities
             // can be invoked in Player.NewRound() which can buff Gold
             _player1.Gold = GoldPerTurn;

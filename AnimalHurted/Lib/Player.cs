@@ -26,7 +26,7 @@ namespace AnimalHurtedLib
 
         public Game Game { get { return _game; } }
 
-        public Deck BuildDeck { get { return _buildDeck; } set { _buildDeck = value; } }
+        public Deck BuildDeck { get { return _buildDeck; } }
 
         public Deck BattleDeck { get { return _battleDeck; } }
 
@@ -75,6 +75,22 @@ namespace AnimalHurtedLib
             _shopDeck = new Deck(this, Game.ShopMaxPetSlots);
             _buildDeck = new Deck(this, Game.BuildDeckSlots);
             _battleDeck = new Deck(this, Game.BuildDeckSlots);
+        }
+
+        public void CloneTo(Player player)
+        {
+            // Name and Game should already be set
+            player._wins = _wins;
+            player._lives = _lives;
+            player._gold = _gold;
+            player._lostLastBattle = _lostLastBattle;
+            _buildDeck.CloneTo(player._buildDeck);
+            _shopDeck.CloneTo(player._shopDeck);
+            // food doesn't keep any state except Cost
+            player._shopFood1 = Activator.CreateInstance(_shopFood1.GetType()) as Food;
+            player._shopFood1.Cost = _shopFood1.Cost;
+            player._shopFood2 = Activator.CreateInstance(_shopFood2.GetType()) as Food;
+            player._shopFood2.Cost = _shopFood2.Cost;
         }
 
         public void BeginUpdate()
@@ -146,10 +162,11 @@ namespace AnimalHurtedLib
             if (deductGold)
                 Gold -= Game.RollCost;
             _shopDeck.Clear();
-            for (int i = 0; i < Game.ShopSlots; i++)
+            for (int i = 0; i < Game.GetShopSlotCount(); i++)
             {
-                int rand = Game.Random.Next(Game.TierAbilities.Count);
-                var card = new Card(_shopDeck, Activator.CreateInstance(Game.TierAbilities[rand]) as Ability);
+                var abilityList = AbilityList.Instance.GetAbilityListForRound(Game.Round);
+                int rand = Game.Random.Next(abilityList.Count);
+                var card = new Card(_shopDeck, Activator.CreateInstance(abilityList[rand]) as Ability);
                 card.HitPoints += BuffHitPoints;
                 card.AttackPoints += BuffAttackPoints;
                 _shopDeck.SetCard(card, i);
@@ -180,10 +197,11 @@ namespace AnimalHurtedLib
 
         void NewShopFood()
         {
-            int randIndex = _game.Random.Next(0, _game.TierFood.Count);
-            _shopFood1 = Activator.CreateInstance(_game.TierFood[randIndex]) as Food;
-            randIndex = _game.Random.Next(0, _game.TierFood.Count);
-            _shopFood2 = Activator.CreateInstance(_game.TierFood[randIndex]) as Food;
+            var foodList = FoodList.Instance.GetFoodListForRound(_game.Round);
+            int randIndex = _game.Random.Next(foodList.Count);
+            _shopFood1 = Activator.CreateInstance(foodList[randIndex]) as Food;
+            randIndex = _game.Random.Next(foodList.Count);
+            _shopFood2 = Activator.CreateInstance(foodList[randIndex]) as Food;
         }
 
         public void BuildEnded(CardCommandQueue queue)

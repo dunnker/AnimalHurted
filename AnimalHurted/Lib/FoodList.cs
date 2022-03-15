@@ -28,7 +28,35 @@ namespace AnimalHurtedLib
         public List<Type> TierFourFood { get; set; }
         public List<Type> TierFiveFood { get; set; }
         public List<Type> TierSixFood { get; set; }
+
+        public List<Type> TierTwoFoodPlus { get; }
+        public List<Type> TierThreeFoodPlus { get; }
+        public List<Type> TierFourFoodPlus { get; }
+        public List<Type> TierFiveFoodPlus { get; }
+        public List<Type> TierSixFoodPlus { get; }
+
         public List<Type> AllFood { get; set; }
+
+        public List<Type> GetFoodListForRound(int round)
+        {
+            switch (round)
+            {
+                case int i when i >= 1 && i <= 2:
+                    return TierOneFood;
+                case int i when i >= 3 && i <= 4:
+                    return FoodList.Instance.TierTwoFoodPlus;
+                case int i when i >= 5 && i <= 6:
+                    return FoodList.Instance.TierThreeFoodPlus;
+                case int i when i >= 7 && i <= 8:
+                    return FoodList.Instance.TierFourFoodPlus;
+                case int i when i >= 9 && i <= 10:
+                    return FoodList.Instance.TierFiveFoodPlus;
+                case int i when i >= 11:
+                    return FoodList.Instance.TierSixFoodPlus;
+                default:
+                    throw new Exception("Invalid round");
+            }
+        }
 
         private FoodList()
         {
@@ -61,6 +89,26 @@ namespace AnimalHurtedLib
             TierSixFood.Add(typeof(MushroomFood));
             TierSixFood.Add(typeof(PizzaFood));
             TierSixFood.Add(typeof(SteakFood));
+
+            TierTwoFoodPlus = new List<Type>();
+            TierTwoFoodPlus.AddRange(TierOneFood);
+            TierTwoFoodPlus.AddRange(TierTwoFood);
+
+            TierThreeFoodPlus = new List<Type>();
+            TierThreeFoodPlus.AddRange(TierTwoFoodPlus);
+            TierThreeFoodPlus.AddRange(TierThreeFood);
+
+            TierFourFoodPlus = new List<Type>();
+            TierFourFoodPlus.AddRange(TierThreeFoodPlus);
+            TierFourFoodPlus.AddRange(TierFourFood);
+
+            TierFiveFoodPlus = new List<Type>();
+            TierFiveFoodPlus.AddRange(TierFourFoodPlus);
+            TierFiveFoodPlus.AddRange(TierFiveFood);
+
+            TierSixFoodPlus = new List<Type>();
+            TierSixFoodPlus.AddRange(TierFiveFoodPlus);
+            TierSixFoodPlus.AddRange(TierSixFood);
 
             AllFood.AddRange(TierOneFood);
             AllFood.AddRange(TierTwoFood);

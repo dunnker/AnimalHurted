@@ -20,7 +20,7 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
             var card = Deck[i];
             var cardSlot = GetCardSlotNode2D(i + 1);
             cardSlot.CardArea2D.RenderCard(card, i, false);
-            if (i >= GameSingleton.Instance.Game.ShopSlots)
+            if (i >= GameSingleton.Instance.Game.GetShopSlotCount())
                 cardSlot.Hide();
         }
     }
