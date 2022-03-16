@@ -124,6 +124,14 @@ filters = PoolStringArray( "*.ah" )
 current_dir = "/"
 current_path = "/"
 
+[node name="GameOverDialog" type="AcceptDialog" parent="."]
+margin_left = 516.0
+margin_top = 185.0
+margin_right = 684.0
+margin_bottom = 243.0
+window_title = "Game Over"
+dialog_text = "Player 1 Won the game!"
+
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_SaveButton_pressed"]

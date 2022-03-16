@@ -77,6 +77,8 @@ public class BuildNode : Node
 
             GameSingleton.Instance.SaveBattleDecks();
             GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
+            // NewRound() calculates the winner, so do this now so winner can be displayed in battle screen
+            GameSingleton.Instance.Game.NewRound();
             // restore for rendering in next scene
             GameSingleton.Instance.RestoreBattleDecks();
 

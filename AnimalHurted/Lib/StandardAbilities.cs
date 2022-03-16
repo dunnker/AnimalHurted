@@ -239,9 +239,9 @@ namespace AnimalHurtedLib
             base.FriendSummoned(queue, card, summonedCard);
             PerformTigerAbility(card, card.Index, (level) =>
             {
-                //TODO: SAP is worded "Give it +? attack until end of battle." and it underscores the attack points during build and battle
-                // after battle, if the friend was summoned during build, the friend's attack points will revert for next build
-                queue.Add(new BuffCardCommand(summonedCard, card.Index, 0, level).Execute());
+                queue.Add(new BuffCardCommand(summonedCard, card.Index, 0, level, 
+                    // buff the build points if not fighting
+                    !card.Deck.Player.Game.Fighting).Execute());
             });
         }
     }
@@ -1405,8 +1405,9 @@ namespace AnimalHurtedLib
             base.FriendSummoned(queue, card, summonedCard);
             PerformTigerAbility(card, card.Index, (level) =>
             {
-                //TODO: see comments in HorseAbility, same might apply here
-                queue.Add(new BuffCardCommand(summonedCard, card.Index, level * 3, level * 3).Execute());
+                queue.Add(new BuffCardCommand(summonedCard, card.Index, level * 3, level * 3, 
+                    // buff the build points if not fighting
+                    !card.Deck.Player.Game.Fighting).Execute());
             });
         }
     }

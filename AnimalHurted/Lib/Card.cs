@@ -288,11 +288,19 @@ namespace AnimalHurtedLib
                 queue.Add(new FaintCardCommand(this, attacking, opponentCard).Execute());
         }
 
-        public void Buff(int sourceIndex, int hitPoints, int attackPoints)
+        public void Buff(int sourceIndex, int hitPoints, int attackPoints, bool buffBuildPoints = false)
         {
             Debug.Assert(hitPoints >= 0 && attackPoints >= 0);
-            _hitPoints += hitPoints;
-            _attackPoints += attackPoints;
+            if (buffBuildPoints)
+            {
+                _buildHitPoints += hitPoints;
+                _buildAttackPoints += attackPoints;
+            }
+            else
+            {
+                _hitPoints += hitPoints;
+                _attackPoints += attackPoints;
+            }
         }
 
         public void Eat(Food food)

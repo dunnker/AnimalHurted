@@ -12,6 +12,7 @@ public class BattleNode : Node
 {
     bool _playingAttack;
     bool _playingBattle;
+    bool _gameOverShown;
 
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
@@ -30,6 +31,7 @@ public class BattleNode : Node
     public Button SaveButton { get { return GetNode<Button>("SaveButton"); } }
     public TextureButton PlayOneButton { get { return GetNode<TextureButton>("PlayOneButton"); } }
     public FileDialog SaveFileDialog { get { return GetNode<FileDialog>("SaveFileDialog"); } } 
+    public AcceptDialog GameOverDialog { get { return GetNode<AcceptDialog>("GameOverDialog"); } } 
 
     [Signal]
     public delegate void ExecuteQueueOverSignal();
@@ -88,9 +90,13 @@ public class BattleNode : Node
             GetTree().ChangeScene("res://Scenes/SandboxNode.tscn");
         else
         {
-            GameSingleton.Instance.Game.NewRound();
-            GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
-            GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+            if (GameSingleton.Instance.Game.IsGameOver())
+                GetTree().ChangeScene("res://Scenes/MainNode.tscn");
+            else
+            {
+                GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
+                GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+            }
         }
     }
 
@@ -150,6 +156,7 @@ public class BattleNode : Node
                 _playingBattle = false;
                 ReplayButton.Disabled = false;
                 SaveButton.Disabled = false;
+                ShowGameOver();
             }
             else
             {
@@ -165,6 +172,21 @@ public class BattleNode : Node
         {
             ReplayButton.Disabled = false;
             SaveButton.Disabled = false;
+        }
+    }
+
+    void ShowGameOver()
+    {
+        if (!_gameOverShown && GameSingleton.Instance.Game.IsGameOver())
+        {
+            _gameOverShown = true;
+            string message;
+            if (GameSingleton.Instance.Game.Player1.Lives == 0)
+                message = "Player 2 Won the game!";
+            else
+                message = "Player 1 Won the game!";
+            GameOverDialog.DialogText = message;
+            GameOverDialog.Show();
         }
     }
 

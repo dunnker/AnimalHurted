@@ -97,8 +97,7 @@ namespace AnimalHurtedLib
         {
             Card.Attacked(queue, _damage, _opponentDamage, OpponentCard);
             // OpponentCard might be null if Card dealt scorpion attack
-            if (OpponentCard != null)
-                OpponentCard.Attacked(queue, _opponentDamage, _damage, Card); // now Card could be null...
+            OpponentCard?.Attacked(queue, _opponentDamage, _damage, Card); // now Card could be null...
             return this;
         }
     }
@@ -115,9 +114,7 @@ namespace AnimalHurtedLib
         public override CardCommand Execute()
         {
             Card.FoodAbility = _foodAbility;
-
             Deck.Player.Game.OnCardGainedFoodAbilityEvent(this);
-
             return this;
         }
     }
@@ -184,7 +181,6 @@ namespace AnimalHurtedLib
                 if (Card.Deck.Player.Game.Fighting && 
                     _sourceDeck != Deck)
                     opponentCard = _sourceDeck[_sourceIndex];
-
                 Card.Hurted(queue, false, opponentCard);
             }
             return this;
@@ -196,11 +192,13 @@ namespace AnimalHurtedLib
         int _sourceIndex; 
         int _hitPoints;
         int _attackPoints;
+        bool _buffBuildPoints;
 
         public int SourceIndex { get { return _sourceIndex; } }
 
-        public BuffCardCommand(Card card, int sourceIndex, int hitPoints, int attackPoints) : base(card)
+        public BuffCardCommand(Card card, int sourceIndex, int hitPoints, int attackPoints, bool buffBuildPoints = false) : base(card)
         {
+            _buffBuildPoints = buffBuildPoints;
             _sourceIndex = sourceIndex;
             _hitPoints = hitPoints;
             _attackPoints = attackPoints;
@@ -208,7 +206,7 @@ namespace AnimalHurtedLib
         
         public override CardCommand Execute()
         {
-            Card.Buff(_sourceIndex, _hitPoints, _attackPoints);
+            Card.Buff(_sourceIndex, _hitPoints, _attackPoints, _buffBuildPoints);
             Deck.Player.Game.OnCardBuffedEvent(this);
             return this;
         }
@@ -258,7 +256,6 @@ namespace AnimalHurtedLib
                 _summonedCard.RenderAbility = Activator.CreateInstance(_renderAbilityType) as Ability;
             _summonedCard.Summon(_atIndex);
             _atDeck.Player.Game.OnCardSummonedEvent(this);
-
             return this;
         }
 

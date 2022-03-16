@@ -41,15 +41,19 @@ public class MainNode : Node
                 GameSingleton.Instance.Game.NewGame();
                 Deck deck = new Deck(GameSingleton.Instance.Game.Player1, Game.BuildDeckSlots);
                 deck.LoadFromStream(reader);
-                deck.CloneTo(GameSingleton.Instance.Game.Player1.BattleDeck);
+                // load into build deck so sandbox will have it after replaying battle
+                deck.CloneTo(GameSingleton.Instance.Game.Player1.BuildDeck);
                 deck = new Deck(GameSingleton.Instance.Game.Player2, Game.BuildDeckSlots);
                 deck.LoadFromStream(reader);
-                deck.CloneTo(GameSingleton.Instance.Game.Player2.BattleDeck);
+                deck.CloneTo(GameSingleton.Instance.Game.Player2.BuildDeck);
+                GameSingleton.Instance.Game.Player1.NewBattleDeck();
+                GameSingleton.Instance.Game.Player2.NewBattleDeck();
             }
         }
         GameSingleton.Instance.SaveBattleDecks();
         GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
         GameSingleton.Instance.RestoreBattleDecks();
+        GameSingleton.Instance.Sandboxing = true;
         GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
     }
 
