@@ -41,7 +41,8 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     // ICardSelectHost
     public void SelectionChanged(CardSlotNode2D cardSlot)
     {
-        GetParent().EmitSignal("CardSelectionChangedSignal", cardSlot.CardArea2D.CardIndex);
+        if (GetParent() is SandboxNode)
+            GetParent().EmitSignal("CardSelectionChangedSignal", cardSlot.CardArea2D.CardIndex);
 
         if (cardSlot.Selected)
         {
