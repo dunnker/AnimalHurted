@@ -161,15 +161,20 @@ namespace AnimalHurtedLib
                 throw new Exception("Not enough gold for Roll.");
             if (deductGold)
                 Gold -= Game.RollCost;
-            _shopDeck.Clear();
+            foreach (var card in _shopDeck)
+                if (!card.Frozen)
+                    card.Deck.Remove(card.Index);
             for (int i = 0; i < Game.GetShopSlotCount(); i++)
             {
-                var abilityList = AbilityList.Instance.GetAbilityListForRound(Game.Round);
-                int rand = Game.Random.Next(abilityList.Count);
-                var card = new Card(_shopDeck, Activator.CreateInstance(abilityList[rand]) as Ability);
-                card.HitPoints += BuffHitPoints;
-                card.AttackPoints += BuffAttackPoints;
-                _shopDeck.SetCard(card, i);
+                if (_shopDeck[i] == null)
+                {
+                    var abilityList = AbilityList.Instance.GetAbilityListForRound(Game.Round);
+                    int rand = Game.Random.Next(abilityList.Count);
+                    var card = new Card(_shopDeck, Activator.CreateInstance(abilityList[rand]) as Ability);
+                    card.HitPoints += BuffHitPoints;
+                    card.AttackPoints += BuffAttackPoints;
+                    _shopDeck.SetCard(card, i);
+                }
             }
             NewShopFood();
         }

@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Scenes/CardArea2D.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/CardAttrsNode2D.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Assets/Pets/AntAbility.png" type="Texture" id=3]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://Assets/FoodAbilities/HoneyBeeAbility.png" type="Texture" id=5]
+[ext_resource path="res://Assets/frozen.png" type="Texture" id=6]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 64, 64 )
@@ -29,6 +30,11 @@ __meta__ = {
 
 [node name="FoodAbilitySprite" type="Sprite" parent="."]
 texture = ExtResource( 5 )
+
+[node name="FrozenSprite" type="Sprite" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0.27451 )
+texture = ExtResource( 6 )
 
 [node name="FoodAbilityModulateTween" type="Tween" parent="."]
 

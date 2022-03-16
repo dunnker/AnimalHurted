@@ -17,6 +17,7 @@ public class CardArea2D : Area2D
     public int CardIndex { get { return _cardIndex; } }
 
     public Sprite Sprite { get { return GetNode<Sprite>("Sprite"); } }
+    public Sprite FrozenSprite { get { return GetNode<Sprite>("FrozenSprite"); } }
     public Sprite FoodAbilitySprite { get { return GetNode<Sprite>("FoodAbilitySprite"); } }
     public Tween FoodAbilityModulateTween { get { return GetNode<Tween>("FoodAbilityModulateTween"); } }
     public Tween FoodAbilityPositionTween { get { return GetNode<Tween>("FoodAbilityPositionTween"); } }
@@ -40,14 +41,16 @@ public class CardArea2D : Area2D
     public void HideCard()
     {
         Sprite.Hide();
+        FrozenSprite.Hide();
         FoodAbilitySprite.Hide();
         CardAttrsNode2D.Hide();
         LevelLabel.Hide();
     }
 
-    public void ShowCard()
+    public void ShowCard(Card card)
     {
         Sprite.Show();
+        FrozenSprite.Visible = card.Frozen;
         CardAttrsNode2D.Show();
         if (_showLevelLabel)
             LevelLabel.Show();
@@ -80,7 +83,7 @@ public class CardArea2D : Area2D
             if (card.BuildHitPoints > 0)
                 HitPointsLabel.Text += "*";
             LevelLabel.Text = string.Format("Lvl{0}{1}", card.Level, new string('+', card.XPRemainder));
-            ShowCard();
+            ShowCard(card);
             if (card.FoodAbility != null)
             {
                 res = GD.Load($"res://Assets/FoodAbilities/{card.FoodAbility.GetType().Name}.png");

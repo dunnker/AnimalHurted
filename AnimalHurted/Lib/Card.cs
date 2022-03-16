@@ -72,9 +72,33 @@ namespace AnimalHurtedLib
 
         public FoodAbility FoodAbility { get { return _foodAbility; } set { _foodAbility = value; } }
 
-        public int HitPoints { get { return _hitPoints; } set { _hitPoints = value; } }
+        public bool Frozen { get; set; }
 
-        public int AttackPoints { get { return _attackPoints; } set { _attackPoints = value; } }
+        public int HitPoints 
+        { 
+            get 
+            { 
+                return _hitPoints;
+            } 
+            
+            set 
+            { 
+                _hitPoints = Math.Min(Game.MaxHitPoints, value); 
+            } 
+        }
+
+        public int AttackPoints 
+        { 
+            get 
+            { 
+                return _attackPoints; 
+            } 
+            
+            set 
+            { 
+                _attackPoints = Math.Min(Game.MaxHitPoints, value); 
+            } 
+        }
 
         // additional hit points that have been acquired during the build but are reset
         // after a battle. For instance, from a cupcake
@@ -298,8 +322,8 @@ namespace AnimalHurtedLib
             }
             else
             {
-                _hitPoints += hitPoints;
-                _attackPoints += attackPoints;
+                HitPoints += hitPoints; // using property setter
+                AttackPoints += attackPoints;
             }
         }
 

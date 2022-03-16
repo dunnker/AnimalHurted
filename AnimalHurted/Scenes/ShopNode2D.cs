@@ -2,7 +2,7 @@ using System;
 using Godot;
 using AnimalHurtedLib;
 
-public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
+public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
 {
     public BuildNode BuildNode { get { return GetParent() as BuildNode; } }
 
@@ -19,12 +19,39 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
         {
             var card = Deck[i];
             var cardSlot = GetCardSlotNode2D(i + 1);
+            cardSlot.ClearSelected();
             cardSlot.CardArea2D.RenderCard(card, i, false);
             if (i >= GameSingleton.Instance.Game.GetShopSlotCount())
                 cardSlot.Hide();
         }
     }
 
+    public CardSlotNode2D GetSelectedCardSlotNode2D()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            var cardSlot = GetCardSlotNode2D(i);
+            if (cardSlot.Selected)
+                return cardSlot;
+        }
+        return null;
+    }
+
+    // ICardSelectHost
+    public void SelectionChanged(CardSlotNode2D cardSlot)
+    {
+        if (cardSlot.Selected)
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                var tempCardSlot = GetCardSlotNode2D(i);
+                if (tempCardSlot != cardSlot)
+                    tempCardSlot.Selected = false;
+            }
+        }
+    }
+
+    // ICardSelectHost
     // IDragParent
     public void DragDropped()
     {
@@ -37,6 +64,8 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck
             // did we drop onto the build deck?
             if (targetDeck.Deck == BuildNode.Player.BuildDeck)
             {
+                sourceCardArea2D.CardSlotNode2D.Selected = false;
+
                 var targetCard = targetDeck.Deck[targetCardArea2D.CardIndex];
                 // are we dropping onto an empty slot, or leveling up a card with same ability
                 if (targetCard == null ||

@@ -17,6 +17,12 @@ public class CardSlotNode2D : Node2D
     public Sprite SelectedSprite { get { return GetNode<Sprite>("SelectedSprite"); } }
     public ICardSlotDeck CardSlotDeck { get { return GetParent() as ICardSlotDeck; } }
 
+    public void ClearSelected()
+    {
+        _selected = false;
+        SelectedSprite.Hide();
+    }
+
     public bool Selected 
     { 
         get 

@@ -146,6 +146,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="FreezeButton" type="Button" parent="."]
+margin_left = 240.0
+margin_top = 632.0
+margin_right = 352.0
+margin_bottom = 668.0
+custom_fonts/font = SubResource( 4 )
+text = "Freeze"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="SellButton" type="Button" parent="."]
 margin_left = 128.0
 margin_top = 352.0
@@ -183,5 +194,6 @@ __meta__ = {
 [connection signal="pressed" from="QuitGameButton" to="." method="_on_QuitGameButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="RollButton" to="." method="_on_RollButton_pressed"]
+[connection signal="pressed" from="FreezeButton" to="." method="_on_FreezeButton_pressed"]
 [connection signal="pressed" from="SellButton" to="." method="_on_SellButton_pressed"]
 [connection signal="pressed" from="ShopPetOKButton" to="." method="_on_ShopPetOKButton_pressed"]

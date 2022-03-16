@@ -199,6 +199,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             var targetDeck = targetCardArea2D.CardSlotNode2D.CardSlotDeck;
             if (targetDeck == this && sourceDeck == this)
             {
+                sourceCardArea2D.CardSlotNode2D.Selected = false;
                 // if dropping on an empty slot
                 if (_deck[targetCardArea2D.CardIndex] == null)
                 {

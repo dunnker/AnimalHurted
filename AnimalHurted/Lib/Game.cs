@@ -26,6 +26,7 @@ namespace AnimalHurtedLib
         public const int BuildDeckSlots = 5;
         public const int ShopMaxPetSlots = 5;
         public const int ShopFoodSlots = 2;
+        public const int MaxHitPoints = 50;
         public Random Random { get { return _random; } }
         public int Round { get { return _round; } }
 

@@ -108,6 +108,17 @@ public class BuildNode : Node
         }
     }
 
+    public void _on_FreezeButton_pressed()
+    {
+        var cardSlot = ShopNode2D.GetSelectedCardSlotNode2D();
+        if (cardSlot != null)
+        {
+            var card = _player.ShopDeck[cardSlot.CardArea2D.CardIndex];
+            card.Frozen = !card.Frozen;
+            cardSlot.CardArea2D.RenderCard(card, card.Index, false);
+        }
+    }    
+
     public Deck CreateSaveDeck()
     {
         var saveDeck = new Deck(_player, Game.BuildDeckSlots);
