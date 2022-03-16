@@ -83,7 +83,7 @@ namespace AnimalHurtedLib
             
             set 
             { 
-                _hitPoints = Math.Min(Game.MaxHitPoints, value); 
+                _hitPoints = Math.Max(-1000, Math.Min(Game.MaxHitPoints, value)); 
             } 
         }
 
@@ -96,8 +96,8 @@ namespace AnimalHurtedLib
             
             set 
             { 
-                _attackPoints = Math.Min(Game.MaxHitPoints, value); 
-            } 
+                _attackPoints = Math.Max(0, Math.Min(Game.MaxHitPoints, value)); 
+            }
         }
 
         // additional hit points that have been acquired during the build but are reset
@@ -110,7 +110,18 @@ namespace AnimalHurtedLib
         public int TotalHitPoints { get { return _buildHitPoints + _hitPoints; } }
         public int TotalAttackPoints { get { return _buildAttackPoints + _attackPoints; } }
 
-        public int XP { get { return _xp; } set { _xp = value; } }
+        public int XP 
+        { 
+            get 
+            { 
+                return _xp; 
+            } 
+            
+            set 
+            { 
+                _xp = Math.Max(1, Math.Min(Game.MaxXP, value));
+            } 
+        }
 
         public int Level
         {
@@ -368,7 +379,7 @@ namespace AnimalHurtedLib
             _hitPoints += buffCard._xp;
             _attackPoints += buffCard._xp;
 
-            _xp = Math.Min(6, _xp + fromCard.XP);
+            XP += fromCard.XP; // property setter
 
             // Level is now the combined level
 
