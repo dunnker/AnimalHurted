@@ -1,6 +1,6 @@
 # Animal Hurted
 
-A card game where animals fight until they faint.
+A Super Auto Pets style game.
 This project is in pre-alpha stage.
 
 The game is not networked multiplayer, for now it is only useful for playing side-by-side with someone or for sandboxing battles.
