@@ -20,7 +20,7 @@ public class SandboxItemNode : PanelContainer, IDragParent
         Connect("StartStopDragSignal", this, "_signal_StartStopDrag", null, (int)ConnectFlags.Deferred);
     }
 
-    public void _on_PanelContainer_gui_input(InputEvent @event)
+    public async void _on_PanelContainer_gui_input(InputEvent @event)
     {
         if (@event is InputEventMouseButton)
         {
@@ -34,11 +34,19 @@ public class SandboxItemNode : PanelContainer, IDragParent
             else
             {
                 // mouse up
-                if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource == this &&
-                    mouseEvent.ButtonIndex == (int)ButtonList.Left &&
-                    !mouseEvent.Pressed)
+                if (mouseEvent.ButtonIndex == (int)ButtonList.Left && !mouseEvent.Pressed)
                 {
-                    EmitSignal("StartStopDragSignal");
+                    if (GameSingleton.Instance.Dragging && GameSingleton.Instance.DragSource == this)
+                    {
+						// wait a short time for CardArea2D to get its mouse entered event
+						// when dragging from a TextureRect, the mouse events get captured and CardArea2D
+						// won't get a mouse entered event until mouse button is unpressed and on
+						// some computers the DragDropped code will be invoked before the mouse entered signal
+						// this is my workaround for now
+                        await ToSignal(GetTree().CreateTimer(0.05f), "timeout");
+
+                        EmitSignal("StartStopDragSignal");
+                    }
                 }
             }
         }
