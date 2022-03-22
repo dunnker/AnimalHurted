@@ -171,7 +171,7 @@ public class BattleNode : Node, IBattleNode
             {
                 PlayOneButton.TextureNormal = GD.Load<Texture>($"res://Assets/play_one_button.png");
                 PlayOneButton.TexturePressed = GD.Load<Texture>($"res://Assets/play_one_button_pressed.png");
-                
+
                 _playingBattle = false;
                 _battleStopped = false;
                 ReplayButton.Disabled = false;
@@ -219,7 +219,6 @@ public class BattleNode : Node, IBattleNode
             MaxTimePerEvent = DefaultMaxTimePerEvent * ((3 - GameSingleton.Instance.BattleSpeed) * 2);
         else
             MaxTimePerEvent = DefaultMaxTimePerEvent;
-        GD.Print(MaxTimePerEvent.ToString());
     }
 
     public void _on_SpeedSlider_value_changed(float value)
