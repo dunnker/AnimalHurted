@@ -18,6 +18,7 @@ public class BattleNode : Node, IBattleNode
 {
     bool _playingAttack;
     bool _playingBattle;
+    bool _battleStopped;
     bool _gameOverShown;
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
@@ -131,15 +132,16 @@ public class BattleNode : Node, IBattleNode
 
     public void _on_PlayOneButton_pressed()
     {
-        if (!_playingAttack && !_playingBattle)
+        if (_playingBattle)
+            _battleStopped = true;
+        else if (!_playingAttack && !_playingBattle)
         {
-            if (!_reader.Finished)
-            {
-                _playingAttack = true;
-                ReplayButton.Disabled = true;
-                SaveButton.Disabled = true;
-                _reader.Execute();
-            }
+            if (_reader.Finished)
+                BeginReplay();
+            _playingAttack = true;
+            ReplayButton.Disabled = true;
+            SaveButton.Disabled = true;
+            _reader.Execute();
         }
     }
 
@@ -147,13 +149,16 @@ public class BattleNode : Node, IBattleNode
     {
         if (!_playingBattle && !_playingAttack)
         {
-            if (!_reader.Finished)
-            {
-                _playingBattle = true;
-                ReplayButton.Disabled = true;
-                SaveButton.Disabled = true;
-                _reader.Execute();
-            }
+            if (_reader.Finished)
+                BeginReplay();
+            
+            PlayOneButton.TextureNormal = GD.Load<Texture>($"res://Assets/pause_button.png");
+            PlayOneButton.TexturePressed = GD.Load<Texture>($"res://Assets/pause_button_pressed.png");
+
+            _playingBattle = true;
+            ReplayButton.Disabled = true;
+            SaveButton.Disabled = true;
+            _reader.Execute();
         }
     }
 
@@ -162,12 +167,17 @@ public class BattleNode : Node, IBattleNode
         _playingAttack = false;
         if (_playingBattle)
         {
-            if (_reader.Finished)
+            if (_reader.Finished || _battleStopped)
             {
+                PlayOneButton.TextureNormal = GD.Load<Texture>($"res://Assets/play_one_button.png");
+                PlayOneButton.TexturePressed = GD.Load<Texture>($"res://Assets/play_one_button_pressed.png");
+                
                 _playingBattle = false;
+                _battleStopped = false;
                 ReplayButton.Disabled = false;
                 SaveButton.Disabled = false;
-                ShowGameOver();
+                if (_reader.Finished)
+                    ShowGameOver();
             }
             else
             {

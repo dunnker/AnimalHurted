@@ -154,7 +154,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         var tweenRotate = new Tween();
         parent.AddChild(tweenRotate);
 
-        float buffSpeed = (parent as IBattleNode).MaxTimePerEvent;
+        float throwSpeed = (parent as IBattleNode).MaxTimePerEvent;
 
         // pick a somewhat random height to throw, to minimize other objects from having
         // the same trajectory
@@ -164,23 +164,23 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         int arcY = 200 + yDelta;
 
         tweenPosX.InterpolateProperty(area2D, "position:x",
-            area2D.GlobalPosition.x, toPosition.x, buffSpeed, 
+            area2D.GlobalPosition.x, toPosition.x, throwSpeed, 
             Tween.TransitionType.Linear, Tween.EaseType.In);
         tweenPosX.Start();
 
         tweenPosY_Up.InterpolateProperty(area2D, "position:y",
-            area2D.GlobalPosition.y, area2D.GlobalPosition.y - arcY, buffSpeed / 2, 
+            area2D.GlobalPosition.y, area2D.GlobalPosition.y - arcY, throwSpeed / 2, 
             Tween.TransitionType.Quad, Tween.EaseType.Out);
         tweenPosY_Up.Start();
 
         tweenPosY_Down.InterpolateProperty(area2D, "position:y",
-            area2D.GlobalPosition.y - arcY, area2D.GlobalPosition.y, buffSpeed / 2, 
+            area2D.GlobalPosition.y - arcY, area2D.GlobalPosition.y, throwSpeed / 2, 
             Tween.TransitionType.Quad, Tween.EaseType.In, 
-            /* delay going back down! */ buffSpeed / 2);
+            /* delay going back down! */ throwSpeed / 2);
         tweenPosY_Down.Start();
 
         tweenRotate.InterpolateProperty(area2D, "rotation",
-            0, 6f, buffSpeed, Tween.TransitionType.Linear, Tween.EaseType.OutIn);
+            0, 6f, throwSpeed, Tween.TransitionType.Linear, Tween.EaseType.OutIn);
         tweenRotate.Start();
 
         await parent.ToSignal(tweenPosX, "tween_all_completed");
