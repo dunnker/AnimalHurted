@@ -183,7 +183,8 @@ namespace AnimalHurtedLib
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            _hurtedCard.Hurted(queue, false, _opponentCard);
+            if (_hurtedCard.Index != -1)
+                _hurtedCard.Hurted(queue, false, _opponentCard);
             return this;
         }
     }
