@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace AnimalHurtedLib
 {
@@ -25,8 +26,10 @@ namespace AnimalHurtedLib
             {
                 result.Add(queue);
                 var nextQueue = new CardCommandQueue();
+                //Debug.WriteLine("Next queue");
                 foreach (var command in queue)
                 {
+                    //Debug.WriteLine(command.ToString());
                     command.ExecuteAbility(nextQueue);
                 }
                 queue = nextQueue;

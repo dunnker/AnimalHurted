@@ -154,6 +154,8 @@ namespace AnimalHurtedLib
         int _sourceIndex;
         int _damage;
         Deck _sourceDeck;
+        Card _hurtedCard;
+        Card _opponentCard;
 
         public Deck SourceDeck { get { return _sourceDeck; } }
 
@@ -168,6 +170,12 @@ namespace AnimalHurtedLib
 
         public override CardCommand Execute()
         {
+            // store reference to Card because other peer commands may move cards in the deck
+            // later when ExecuteAbility is invoked, we don't want to use Card property as it might
+            // refer to the wrong card
+            _hurtedCard = Card;
+            if (Deck.Player.Game.Fighting && _sourceDeck != Deck)
+                _opponentCard = _sourceDeck[_sourceIndex];
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
             Deck.Player.Game.OnCardHurtEvent(this, Card);
             return this;
@@ -175,14 +183,7 @@ namespace AnimalHurtedLib
 
         public override CardCommand ExecuteAbility(CardCommandQueue queue)
         {
-            if (Card != null)
-            {
-                Card opponentCard = null;
-                if (Card.Deck.Player.Game.Fighting && 
-                    _sourceDeck != Deck)
-                    opponentCard = _sourceDeck[_sourceIndex];
-                Card.Hurted(queue, false, opponentCard);
-            }
+            _hurtedCard.Hurted(queue, false, _opponentCard);
             return this;
         }
     }
