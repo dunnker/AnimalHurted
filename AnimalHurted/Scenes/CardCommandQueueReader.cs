@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Godot;
 using AnimalHurtedLib;
 
@@ -11,6 +12,8 @@ public class CardCommandQueueReader
     List<CardCommandQueue> _list;
     string _signalName;
     Node _node;
+
+    public SemaphoreSlim Signal = new SemaphoreSlim(0, 1);
 
     public CardCommandQueueReader(Node node, List<CardCommandQueue> list, string signalName)
     {
@@ -26,7 +29,7 @@ public class CardCommandQueueReader
 
     public bool Finished { get { return _queueIndex >= _list.Count - 1; } }
 
-    public void Execute()
+    public async void Execute()
     {
         _queueIndex++;
         if (_queueIndex < _list.Count)
@@ -42,6 +45,8 @@ public class CardCommandQueueReader
                 _node.EmitSignal(_signalName);
             };    
 
+            CardCommand lastCommand = null;
+
             foreach (var command in queue)
             {
                 // Each command Execute might inflict damage (HurtCommand), faint a pet (FaintCommand)
@@ -49,13 +54,27 @@ public class CardCommandQueueReader
                 // In turn, a corresonding event is fired off, OnHurt, OnFaint etc. and 
                 // the DeckNode2D scene responds to the event and renders an animation 
 
-                command.Execute();
-
                 //GD.Print(command.ToString());
+
+                // serialize animations for summon command
+                if (command is SummonCardCommand)
+                {
+                    if (command != queue.First() && !(lastCommand is SummonCardCommand))
+                        // wait for last animation(s) to finish
+                        await _node.ToSignal(_node.GetTree().CreateTimer((_node as IBattleNode).MaxTimePerEvent), "timeout");
+
+                    command.Execute();
+                    // now wait for summon animation to finish
+                    await Signal.WaitAsync();
+                }
+                else
+                    command.Execute();
 
                 // not executing abilities during replay, because abilities
                 // have already been processed, for example in Game.CreateFightResult():
                 //command.ExecuteAbility()
+
+                lastCommand = command;
             }
         }
     }

@@ -3,7 +3,7 @@ using System.IO;
 using Godot;
 using AnimalHurtedLib;
 
-public class BuildNode : Node
+public class BuildNode : Node, IBattleNode
 {
     Player _player;
     CardCommandQueueReader _reader;
@@ -13,6 +13,11 @@ public class BuildNode : Node
     public DeckNode2D DeckNode2D { get { return GetNode<global::DeckNode2D>("DeckNode2D"); } }
 
     public Player Player { get { return _player; } }
+
+    // IBattleNode
+    public float MaxTimePerEvent { get; set; } = BattleNode.DefaultMaxTimePerEvent;
+    public CardCommandQueueReader Reader { get { return _reader; } }
+    // IBattleNode
 
     public Label GoldLabel { get { return GetNode<Label>("PlayerAttrsNode2D/GoldLabel"); } }
     public Label LivesLabel { get { return GetNode<Label>("PlayerAttrsNode2D/LivesLabel"); } }

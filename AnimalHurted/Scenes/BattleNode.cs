@@ -8,21 +8,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-public class BattleNode : Node
+public interface IBattleNode
+{
+    float MaxTimePerEvent { get; set; }
+    CardCommandQueueReader Reader { get; }
+}
+
+public class BattleNode : Node, IBattleNode
 {
     bool _playingAttack;
     bool _playingBattle;
     bool _gameOverShown;
-
     Vector2 _player1DeckPosition;
     Vector2 _player2DeckPosition;
-
     CardCommandQueueReader _reader;
 
+    // IBattleNode
     // every card command event (OnHurt, OnFaint etc.) that is handled by BattleNode and DeckNode2D
     // must be finished before MaxTimePerEvent. See comments in PositionDecks
-    public const float MaxTimePerEvent = 0.3f;
-    public const float PositionDeckMoveSpeed = 0.3f;
+    public float MaxTimePerEvent { get; set; } = DefaultMaxTimePerEvent;
+    public CardCommandQueueReader Reader { get { return _reader; } }
+    // IBattleNode
+
+    public const float DefaultMaxTimePerEvent = 0.4f;
 
     public DeckNode2D Player1DeckNode2D { get { return GetNode<DeckNode2D>("Player1DeckNode2D"); } }
     public DeckNode2D Player2DeckNode2D { get { return GetNode<DeckNode2D>("Player2DeckNode2D"); } }
@@ -55,6 +63,9 @@ public class BattleNode : Node
             // before the next set of animation events fire off -- so a new "tween_completed"
             // signal can be invoked
             (int)ConnectFlags.Deferred);
+
+        GetNode<Slider>("SpeedSlider").Value = GameSingleton.Instance.BattleSpeed;
+        SetMaxTimePerEvent();
 
         _player1DeckPosition = Player1DeckNode2D.Position;
         _player2DeckPosition = Player2DeckNode2D.Position;
@@ -164,7 +175,7 @@ public class BattleNode : Node
 				// which waits for MaxTimePerEvent, and then spends PositionDeckMoveSpeed amount time to move decks
 				// which means the true maximum time spent considering all events is MaxTimePerEvent + PositionDeckMoveSpeed
 				// so we have to wait this additional amount of time before starting the next round of animations
-                await ToSignal(GetTree().CreateTimer(PositionDeckMoveSpeed + 0.1f), "timeout");
+                await ToSignal(GetTree().CreateTimer(MaxTimePerEvent + 0.1f), "timeout");
                 _reader.Execute();
             }
         }
@@ -188,6 +199,23 @@ public class BattleNode : Node
             GameOverDialog.DialogText = message;
             GameOverDialog.Show();
         }
+    }
+
+    void SetMaxTimePerEvent()
+    {
+        if (GameSingleton.Instance.BattleSpeed > 3)
+            MaxTimePerEvent = DefaultMaxTimePerEvent / ((GameSingleton.Instance.BattleSpeed - 3) * 2);
+        else if (GameSingleton.Instance.BattleSpeed < 3)
+            MaxTimePerEvent = DefaultMaxTimePerEvent * ((3 - GameSingleton.Instance.BattleSpeed) * 2);
+        else
+            MaxTimePerEvent = DefaultMaxTimePerEvent;
+        GD.Print(MaxTimePerEvent.ToString());
+    }
+
+    public void _on_SpeedSlider_value_changed(float value)
+    {
+        GameSingleton.Instance.BattleSpeed = (int)value;
+        SetMaxTimePerEvent();
     }
 
     public async void _game_AttackEvent(object sender, CardCommand command)
@@ -274,7 +302,7 @@ public class BattleNode : Node
 
     public async Task PositionDecks(bool hideCardSlots = true)
     {
-        float moveSpeed = PositionDeckMoveSpeed;
+        float moveSpeed = MaxTimePerEvent;
 
         // when repositioning, other animations might still be going
         // so add small delay to allow those animations to complete in order

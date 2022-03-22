@@ -24,6 +24,8 @@ public class GameSingleton
 
     public bool Sandboxing { get; set; }
 
+    public int BattleSpeed { get; set; } = 3;
+
     public static GameSingleton Instance
     {
         get

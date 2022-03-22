@@ -16,8 +16,10 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
     public AudioStreamPlayer ThumpPlayer { get { return GetNode<AudioStreamPlayer>("ThumpPlayer"); } }
     public AudioStreamPlayer GulpPlayer { get { return GetNode<AudioStreamPlayer>("GulpPlayer"); } }
     public AudioStreamPlayer WhooshPlayer { get { return GetNode<AudioStreamPlayer>("WhooshPlayer"); } }
+    public AudioStreamPlayer SummonPlayer { get { return GetNode<AudioStreamPlayer>("SummonPlayer"); } }
 
     public Deck Deck { get { return _deck; } }
+    public IBattleNode BattleNode { get { return GetParent() as IBattleNode; } }
 
     public bool CanDragDropLevelUp { get; set; } = true;
 
@@ -152,7 +154,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
         var tweenRotate = new Tween();
         parent.AddChild(tweenRotate);
 
-        float buffSpeed = BattleNode.MaxTimePerEvent;
+        float buffSpeed = (parent as IBattleNode).MaxTimePerEvent;
 
         // pick a somewhat random height to throw, to minimize other objects from having
         // the same trajectory
@@ -327,12 +329,30 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                         break;
                 }
                 if (GetParent() is BattleNode)
-                {
                     await (GetParent() as BattleNode).PositionDecks(false);
-                }
             }
 
+            SummonPlayer.Play();
+
             cardSlot.CardArea2D.RenderCard(_deck[summonedCommand.AtIndex], summonedCommand.AtIndex);
+
+            var tween = new Tween();
+            AddChild(tween);
+
+            float summonTime = BattleNode.MaxTimePerEvent;
+
+            tween.InterpolateProperty(cardSlot.CardArea2D.Sprite, "scale",
+                new Vector2(1.0f, 1.0f), new Vector2(1.3f, 1.3f), summonTime, Tween.TransitionType.Linear, Tween.EaseType.Out);
+            tween.Start();
+
+            await ToSignal(tween, "tween_all_completed");
+
+            tween.QueueFree();
+
+            cardSlot.CardArea2D.Sprite.Scale = new Vector2(1.0f, 1.0f);
+
+            // serializing summon events
+            BattleNode.Reader.Signal.Release();
             
             command.UserEvent?.Invoke(this, EventArgs.Empty);
         }
@@ -379,7 +399,7 @@ public class DeckNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
             GetParent().AddChild(damageArea2D);
             damageArea2D.GlobalPosition = sourceCardSlot.GlobalPosition;
 
-            await DeckNode2D.ThrowArea2D(this, damageArea2D, cardSlot.GlobalPosition);
+            await DeckNode2D.ThrowArea2D(GetParent(), damageArea2D, cardSlot.GlobalPosition);
 
             damageArea2D.QueueFree();
 

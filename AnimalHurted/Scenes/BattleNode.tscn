@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Assets/background.png" type="Texture" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
@@ -12,6 +12,12 @@
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 32
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
 font_data = ExtResource( 5 )
 
 [node name="Node" type="Node"]
@@ -132,9 +138,36 @@ margin_bottom = 243.0
 window_title = "Game Over"
 dialog_text = "Player 1 Won the game!"
 
+[node name="SpeedLabel" type="Label" parent="."]
+margin_left = 58.0
+margin_top = 40.0
+margin_right = 218.0
+margin_bottom = 67.0
+custom_fonts/font = SubResource( 2 )
+text = "Speed"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SpeedSlider" type="HSlider" parent="."]
+margin_left = 58.0
+margin_top = 76.0
+margin_right = 307.0
+margin_bottom = 92.0
+rect_scale = Vector2( 1.2, 1.2 )
+min_value = 1.0
+max_value = 5.0
+value = 3.0
+tick_count = 4
+ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_SaveButton_pressed"]
 [connection signal="pressed" from="PlayOneButton" to="." method="_on_PlayOneButton_pressed"]
 [connection signal="pressed" from="PlayButton" to="." method="_on_PlayButton_pressed"]
 [connection signal="file_selected" from="SaveFileDialog" to="." method="_on_FileDialog_file_selected"]
+[connection signal="value_changed" from="SpeedSlider" to="." method="_on_SpeedSlider_value_changed"]
