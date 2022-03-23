@@ -169,6 +169,7 @@ namespace AnimalHurtedLib
                         int oldLevel = buildCard.Level; 
                         buildCard.GainXP(shopCard);
                         player.BuildDeck.CloneTo(saveDeck);
+                        buildCard.Bought(queue);
                         buildCard.GainedXP(queue, oldLevel);
                     }
                     else
