@@ -28,6 +28,8 @@ public class GameSingleton
 
     public bool VersusAI { get; set; }
 
+    public bool GameOverShown { get; set; }
+
     public static GameSingleton Instance
     {
         get

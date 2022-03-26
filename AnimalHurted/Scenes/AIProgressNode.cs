@@ -56,7 +56,7 @@ public class AIProgressNode : Node
     {
         var move = _result.FirstOrDefault();
         move?.Action.ExecuteActions(GameSingleton.Instance.Game.Player2);
-        BuildNode.StartBattle(this);
+        BuildNode.StartBattle(this, true);
     }
 
     public void _on_ContinueButton_pressed()

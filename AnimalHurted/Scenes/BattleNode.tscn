@@ -130,14 +130,6 @@ filters = PoolStringArray( "*.ah" )
 current_dir = "/"
 current_path = "/"
 
-[node name="GameOverDialog" type="AcceptDialog" parent="."]
-margin_left = 516.0
-margin_top = 185.0
-margin_right = 684.0
-margin_bottom = 243.0
-window_title = "Game Over"
-dialog_text = "Player 1 Won the game!"
-
 [node name="SpeedLabel" type="Label" parent="."]
 margin_left = 58.0
 margin_top = 40.0

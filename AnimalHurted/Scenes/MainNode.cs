@@ -14,6 +14,7 @@ public class MainNode : Node
 
     void NewGame()
     {
+        GameSingleton.Instance.GameOverShown = false;
         GameSingleton.Instance.Game = new Game();
         GameSingleton.Instance.Game.NewGame();
         GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 

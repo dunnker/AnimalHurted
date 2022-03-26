@@ -71,10 +71,10 @@ public class BuildNode : Node, IBattleNode
             GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
         }
         else
-            BuildNode.StartBattle(this);
+            BuildNode.StartBattle(this, true);
     }
 
-    public static void StartBattle(Node node)
+    public static void StartBattle(Node node, bool newRound)
     {
         GameSingleton.Instance.Game.Player1.NewBattleDeck();
         GameSingleton.Instance.Game.Player2.NewBattleDeck();
@@ -91,8 +91,9 @@ public class BuildNode : Node, IBattleNode
         GameSingleton.Instance.SaveBattleDecks();
         GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
 
-        // NewRound() calculates the winner, so do this now so winner can be displayed in battle screen
-        GameSingleton.Instance.Game.NewRound();
+        if (newRound)
+            // NewRound() calculates the winner, so do this now so winner can be displayed in battle screen
+            GameSingleton.Instance.Game.NewRound();
 
         // restore for rendering in next scene
         GameSingleton.Instance.RestoreBattleDecks();
