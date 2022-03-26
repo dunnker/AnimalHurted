@@ -87,10 +87,16 @@ namespace AnimalHurtedLib
             _buildDeck.CloneTo(player._buildDeck);
             _shopDeck.CloneTo(player._shopDeck);
             // food doesn't keep any state except Cost
-            player._shopFood1 = Activator.CreateInstance(_shopFood1.GetType()) as Food;
-            player._shopFood1.Cost = _shopFood1.Cost;
-            player._shopFood2 = Activator.CreateInstance(_shopFood2.GetType()) as Food;
-            player._shopFood2.Cost = _shopFood2.Cost;
+            if (_shopFood1 != null)
+            {
+                player._shopFood1 = Activator.CreateInstance(_shopFood1.GetType()) as Food;
+                player._shopFood1.Cost = _shopFood1.Cost;
+            }
+            if (_shopFood2 != null)
+            {
+                player._shopFood2 = Activator.CreateInstance(_shopFood2.GetType()) as Food;
+                player._shopFood2.Cost = _shopFood2.Cost;
+            }
         }
 
         public void BeginUpdate()
@@ -215,12 +221,24 @@ namespace AnimalHurtedLib
                 c.Ability.RoundEnded(queue, c);
         }
 
-        public void NewRound(bool won, bool lost, int round)
+        public FightResultEnum GetFightResultEnum(Player opponentPlayer)
         {
+            if (_battleDeck.GetCardCount() > 0)
+                return FightResultEnum.Won;
+            else if (opponentPlayer.BattleDeck.GetCardCount() > 0)
+                return FightResultEnum.Lost;
+            else
+                return FightResultEnum.Draw;
+        }
+
+        public void NewRound(FightResultEnum fightResultEnum, int round)
+        {
+            Gold = Game.GoldPerTurn;
+            Roll(deductGold: false);
             _lostLastBattle = false;
-            if (won)
+            if (fightResultEnum == FightResultEnum.Won)
                 _wins += 1;
-            else if (lost)
+            else if (fightResultEnum == FightResultEnum.Lost)
             {
                 _lostLastBattle = true;
                 if (round == 1 || round == 2)

@@ -315,7 +315,8 @@ namespace AnimalHurtedLib
 
         public void Hurted(CardCommandQueue queue, bool attacking, Card opponentCard = null)
         {
-            if (opponentCard != null && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
+            // opponentCard.Index could be -1 if dealt scorpion attack
+            if (opponentCard != null && opponentCard.Index != -1 && TotalHitPoints <= 0 && opponentCard.TotalHitPoints > 0)
                 opponentCard.Ability.Knockout(queue, opponentCard);
             if (TotalHitPoints > 0)
                 _ability.Hurted(queue, this);
@@ -346,7 +347,9 @@ namespace AnimalHurtedLib
         public void Ate(CardCommandQueue queue, Food food)
         {
             food.ExecuteAbility(queue, this);
-            _ability.AteFood(queue, this);
+            // if didn't faint from sleeping pill
+            if (_index != -1)
+                _ability.AteFood(queue, this);
             foreach (var card in _deck)
                 if (card != this)
                     card._ability.FriendAteFood(queue, card, this);

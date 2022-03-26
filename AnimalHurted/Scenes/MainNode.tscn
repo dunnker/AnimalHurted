@@ -41,6 +41,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="NewAIGameButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -64.0
+margin_top = 240.0
+margin_right = 78.0
+margin_bottom = 276.0
+custom_fonts/font = SubResource( 1 )
+text = "New AI Game"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ReplayButton" type="Button" parent="."]
 anchor_left = 0.5
 anchor_right = 0.5
@@ -83,6 +96,7 @@ current_path = "/"
 
 [connection signal="pressed" from="QuitButton" to="." method="_on_QuitButton_pressed"]
 [connection signal="pressed" from="NewGameButton" to="." method="_on_NewGameButton_pressed"]
+[connection signal="pressed" from="NewAIGameButton" to="." method="_on_NewAIGameButton_pressed"]
 [connection signal="pressed" from="ReplayButton" to="." method="_on_ReplayButton_pressed"]
 [connection signal="pressed" from="SandboxButton" to="." method="_on_SandboxButton_pressed"]
 [connection signal="file_selected" from="OpenFileDialog" to="." method="_on_OpenFileDialog_file_selected"]

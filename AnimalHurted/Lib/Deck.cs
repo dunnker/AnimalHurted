@@ -136,9 +136,8 @@ namespace AnimalHurtedLib
             // we're looking for in order to avoid infinite loop below.
             // We're excluding cards that are TotalHitPoints <= 0 because we should not be Buffing or Hurting
             // cards that are about to faint
-            int count = _cards.Count(c => c != null && c.TotalHitPoints > 0 && 
-                (excludingIndexes == null || !excludingIndexes.Contains(c.Index)));
-            if (count > 0)
+            if (_cards.Any(c => c != null && c.TotalHitPoints > 0 && 
+                (excludingIndexes == null || !excludingIndexes.Contains(c.Index))))
             {
                 do
                 {

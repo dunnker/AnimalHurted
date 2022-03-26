@@ -26,6 +26,8 @@ public class GameSingleton
 
     public int BattleSpeed { get; set; } = 3;
 
+    public bool VersusAI { get; set; }
+
     public static GameSingleton Instance
     {
         get

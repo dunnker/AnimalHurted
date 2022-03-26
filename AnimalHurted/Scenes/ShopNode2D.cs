@@ -83,8 +83,11 @@ public class ShopNode2D : Node2D, IDragParent, ICardSlotDeck, ICardSelectHost
                     GameSingleton.Instance.Game.BeginUpdate();
                     // BuyFromShop makes direct changes to the deck (stored in saveDeck) and then
                     // invokes ability methods which make further changes
+                    var queue = new CardCommandQueue();
+                    var saveDeck = new Deck(BuildNode.Player, Game.BuildDeckSlots);
+                    BuildNode.Player.BuildDeck.CloneTo(saveDeck);
                     GameSingleton.Instance.Game.BuyFromShop(sourceCardArea2D.CardIndex, targetCardArea2D.CardIndex, 
-                        BuildNode.Player, out CardCommandQueue queue, out Deck saveDeck);
+                        BuildNode.Player, queue, saveDeck);
                     GameSingleton.Instance.Game.EndUpdate();
                     // manually invoke gold changed event since we disabled events
                     BuildNode.Player.OnGoldChangedEvent(saveGold);

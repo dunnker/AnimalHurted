@@ -797,7 +797,9 @@ namespace AnimalHurtedLib
         public override void FriendAteFood(CardCommandQueue queue, Card card, Card friendCard)
         {
             base.FriendAteFood(queue, card, friendCard);
-            queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, 0).Execute());
+            // friend may have fainted from sleeping pill
+            if (friendCard.Index != -1)
+                queue.Add(new BuffCardCommand(friendCard, card.Index, card.Level, 0).Execute());
         }
     }
 
@@ -972,9 +974,13 @@ namespace AnimalHurtedLib
                     // I presume because the card will be hurt but not faint and end up with negative HP
                     // and get selected again as the lowest health enemy. so to fix this we filter out
                     // all cards with negative health before doing the Aggregate call to find lowest health card
-                    var targetCard = opponent.BattleDeck.Where((c) => c.TotalHitPoints > 0).Aggregate((minCard, nextCard) => 
-                        minCard.TotalHitPoints < nextCard.TotalHitPoints ? minCard : nextCard);
-                    queue.Add(new HurtCardCommand(targetCard, level * 5, card.Deck, card.Index).Execute());
+                    var healthyCards = opponent.BattleDeck.Where((c) => c.TotalHitPoints > 0).ToList();
+                    if (healthyCards.Count > 0)
+                    {
+                        var targetCard = healthyCards.Aggregate((minCard, nextCard) => 
+                           minCard.TotalHitPoints < nextCard.TotalHitPoints ? minCard : nextCard);
+                        queue.Add(new HurtCardCommand(targetCard, level * 5, card.Deck, card.Index).Execute());
+                    }
                 }
             });
         }

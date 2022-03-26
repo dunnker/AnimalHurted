@@ -60,35 +60,44 @@ public class BuildNode : Node, IBattleNode
 
         _player.GoldChangedEvent -= _GoldChangedEvent;
 
-        if (_player == GameSingleton.Instance.Game.Player1)
+        if (GameSingleton.Instance.VersusAI)
+        {
+            GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
+            GetTree().ChangeScene("res://Scenes/AIProgressNode.tscn");
+        }
+        else if (_player == GameSingleton.Instance.Game.Player1)
         {
             GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
             GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
         }
         else
+            BuildNode.StartBattle(this);
+    }
+
+    public static void StartBattle(Node node)
+    {
+        GameSingleton.Instance.Game.Player1.NewBattleDeck();
+        GameSingleton.Instance.Game.Player2.NewBattleDeck();
+
+        /*using (var fileStream = new FileStream(@".battles\animalhurted.ah", FileMode.Create))
         {
-            GameSingleton.Instance.Game.Player1.NewBattleDeck();
-            GameSingleton.Instance.Game.Player2.NewBattleDeck();
-
-
-            /*using (var fileStream = new FileStream(@".battles\animalhurted.ah", FileMode.Create))
+            using (var writer = new BinaryWriter(fileStream))
             {
-                using (var writer = new BinaryWriter(fileStream))
-                {
-                    GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(writer);
-                    GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(writer);
-                }
-            }*/
+                GameSingleton.Instance.Game.Player1.BattleDeck.SaveToStream(writer);
+                GameSingleton.Instance.Game.Player2.BattleDeck.SaveToStream(writer);
+            }
+        }*/
 
-            GameSingleton.Instance.SaveBattleDecks();
-            GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
-            // NewRound() calculates the winner, so do this now so winner can be displayed in battle screen
-            GameSingleton.Instance.Game.NewRound();
-            // restore for rendering in next scene
-            GameSingleton.Instance.RestoreBattleDecks();
+        GameSingleton.Instance.SaveBattleDecks();
+        GameSingleton.Instance.FightResult = GameSingleton.Instance.Game.CreateFightResult();
 
-            GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
-        }
+        // NewRound() calculates the winner, so do this now so winner can be displayed in battle screen
+        GameSingleton.Instance.Game.NewRound();
+
+        // restore for rendering in next scene
+        GameSingleton.Instance.RestoreBattleDecks();
+
+        node.GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
     }
 
     public void _on_SellButton_pressed()

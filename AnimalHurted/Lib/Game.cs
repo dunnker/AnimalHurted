@@ -10,6 +10,8 @@ namespace AnimalHurtedLib
 {
     public delegate void CardCommandEventHandler(object sender, CardCommand command);
 
+    public enum FightResultEnum { Won, Lost, Draw }
+
     public class Game
     {
         readonly Random _random;
@@ -124,32 +126,16 @@ namespace AnimalHurtedLib
         public void NewRound()
         {
             _round++;
-            // assign Gold before calling Player.NewRound() because card abilities
-            // can be invoked in Player.NewRound() which can buff Gold
-            _player1.Gold = GoldPerTurn;
-            _player2.Gold = GoldPerTurn;
-            _player1.Roll(deductGold: false);
-            _player2.Roll(deductGold: false);
-            _player1.NewRound(_player1.BattleDeck.GetCardCount() > 0, 
-                _player1.BattleDeck.GetCardCount() == 0 && _player2.BattleDeck.GetCardCount() > 0, _round);
-            _player2.NewRound(_player2.BattleDeck.GetCardCount() > 0, 
-                _player2.BattleDeck.GetCardCount() == 0 && _player1.BattleDeck.GetCardCount() > 0, _round);
+            _player1.NewRound(_player1.GetFightResultEnum(_player2), _round);
+            _player2.NewRound(_player2.GetFightResultEnum(_player1), _round);
         }
 
-        public void BuyFromShop(int shopIndex, int buildIndex, Player player, 
-            out CardCommandQueue queue, out Deck saveDeck)
+        public void BuyFromShop(int shopIndex, int buildIndex, Player player, CardCommandQueue queue, Deck saveDeck = null)
         {
             if (player.Gold < Game.PetCost)
-            {
-                queue = null;
-                saveDeck = null;
                 throw new Exception("Not enough gold to buy pet");
-            }
             else
             {
-                queue = new CardCommandQueue();
-                saveDeck = new Deck(player, Game.BuildDeckSlots);
-
                 var shopCard = player.ShopDeck[shopIndex]; 
                 var buildCard = player.BuildDeck[buildIndex];
 
@@ -158,8 +144,8 @@ namespace AnimalHurtedLib
                     var card = new Card(player.BuildDeck, shopCard);
                     card.Buy(buildIndex);
                     player.ShopDeck.Remove(shopIndex);
-
-                    player.BuildDeck.CloneTo(saveDeck);
+                    if (saveDeck != null)
+                        player.BuildDeck.CloneTo(saveDeck);
                     card.Bought(queue);
                 }
                 else
@@ -168,7 +154,8 @@ namespace AnimalHurtedLib
                     {
                         int oldLevel = buildCard.Level; 
                         buildCard.GainXP(shopCard);
-                        player.BuildDeck.CloneTo(saveDeck);
+                        if (saveDeck != null)
+                            player.BuildDeck.CloneTo(saveDeck);
                         buildCard.Bought(queue);
                         buildCard.GainedXP(queue, oldLevel);
                     }

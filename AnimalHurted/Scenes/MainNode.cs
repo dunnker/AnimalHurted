@@ -11,12 +11,25 @@ public class MainNode : Node
     {
         GetTree().Notification(NotificationWmQuitRequest);
     }
-    public void _on_NewGameButton_pressed()
+
+    void NewGame()
     {
         GameSingleton.Instance.Game = new Game();
         GameSingleton.Instance.Game.NewGame();
         GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
         GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
+    }
+
+    public void _on_NewGameButton_pressed()
+    {
+        GameSingleton.Instance.VersusAI = false;
+        NewGame();
+    }
+
+    public void _on_NewAIGameButton_pressed()
+    {
+        GameSingleton.Instance.VersusAI = true;
+        NewGame();
     }
 
     public void _on_ReplayButton_pressed()
@@ -55,15 +68,5 @@ public class MainNode : Node
         GameSingleton.Instance.RestoreBattleDecks();
         GameSingleton.Instance.Sandboxing = true;
         GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
-    }
-
-    public override void _Ready()
-    {
-        
-    }
-
-    public override void _Process(float delta)
-    {
-        
     }
 }

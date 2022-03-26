@@ -17,8 +17,13 @@ namespace AnimalHurtedLib
             _list.Add(cardCommand);
         }
 
+        // Invoke ExecuteAbility for commands in the queue. If an ability creates further state changes, 
+        // e.g. adds additional commands into the next queue, then continue invoking ExecuteAbility on those
+        // 'child' commands. The resulting list is represents all successive changes caused by the original 'parent'
+        // queue.
         public List<CardCommandQueue> CreateExecuteResult(Game game)
         {
+            // disables events 
             game.BeginUpdate();
             var result = new List<CardCommandQueue>();
             CardCommandQueue queue = this;

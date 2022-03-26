@@ -174,7 +174,7 @@ namespace AnimalHurtedLib
             // later when ExecuteAbility is invoked, we don't want to use Card property as it might
             // refer to the wrong card
             _hurtedCard = Card;
-            if (Deck.Player.Game.Fighting && _sourceDeck != Deck)
+            if (Deck.Player.Game.Fighting && _sourceDeck != Deck && _sourceIndex != -1)
                 _opponentCard = _sourceDeck[_sourceIndex];
             Card.Hurt(_damage, _sourceDeck, _sourceIndex);
             Deck.Player.Game.OnCardHurtEvent(this, Card);
