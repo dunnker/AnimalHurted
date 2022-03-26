@@ -5,12 +5,6 @@ This project is in pre-alpha stage. It is written in C# and Godot using VSCode a
 
 The game is not networked multiplayer, for now it is only useful for playing side-by-side with someone or for sandboxing battles.
 
-# Battle Scene
-Look at that fat blowfish!
+# Sandboxing a battle
 
-![Battle Scene](Screenshots/screenshot_battle.png)
-
-# Sandbox Mode
-Yes that's a whale about to chow down on a rooster:
-
-![Sandbox Mode](Screenshots/screenshot_sandbox.png)
+https://user-images.githubusercontent.com/12779689/160256297-2ea6afff-4a0e-469b-bdca-a8b4dd541840.mp4
