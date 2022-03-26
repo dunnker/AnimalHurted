@@ -10,6 +10,7 @@ using AnimalHurtedLib.AI;
 public class AIProgressNode : Node
 {
     const int MaxIterations = 50000;
+    bool _abort;
 
     IOrderedEnumerable<MonteCarloTreeSearch.Node<GameAIPlayer, Move>> _result;
     
@@ -37,7 +38,7 @@ public class AIProgressNode : Node
             rootNode.BuildTree(new Func<int, long, bool>((numIterations, elapsedMs) => { 
                 if (numIterations % 100 == 0)
                     EmitSignal("ProgressSignal", numIterations);
-                return numIterations < MaxIterations;
+                return !_abort && numIterations < MaxIterations;
             }));
 
             _result = rootNode.Children.OrderByDescending(n => n.NumRuns);
@@ -56,5 +57,11 @@ public class AIProgressNode : Node
         var move = _result.FirstOrDefault();
         move?.Action.ExecuteActions(GameSingleton.Instance.Game.Player2);
         BuildNode.StartBattle(this);
+    }
+
+    public void _on_ContinueButton_pressed()
+    {
+        _abort = true;
+        GetNode<Button>("ContinueButton").Disabled = true;
     }
 }

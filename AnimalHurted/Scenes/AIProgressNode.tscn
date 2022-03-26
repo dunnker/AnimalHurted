@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Scenes/AIProgressNode.cs" type="Script" id=1]
 [ext_resource path="res://Assets/background.png" type="Texture" id=2]
@@ -9,6 +9,10 @@ bg_color = Color( 0.317647, 0.52549, 0.176471, 1 )
 
 [sub_resource type="DynamicFont" id=1]
 size = 28
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 24
 font_data = ExtResource( 3 )
 
 [node name="Node" type="Node"]
@@ -39,3 +43,16 @@ text = "Thinking..."
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ContinueButton" type="Button" parent="."]
+margin_left = 1008.0
+margin_top = 400.0
+margin_right = 1150.0
+margin_bottom = 436.0
+custom_fonts/font = SubResource( 3 )
+text = "Continue"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]
