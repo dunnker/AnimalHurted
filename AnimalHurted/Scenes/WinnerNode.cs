@@ -22,8 +22,8 @@ public class WinnerNode : Node
             // mouse down
             if (mouseEvent.ButtonIndex == (int)ButtonList.Left && mouseEvent.Pressed)
             {
-                // show battle scene again in case user wants to save battle to file
-                BuildNode.StartBattle(this, false);
+                GameSingleton.Instance.RestoreBattleDecks();
+                GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
             }
         }
     }
