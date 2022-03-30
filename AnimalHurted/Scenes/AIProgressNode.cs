@@ -30,7 +30,7 @@ public class AIProgressNode : Node
         ProgressBar.MaxValue = MaxIterations;
 
         new System.Threading.Thread(() => {
-            AnimalHurtedLib.AI.GameAIState rootState = new AnimalHurtedLib.AI.GameAIState(GameSingleton.Instance.Game,
+            AnimalHurtedLib.AI.GameAIState rootState = new AnimalHurtedLib.AI.GameAIState(true, GameSingleton.Instance.Game,
                 GameSingleton.Instance.Game.Player2);
 
             MonteCarloTreeSearch.Node<GameAIPlayer, Move> rootNode = new MonteCarloTreeSearch.Node<GameAIPlayer, Move>(rootState);
@@ -42,7 +42,7 @@ public class AIProgressNode : Node
             }));
 
             _result = rootNode.Children.OrderByDescending(n => n.NumRuns);
-
+            
             EmitSignal("ProgressFinishedSignal");
         }).Start();
     }

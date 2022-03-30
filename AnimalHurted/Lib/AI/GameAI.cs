@@ -23,6 +23,7 @@ namespace AnimalHurtedLib.AI
     {
         public int ShopIndex { get; set; }
         public int TargetIndex { get; set; }
+        Type _boughtAbilityType;
 
         public override void Execute(Player player, List<CardCommandQueue> result)
         {
@@ -34,6 +35,10 @@ namespace AnimalHurtedLib.AI
                 shopCard = player.ShopDeck.Reverse().SkipWhile((card) => card != null && card.Index >= ShopIndex).FirstOrDefault();
             if (shopCard != null)
             {
+                if (_boughtAbilityType == null)
+                    _boughtAbilityType = shopCard.Ability.GetType();
+                else if (_boughtAbilityType != shopCard.Ability.GetType())
+                    throw new Exception("Previously bought card has different ability.");
                 var buildCard = player.BuildDeck[TargetIndex];
                 // if a card is at target location, and we can't level it up, then sell it
                 if (buildCard != null && shopCard.Ability.GetType() != buildCard.Ability.GetType() &&
@@ -59,6 +64,7 @@ namespace AnimalHurtedLib.AI
     {
         public int FoodIndex { get; set; }
         public int TargetIndex { get; set; }
+        Type _boughtFoodType;
 
         public override void Execute(Player player, List<CardCommandQueue> result)
         {
@@ -66,6 +72,10 @@ namespace AnimalHurtedLib.AI
             var buildCard = player.BuildDeck[TargetIndex];
             if (buildCard != null && food != null && player.Gold >= food.Cost)
             {
+                if (_boughtFoodType == null)
+                    _boughtFoodType = food.GetType();
+                else if (_boughtFoodType != food.GetType())
+                    throw new Exception("Previously bought food has different type.");
                 player.BuyFood(buildCard, FoodIndex);
                 var queue = new CardCommandQueue();
                 buildCard.Ate(queue, food);
@@ -109,10 +119,15 @@ namespace AnimalHurtedLib.AI
 
     public class RollAction : MoveAction
     {
+        int _seed = GameAIState.Random.Next();
+
         public override void Execute(Player player, List<CardCommandQueue> result)
         {
+            Random random = new Random(_seed);
+
             if (player.Gold >= Game.RollCost)
-                player.Roll();
+                // roll with seed value
+                player.Roll(deductGold: true, random);
         }
     }
 
@@ -150,7 +165,7 @@ namespace AnimalHurtedLib.AI
             {
                 double[] probabilities = new double[] 
                 { 
-                    0.6, // 0.5 chance of Buy 
+                    0.6, // 0.6 chance of Buy 
                     0.8, // 0.2 chance of BuyFood
                     0.9, // 0.1 chance of Reorder
                     1.0  // 0.1 chance of Roll
@@ -241,11 +256,13 @@ namespace AnimalHurtedLib.AI
     // state class is attached to each node in the tree
     public class GameAIState : MonteCarlo.IState<GameAIPlayer, Move>
     {
+        bool _rootState;
         Game _game;
         GameAIPlayer _player1;
         GameAIPlayer _player2;
         GameAIPlayer _currentPlayer;
         GameAIPlayer _opponentPlayer;
+        List<Move> _actions;
 
         public static Random Random = new Random();
 
@@ -263,9 +280,10 @@ namespace AnimalHurtedLib.AI
             }
         }
 
-        public GameAIState(Game game, Player currentPlayer)
+        public GameAIState(bool rootState, Game game, Player currentPlayer)
         {
             _game = game;
+            _rootState = rootState;
             _player1 = new GameAIPlayer(_game.Player1);
             _player2 = new GameAIPlayer(_game.Player2);
             if (currentPlayer == _player1.Player)
@@ -285,14 +303,20 @@ namespace AnimalHurtedLib.AI
         { 
             get
             {
-                var result = new List<Move>();
-                // pick an arbitrary number of permuations of random actions to perform during build
-                for (int i = 1; i <= 50; i++)
+                if (_actions == null)
                 {
-                    var move = new Move(_currentPlayer.Player);
-                    result.Add(move);
+                    var count = 100;
+                    if (_rootState)
+                        count = 400;
+                    _actions = new List<Move>();
+                    // pick an arbitrary number of permuations of random actions to perform during build
+                    for (int i = 1; i <= count; i++)
+                    {
+                        var move = new Move(_currentPlayer.Player);
+                        _actions.Add(move);
+                    }
                 }
-                return result;
+                return _actions;
             }
         }
 
@@ -342,7 +366,7 @@ namespace AnimalHurtedLib.AI
         { 
             Game game = new Game();
             _game.CloneTo(game);
-            return new GameAIState(game, CurrentPlayer.Player); 
+            return new GameAIState(false, game, CurrentPlayer.Player); 
         }
     }
 }

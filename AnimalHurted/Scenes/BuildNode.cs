@@ -58,8 +58,6 @@ public class BuildNode : Node, IBattleNode
             await ToSignal(GetTree().CreateTimer(1f), "timeout");
         }
 
-        _player.GoldChangedEvent -= _GoldChangedEvent;
-
         if (GameSingleton.Instance.VersusAI)
         {
             GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
@@ -195,22 +193,36 @@ public class BuildNode : Node, IBattleNode
         #endif
     } 
     
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        // Dispose can be called from Godot editor, and our singleton
+        // may not have a Game when designing
+        if (GameSingleton.Instance.Game != null)
+        {
+            _player.GoldChangedEvent -= _GoldChangedEvent;
+        }
+    }
+
     public override void _Ready()
     {
         // using singleton to init this scene
         // this is because GetTree().ChangeScene(...) is a deferred call and we can't
         // pass parameters to the new scene instance
-        _player = GameSingleton.Instance.BuildNodePlayer;
+        if (GameSingleton.Instance.Game != null)
+        {
+            _player = GameSingleton.Instance.BuildNodePlayer;
 
-        _player.GoldChangedEvent += _GoldChangedEvent;
-        GoldLabel.Text = _player.Gold.ToString();
-        LivesLabel.Text = _player.Lives.ToString();
-        WinsLabel.Text = _player.Wins.ToString();
-        RoundLabel.Text = GameSingleton.Instance.Game.Round.ToString();
-        PlayerNameLabel.Text = _player.Name;
-        DeckNode2D.RenderDeck(_player.BuildDeck);
-        ShopNode2D.RenderShop();
-        RenderPlayerFood();
+            _player.GoldChangedEvent += _GoldChangedEvent;
+            GoldLabel.Text = _player.Gold.ToString();
+            LivesLabel.Text = _player.Lives.ToString();
+            WinsLabel.Text = _player.Wins.ToString();
+            RoundLabel.Text = GameSingleton.Instance.Game.Round.ToString();
+            PlayerNameLabel.Text = _player.Name;
+            DeckNode2D.RenderDeck(_player.BuildDeck);
+            ShopNode2D.RenderShop();
+            RenderPlayerFood();
+        }
 
         Connect("ExecuteQueueOverSignal", this, "_signal_ExecuteQueueOver", null, 
             (int)ConnectFlags.Deferred);

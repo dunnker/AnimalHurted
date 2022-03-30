@@ -161,7 +161,7 @@ namespace AnimalHurtedLib
             }
         }
 
-        public void Roll(bool deductGold = true)
+        public void Roll(bool deductGold = true, Random random = null)
         {
             if (Gold < Game.RollCost)
                 throw new Exception("Not enough gold for Roll.");
@@ -175,14 +175,16 @@ namespace AnimalHurtedLib
                 if (_shopDeck[i] == null)
                 {
                     var abilityList = AbilityList.Instance.GetAbilityListForRound(Game.Round);
-                    int rand = Game.Random.Next(abilityList.Count);
+                    if (random == null)
+                        random = Game.Random;
+                    int rand = random.Next(abilityList.Count);
                     var card = new Card(_shopDeck, Activator.CreateInstance(abilityList[rand]) as Ability);
                     card.HitPoints += BuffHitPoints;
                     card.AttackPoints += BuffAttackPoints;
                     _shopDeck.SetCard(card, i);
                 }
             }
-            NewShopFood();
+            NewShopFood(random);
         }
 
         public Food GetShopFoodFromIndex(int foodIndex)
@@ -206,12 +208,14 @@ namespace AnimalHurtedLib
             Gold -= food.Cost;
         }
 
-        void NewShopFood()
+        void NewShopFood(Random random = null)
         {
             var foodList = FoodList.Instance.GetFoodListForRound(_game.Round);
-            int randIndex = _game.Random.Next(foodList.Count);
+            if (random == null)
+                random = _game.Random;
+            int randIndex = random.Next(foodList.Count);
             _shopFood1 = Activator.CreateInstance(foodList[randIndex]) as Food;
-            randIndex = _game.Random.Next(foodList.Count);
+            randIndex = random.Next(foodList.Count);
             _shopFood2 = Activator.CreateInstance(foodList[randIndex]) as Food;
         }
 
