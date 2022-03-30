@@ -30,6 +30,8 @@ public class BuildNode : Node, IBattleNode
 
     public void _on_QuitGameButton_pressed()
     {
+        if (GameSingleton.Instance.VersusAI)
+            GameSingleton.Instance.TerminateAIThread();
         GetTree().ChangeScene("res://Scenes/MainNode.tscn");
     }
 

@@ -68,6 +68,7 @@ public class GameSingleton
     AIFinishedDelegate _aiFinishedDelegate;
     bool _aiFinished;
     IOrderedEnumerable<MonteCarloTreeSearch.Node<GameAIPlayer, Move>> _aiResult;
+    Thread _aiThread;
 
     public void OnAIProgress(int iterationCount, out bool abort)
     {
@@ -111,12 +112,22 @@ public class GameSingleton
 
     private readonly object aiLock = new object();
 
+    public void TerminateAIThread()
+    {
+        lock(aiLock)
+        {
+            if (!_aiFinished && _aiThread != null)
+                _aiThread.Abort();
+            _aiThread = null;
+        }
+    }
+
     public void StartAIThread()
     {
         _aiFinished = false;
         _aiResult = null;
 
-        new System.Threading.Thread(() => {
+        _aiThread = new System.Threading.Thread(() => {
             var game = new Game();
             GameSingleton.Instance.Game.CloneTo(game);
 
@@ -142,6 +153,7 @@ public class GameSingleton
 
             _aiResult = rootNode.Children.OrderByDescending(n => n.NumRuns);
             OnAIFinished(_aiResult);
-        }).Start();
+        });
+        _aiThread.Start();
     }
 }
