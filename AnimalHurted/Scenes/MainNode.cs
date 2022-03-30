@@ -18,6 +18,10 @@ public class MainNode : Node
         GameSingleton.Instance.Game = new Game();
         GameSingleton.Instance.Game.NewGame();
         GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player1; 
+
+        if (GameSingleton.Instance.VersusAI)
+            GameSingleton.Instance.StartAIThread();
+
         GetTree().ChangeScene("res://Scenes/BuildNode.tscn");
     }
 

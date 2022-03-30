@@ -9,11 +9,9 @@ using AnimalHurtedLib.AI;
 
 public class AIProgressNode : Node
 {
-    const int MaxIterations = 50000;
     bool _abort;
-
     IOrderedEnumerable<MonteCarloTreeSearch.Node<GameAIPlayer, Move>> _result;
-    
+
     public ProgressBar ProgressBar { get { return GetNode<ProgressBar>("ProgressBar"); } }
 
     [Signal]
@@ -27,24 +25,26 @@ public class AIProgressNode : Node
         Connect("ProgressSignal", this, "_signal_Progress", null, (int)ConnectFlags.Deferred);
         Connect("ProgressFinishedSignal", this, "_signal_ProgressFinished", null, (int)ConnectFlags.Deferred);
 
-        ProgressBar.MaxValue = MaxIterations;
+        ProgressBar.MaxValue = GameSingleton.AIMaxIterations;
 
-        new System.Threading.Thread(() => {
-            AnimalHurtedLib.AI.GameAIState rootState = new AnimalHurtedLib.AI.GameAIState(true, GameSingleton.Instance.Game,
-                GameSingleton.Instance.Game.Player2);
-
-            MonteCarloTreeSearch.Node<GameAIPlayer, Move> rootNode = new MonteCarloTreeSearch.Node<GameAIPlayer, Move>(rootState);
-
-            rootNode.BuildTree(new Func<int, long, bool>((numIterations, elapsedMs) => { 
-                if (numIterations % 100 == 0)
-                    EmitSignal("ProgressSignal", numIterations);
-                return !_abort && numIterations < MaxIterations;
-            }));
-
-            _result = rootNode.Children.OrderByDescending(n => n.NumRuns);
-            
+        GameSingleton.Instance.SetAIDelegates(out bool aiFinished, out _result, AIProgress, AIFinished);
+        if (aiFinished)
             EmitSignal("ProgressFinishedSignal");
-        }).Start();
+    }
+
+    // thread event
+    void AIProgress(object sender, int iterationCount, out bool abort)
+    {
+        abort = _abort;
+        // signal to main thread
+        EmitSignal("ProgressSignal", iterationCount);
+    }
+
+    // thread event
+    void AIFinished(object sender, IOrderedEnumerable<MonteCarloTreeSearch.Node<GameAIPlayer, Move>> result)
+    {
+        _result = result;
+        EmitSignal("ProgressFinishedSignal");
     }
 
     public void _signal_Progress(int numIterations)

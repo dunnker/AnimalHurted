@@ -59,10 +59,7 @@ public class BuildNode : Node, IBattleNode
         }
 
         if (GameSingleton.Instance.VersusAI)
-        {
-            GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
             GetTree().ChangeScene("res://Scenes/AIProgressNode.tscn");
-        }
         else if (_player == GameSingleton.Instance.Game.Player1)
         {
             GameSingleton.Instance.BuildNodePlayer = GameSingleton.Instance.Game.Player2;
@@ -94,6 +91,10 @@ public class BuildNode : Node, IBattleNode
 
         // restore for rendering in next scene
         GameSingleton.Instance.RestoreBattleDecks();
+
+        if (GameSingleton.Instance.VersusAI)
+            // AI starts calculating its move for the next round
+            GameSingleton.Instance.StartAIThread();
 
         node.GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
     }
