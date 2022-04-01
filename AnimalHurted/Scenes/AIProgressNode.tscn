@@ -59,4 +59,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="WarningLabel" type="Label" parent="."]
+margin_left = 784.0
+margin_top = 448.0
+margin_right = 1153.0
+margin_bottom = 468.0
+theme = ExtResource( 4 )
+text = "(For best results, wait until finished)"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="ContinueButton" to="." method="_on_ContinueButton_pressed"]

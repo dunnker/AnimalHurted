@@ -58,7 +58,9 @@ public class GameSingleton
             Game.Player2.Name = Player2Name;
         Game.NewGame();
         BuildNodePlayer = Game.Player1; 
-        if (VersusAI)
+        // HardMode means we don't start AI thread until player 1 finishes their deck
+        // so we can "see" player 1's deck before calculating best move
+        if (VersusAI && !AISingleton.Instance.HardMode)
             AISingleton.Instance.StartAIThread();
     }
 

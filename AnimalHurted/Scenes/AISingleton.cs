@@ -33,6 +33,8 @@ public class AISingleton
         }
     }
 
+    public bool HardMode { get; set; }
+
     public const int AIMaxIterations = 30000;
 
     public void OnAIProgress(int iterationCount, out bool abort)
@@ -101,7 +103,8 @@ public class AISingleton
                 //TODO: on first couple of rounds we pick some random moves to play for the human
                 // but in later rounds, these random moves may not be an improvement to match up against
                 // so for now only doing this in first couple of rounds until AI improves its move selection
-                if (game.Round <= 3)
+                // with HardMode, we already see human player's deck so no need to add moves for the player1
+                if (!HardMode && game.Round <= 3)
                 {
                     var move = new Move(game.Player1);
                     move.ExecuteActions(game.Player1);

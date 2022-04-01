@@ -27,6 +27,10 @@ public class AIProgressNode : Node
 
         ProgressBar.MaxValue = AISingleton.AIMaxIterations;
 
+        // with HardMode, we don't start thread until player 1 has finished building their deck
+        if (AISingleton.Instance.HardMode)
+            AISingleton.Instance.StartAIThread();
+
         AISingleton.Instance.SetAIDelegates(out bool aiFinished, out _result, AIProgress, AIFinished);
         if (aiFinished)
             EmitSignal("ProgressFinishedSignal");

@@ -11,11 +11,13 @@ public class MainNode : Node
     public LineEdit PlayerName1Edit { get { return GetNode<LineEdit>("ConfirmationDialog/VBoxContainer/HBoxContainer/PlayerName1Edit"); } }
     public LineEdit PlayerName2Edit { get { return GetNode<LineEdit>("ConfirmationDialog/VBoxContainer/HBoxContainer2/PlayerName2Edit"); } }
     public LineEdit AINameEdit { get { return GetNode<LineEdit>("ConfirmationDialog/VBoxContainer/HBoxContainer3/AINameEdit"); } }
+    public CheckBox HardModeCheckBox { get { return GetNode<CheckBox>("HardModeCheckBox"); } }
 
     public override void _Ready()
     {
         base._Ready();
         LoadConfigValues();
+        HardModeCheckBox.Pressed = AISingleton.Instance.HardMode;
     }
 
     public void _on_QuitButton_pressed()
@@ -40,6 +42,11 @@ public class MainNode : Node
     {
         GameSingleton.Instance.VersusAI = true;
         NewGame();
+    }
+
+    public void _on_HardModeCheckBox_pressed()
+    {
+        AISingleton.Instance.HardMode = HardModeCheckBox.Pressed;
     }
 
     public void _on_SettingsButton_pressed()
