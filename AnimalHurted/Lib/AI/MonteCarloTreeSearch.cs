@@ -21,7 +21,7 @@ namespace MonteCarlo
 
         void ApplyAction(TAction action);
 
-        double GetResult(IState<TPlayer, TAction> state, TPlayer forPlayer);
+        double GetResult(TPlayer forPlayer);
     }
 
     public class MonteCarloTreeSearch
@@ -98,7 +98,8 @@ namespace MonteCarlo
                     {
                         var action = node.UntriedActions.RandomChoice();
                         state.ApplyAction(action);
-                        node = node.AddChild(action, state);
+                        // clone state when adding node since state will change from Rollout below
+                        node = node.AddChild(action, state.Clone());
                     }
 
                     //simulate
@@ -108,7 +109,7 @@ namespace MonteCarlo
                     while (node != null)
                     {
                         node.NumRuns++;
-                        node.NumWins += state.GetResult(state, this.Player);
+                        node.NumWins += state.GetResult(this.Player);
                         node = node.Parent;
                     }
                 }

@@ -265,8 +265,10 @@ namespace AnimalHurtedLib
             base.Bought(queue, card);
             var maxCard = card.Deck.OrderByDescending(c => c.TotalHitPoints).First();
             // if maxCard was buffed by a cupcake, then we're taking on those hit points
-            // as well. not sure what SAP does in this case
-            card.HitPoints = maxCard.TotalHitPoints;
+            // as well
+            int delta = maxCard.TotalHitPoints - card.TotalHitPoints;
+            if (delta > 0)
+                queue.Add(new BuffCardCommand(card, card.Index, delta, 0).Execute());
         }
     }
 

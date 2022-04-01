@@ -94,7 +94,7 @@ public class BuildNode : Node, IBattleNode
         // restore for rendering in next scene
         GameSingleton.Instance.RestoreBattleDecks();
 
-        if (GameSingleton.Instance.VersusAI)
+        if (GameSingleton.Instance.VersusAI && !GameSingleton.Instance.Game.IsGameOver())
             // AI starts calculating its move for the next round
             GameSingleton.Instance.StartAIThread();
 

@@ -13,7 +13,7 @@ namespace AnimalHurtedLib.AI
 
     public class MoveAction
     {
-        public virtual void Execute(Player player, List<CardCommandQueue> result)
+        public virtual void Execute(Move move, Player player, List<CardCommandQueue> result)
         {
 
         }
@@ -25,7 +25,7 @@ namespace AnimalHurtedLib.AI
         public int TargetIndex { get; set; }
         Type _boughtAbilityType;
 
-        public override void Execute(Player player, List<CardCommandQueue> result)
+        public override void Execute(Move move, Player player, List<CardCommandQueue> result)
         {
             var shopCard = player.ShopDeck[ShopIndex];
             // AI picked a shop card that doesn't exist, so find next card in ShopDeck
@@ -35,6 +35,8 @@ namespace AnimalHurtedLib.AI
                 shopCard = player.ShopDeck.Reverse().SkipWhile((card) => card != null && card.Index >= ShopIndex).FirstOrDefault();
             if (shopCard != null)
             {
+                // _boughtAbilityType is strictly for error checking. As nodes are revisited, actions are performed again,
+                // and they should be performed again in the same state
                 if (_boughtAbilityType == null)
                     _boughtAbilityType = shopCard.Ability.GetType();
                 else if (_boughtAbilityType != shopCard.Ability.GetType())
@@ -66,7 +68,7 @@ namespace AnimalHurtedLib.AI
         public int TargetIndex { get; set; }
         Type _boughtFoodType;
 
-        public override void Execute(Player player, List<CardCommandQueue> result)
+        public override void Execute(Move move, Player player, List<CardCommandQueue> result)
         {
             var food = player.GetShopFoodFromIndex(FoodIndex);
             var buildCard = player.BuildDeck[TargetIndex];
@@ -89,7 +91,7 @@ namespace AnimalHurtedLib.AI
         public int FromIndex { get; set; }
         public int ToIndex { get; set; }
 
-        public override void Execute(Player player, List<CardCommandQueue> result)
+        public override void Execute(Move move, Player player, List<CardCommandQueue> result)
         {
             var fromCard = player.BuildDeck[FromIndex];
             if (fromCard != null)
@@ -119,15 +121,11 @@ namespace AnimalHurtedLib.AI
 
     public class RollAction : MoveAction
     {
-        int _seed = GameAIState.Random.Next();
-
-        public override void Execute(Player player, List<CardCommandQueue> result)
+        public override void Execute(Move move, Player player, List<CardCommandQueue> result)
         {
-            Random random = new Random(_seed);
-
             if (player.Gold >= Game.RollCost)
                 // roll with seed value
-                player.Roll(deductGold: true, random);
+                player.Roll(deductGold: true, move.SeededRandom);
         }
     }
 
@@ -137,13 +135,22 @@ namespace AnimalHurtedLib.AI
         List<MoveAction> _actions = new List<MoveAction>();
         List<CardCommandQueue> _result;
         static Array _enums = Enum.GetValues(typeof(MoveActionEnum));
+        int _seed = GameAIState.Random.Next();
+        Random _seededRandom;
+
+        public Random SeededRandom { get { return _seededRandom; } }
 
         public void ExecuteActions(Player player)
         {
+            _seededRandom = new Random(_seed);
+            // ensure player's shop deck is the same for each subsequent call to ExecuteActions
+            //TODO: this ruins Squirrel ability
+            player.Roll(deductGold: false, _seededRandom);
+
             // if _result == null
             _result = new List<CardCommandQueue>();
             foreach (var action in _actions)
-                action.Execute(player, _result);
+                action.Execute(this, player, _result);
             //TODO
             // should be able to just execute commands again? will investigate later
             //else
@@ -160,7 +167,7 @@ namespace AnimalHurtedLib.AI
 
         void AddActions(Player player)
         {
-            int gold = Game.GoldPerTurn;
+            int gold = player.Gold;
             while (gold >= 1)
             {
                 double[] probabilities = new double[] 
@@ -305,11 +312,15 @@ namespace AnimalHurtedLib.AI
             {
                 if (_actions == null)
                 {
-                    var count = 100;
+                    // pick an arbitrary number of permutations of random actions to perform during build
+                    // see also GameSingleton's AIMaxIterations const
+                    // higher numbers increase RAM consumption considerably
+                    var count = 50;
                     if (_rootState)
-                        count = 400;
+                        // picking a higher number of actions for root node to explore
+                        count = 150;
+
                     _actions = new List<Move>();
-                    // pick an arbitrary number of permuations of random actions to perform during build
                     for (int i = 1; i <= count; i++)
                     {
                         var move = new Move(_currentPlayer.Player);
@@ -322,36 +333,41 @@ namespace AnimalHurtedLib.AI
 
         public void Rollout()
         {
-            do
+            while (!_game.IsGameOver())
             {
                 _currentPlayer.Player.NewBattleDeck();
                 _opponentPlayer.Player.NewBattleDeck();
                 _game.CreateFightResult();
-                if (_game.IsGameOver())
-                    break;
-                else 
+                _game.NewRound();
+                if (!_game.IsGameOver())
                 {
-                    _game.NewRound();
                     var move1 = new Move(_currentPlayer.Player);
                     move1.ExecuteActions(_currentPlayer.Player);
                     var move2 = new Move(_opponentPlayer.Player);
                     move2.ExecuteActions(_opponentPlayer.Player);
                 }
             }
-            while (true);
         }
 
         public void ApplyAction(Move action)
         { 
             action.ExecuteActions(_currentPlayer.Player);
+            if (_currentPlayer == _player2)
+            {
+                _opponentPlayer.Player.NewBattleDeck();
+                _currentPlayer.Player.NewBattleDeck();
+                _game.CreateFightResult();
+                _game.NewRound();
+            }
             NewCurrentPlayer();
         }
 
         public GameAIPlayer CurrentPlayer { get { return _currentPlayer; } }
 
-        public double GetResult(IState<GameAIPlayer, Move> state, GameAIPlayer player)
+        public double GetResult(GameAIPlayer player)
         { 
-            var currentPlayer = ((GameAIState)state)._player2.Player;
+            // ignore player param since it's from cloned state
+            var currentPlayer = _player2.Player;
             Player opponentPlayer;
             opponentPlayer = currentPlayer.GetOpponentPlayer();
             if (currentPlayer.Lives > 0 && opponentPlayer.Lives == 0)
@@ -366,7 +382,12 @@ namespace AnimalHurtedLib.AI
         { 
             Game game = new Game();
             _game.CloneTo(game);
-            return new GameAIState(false, game, CurrentPlayer.Player); 
+            Player currentPlayer;
+            if (_currentPlayer.Player == _game.Player1)
+                currentPlayer = game.Player1;
+            else
+                currentPlayer = game.Player2;
+            return new GameAIState(false, game, currentPlayer); 
         }
     }
 }

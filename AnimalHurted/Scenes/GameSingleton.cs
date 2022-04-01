@@ -62,7 +62,7 @@ public class GameSingleton
         _saveBattleDeck2.CloneTo(Game.Player2.BattleDeck);
     }
 
-    public const int AIMaxIterations = 50000;
+    public const int AIMaxIterations = 30000;
 
     AIProgressDelegate _aiProgressDelegate;
     AIFinishedDelegate _aiFinishedDelegate;

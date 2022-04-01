@@ -163,7 +163,7 @@ namespace AnimalHurtedLib
 
         public void Roll(bool deductGold = true, Random random = null)
         {
-            if (Gold < Game.RollCost)
+            if (deductGold && Gold < Game.RollCost)
                 throw new Exception("Not enough gold for Roll.");
             if (deductGold)
                 Gold -= Game.RollCost;
