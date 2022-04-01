@@ -25,9 +25,9 @@ public class AIProgressNode : Node
         Connect("ProgressSignal", this, "_signal_Progress", null, (int)ConnectFlags.Deferred);
         Connect("ProgressFinishedSignal", this, "_signal_ProgressFinished", null, (int)ConnectFlags.Deferred);
 
-        ProgressBar.MaxValue = GameSingleton.AIMaxIterations;
+        ProgressBar.MaxValue = AISingleton.AIMaxIterations;
 
-        GameSingleton.Instance.SetAIDelegates(out bool aiFinished, out _result, AIProgress, AIFinished);
+        AISingleton.Instance.SetAIDelegates(out bool aiFinished, out _result, AIProgress, AIFinished);
         if (aiFinished)
             EmitSignal("ProgressFinishedSignal");
     }

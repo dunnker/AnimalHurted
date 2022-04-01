@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/background.png" type="Texture" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://Scenes/SandboxNode.cs" type="Script" id=5]
 [ext_resource path="res://Assets/heart.png" type="Texture" id=6]
 [ext_resource path="res://Assets/rock.png" type="Texture" id=7]
+[ext_resource path="res://Scenes/DefaultTheme.tres" type="Theme" id=8]
 
 [sub_resource type="DynamicFont" id=3]
 size = 32
@@ -81,6 +82,7 @@ margin_left = 456.0
 margin_top = 64.0
 margin_right = 598.0
 margin_bottom = 100.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 1 )
 text = "Back"
 __meta__ = {
@@ -94,6 +96,7 @@ margin_left = 456.0
 margin_top = 112.0
 margin_right = 598.0
 margin_bottom = 148.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 1 )
 text = "Battle"
 __meta__ = {
@@ -107,6 +110,7 @@ margin_left = -256.0
 margin_top = 512.0
 margin_right = -114.0
 margin_bottom = 548.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 1 )
 text = "Remove"
 __meta__ = {

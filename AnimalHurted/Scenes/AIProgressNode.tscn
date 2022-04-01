@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scenes/AIProgressNode.cs" type="Script" id=1]
 [ext_resource path="res://Assets/background.png" type="Texture" id=2]
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://Scenes/DefaultTheme.tres" type="Theme" id=4]
 
 [sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.317647, 0.52549, 0.176471, 1 )
@@ -27,6 +28,7 @@ margin_left = 112.0
 margin_top = 320.0
 margin_right = 1152.0
 margin_bottom = 384.0
+theme = ExtResource( 4 )
 custom_styles/fg = SubResource( 2 )
 percent_visible = false
 __meta__ = {
@@ -38,6 +40,7 @@ margin_left = 112.0
 margin_top = 280.0
 margin_right = 213.0
 margin_bottom = 300.0
+theme = ExtResource( 4 )
 custom_fonts/font = SubResource( 1 )
 text = "Thinking..."
 __meta__ = {
@@ -49,6 +52,7 @@ margin_left = 1008.0
 margin_top = 400.0
 margin_right = 1150.0
 margin_bottom = 436.0
+theme = ExtResource( 4 )
 custom_fonts/font = SubResource( 3 )
 text = "Continue"
 __meta__ = {

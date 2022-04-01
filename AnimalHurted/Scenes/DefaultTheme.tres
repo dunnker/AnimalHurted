@@ -1,0 +1,13 @@
+[gd_resource type="Theme" load_steps=3 format=2]
+
+[ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=1]
+
+[sub_resource type="DynamicFont" id=2]
+size = 24
+font_data = ExtResource( 1 )
+
+[resource]
+resource_name = "DefaultTheme"
+default_font = SubResource( 2 )
+HBoxContainer/constants/separation = 20
+VBoxContainer/constants/separation = 20

@@ -31,7 +31,7 @@ public class BuildNode : Node, IBattleNode
     public void _on_QuitGameButton_pressed()
     {
         if (GameSingleton.Instance.VersusAI)
-            GameSingleton.Instance.TerminateAIThread();
+            AISingleton.Instance.TerminateAIThread();
         GetTree().ChangeScene("res://Scenes/MainNode.tscn");
     }
 
@@ -96,7 +96,7 @@ public class BuildNode : Node, IBattleNode
 
         if (GameSingleton.Instance.VersusAI && !GameSingleton.Instance.Game.IsGameOver())
             // AI starts calculating its move for the next round
-            GameSingleton.Instance.StartAIThread();
+            AISingleton.Instance.StartAIThread();
 
         node.GetTree().ChangeScene("res://Scenes/BattleNode.tscn");
     }

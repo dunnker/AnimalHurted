@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Scenes/BuildNode.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/DeckNode2D.tscn" type="PackedScene" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://Assets/PartyConfettiRegular-eZOn3.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://Scenes/PlayerAttrsNode2D.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Scenes/FoodSlotNode2D.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Scenes/DefaultTheme.tres" type="Theme" id=8]
 
 [sub_resource type="DynamicFont" id=3]
 size = 24
@@ -118,6 +119,7 @@ margin_left = 848.0
 margin_top = 16.0
 margin_right = 990.0
 margin_bottom = 52.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 3 )
 text = "Quit"
 __meta__ = {
@@ -129,6 +131,7 @@ margin_left = 848.0
 margin_top = 64.0
 margin_right = 990.0
 margin_bottom = 100.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 3 )
 text = "Continue"
 __meta__ = {
@@ -140,6 +143,7 @@ margin_left = 128.0
 margin_top = 632.0
 margin_right = 224.0
 margin_bottom = 668.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 4 )
 text = "Roll"
 __meta__ = {
@@ -151,6 +155,7 @@ margin_left = 240.0
 margin_top = 632.0
 margin_right = 352.0
 margin_bottom = 668.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 4 )
 text = "Freeze"
 __meta__ = {
@@ -162,6 +167,7 @@ margin_left = 128.0
 margin_top = 352.0
 margin_right = 224.0
 margin_bottom = 388.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 4 )
 text = "Sell"
 __meta__ = {
@@ -174,6 +180,7 @@ margin_left = 856.0
 margin_top = 392.0
 margin_right = 1056.0
 margin_bottom = 424.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -185,6 +192,7 @@ margin_left = 1072.0
 margin_top = 392.0
 margin_right = 1158.0
 margin_bottom = 428.0
+theme = ExtResource( 8 )
 custom_fonts/font = SubResource( 3 )
 text = "OK"
 __meta__ = {

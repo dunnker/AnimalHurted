@@ -9,9 +9,9 @@ public class WinnerNode : Node
     {
         GameSingleton.Instance.GameOverShown = true;
         if (GameSingleton.Instance.Game.Player1.Lives == 0)
-            WonLabel.Text = "Player 2 won the game!";
+            WonLabel.Text = $"{GameSingleton.Instance.Game.Player2.Name} won the game!";
         else
-            WonLabel.Text = "Player 1 won the game!";
+            WonLabel.Text = $"{GameSingleton.Instance.Game.Player1.Name} won the game!";
     }
 
     public void _on_ColorRect_gui_input(InputEvent @event)
