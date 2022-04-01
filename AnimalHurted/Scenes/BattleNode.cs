@@ -82,6 +82,8 @@ public class BattleNode : Node, IBattleNode
     public override void _Input(InputEvent @event)
     {
         #if CHEATS_ENABLED
+        // pressing Alt+R in battle screen will retry the battle with new random variables
+        // useful for replaying battles to see if outcome would be different by chance
         if (Input.IsActionPressed("retry_battle"))
         {
             GameSingleton.Instance.RestoreBattleDecks();

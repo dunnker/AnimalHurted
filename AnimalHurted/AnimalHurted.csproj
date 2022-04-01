@@ -1,6 +1,6 @@
 <Project Sdk="Godot.NET.Sdk/3.3.0">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <DefineConstants>CHEATS_ENABLED</DefineConstants>
+    <!-- DefineConstants>CHEATS_ENABLED</DefineConstants -->
   </PropertyGroup>
 </Project>
