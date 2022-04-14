@@ -127,7 +127,6 @@ current_dir = "/"
 current_path = "/"
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
-visible = true
 margin_left = 416.0
 margin_top = 144.0
 margin_right = 904.0

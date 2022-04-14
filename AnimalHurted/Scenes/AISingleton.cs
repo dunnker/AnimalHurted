@@ -96,6 +96,7 @@ public class AISingleton
 
         _aiThread = new System.Threading.Thread(() => {
             try
+            
             {
                 var game = new Game();
                 GameSingleton.Instance.Game.CloneTo(game);
@@ -111,6 +112,9 @@ public class AISingleton
                 }
 
                 AnimalHurtedLib.AI.GameAIState rootState = new AnimalHurtedLib.AI.GameAIState(true, game, game.Player2);
+
+                // exploration constant; 0.10 gives a greater depth of nodes searched
+                MonteCarloTreeSearch.UCTK = 0.10;
 
                 MonteCarloTreeSearch.Node<GameAIPlayer, Move> rootNode = new MonteCarloTreeSearch.Node<GameAIPlayer, Move>(rootState);
 

@@ -26,6 +26,8 @@ namespace MonteCarlo
 
     public class MonteCarloTreeSearch
     {
+        public static double UCTK = 1.0;
+
         public class Node<TPlayer, TAction> : IMctsNode<TAction> where TPlayer : IPlayer where TAction: IAction
         {
             public Node(IState<TPlayer, TAction> state, TAction action = default(TAction), Node<TPlayer, TAction> parent = null)
@@ -55,11 +57,9 @@ namespace MonteCarlo
 
             public IList<TAction> Actions => State.Actions;
 
-            private static double c = Math.Sqrt(2);
-
             public double ExploitationValue => NumWins / NumRuns;
 
-            public double ExplorationValue => (Math.Sqrt(2*Math.Log(Parent.NumRuns) / NumRuns));
+            public double ExplorationValue => UCTK * Math.Sqrt(2*Math.Log(Parent.NumRuns) / NumRuns);
 
             private double UCT => ExploitationValue + ExplorationValue;
 

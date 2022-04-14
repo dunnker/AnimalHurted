@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using MonteCarlo;
 using AnimalHurtedLib;
 using AnimalHurtedLib.AI;
@@ -48,6 +49,21 @@ public class AIProgressNode : Node
     void AIFinished(object sender, IOrderedEnumerable<MonteCarloTreeSearch.Node<GameAIPlayer, Move>> result)
     {
         _result = result;
+
+		// output the branch of the tree from the result selected
+        /*int lineCount = 0;
+        string output = string.Empty;
+        var node = result.FirstOrDefault();
+        while (node != null)
+        {
+            if (!string.IsNullOrEmpty(output))
+                output += System.Environment.NewLine;
+            output += $"{new string(' ', lineCount * 4)} {node.NumWins} '{node.State.CurrentPlayer.Player.Name}' {node.State.CurrentPlayer.Player.Game.Round}";
+            lineCount++;
+            node = node.Children.OrderByDescending(n => n.NumRuns).FirstOrDefault();
+        }
+        Debug.WriteLine(output);*/
+
         EmitSignal("ProgressFinishedSignal");
     }
 
